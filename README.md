@@ -1,18 +1,26 @@
-# c99-engine
+# pti-projects
 
 [![Build](/../../actions/workflows/main.yml/badge.svg)](/../../actions/workflows/main.yml)
 
-This projects a work in progress.
+Projects using **[pti](https://github.com/mathewmariani/pti)**
 
 ## Repository Layout
 
-*   `engine/` – The main source for the engine and platfom code.
-*   `examples/` – Example projects using the engine.
 *   `build/` - Intermediate files and other build output. 
 *   `extra/` - Files used during the build process.
 *   `libs/` - Required external libraries.
+*   `projects/` - Root directory for all projects.
 *   `resources/` – Scripts and resources used for building the website.
 
+
+## How to Build on Windows, Linux and macOS
+
+```
+> git clone https://github.com/mathewmariani/pti-projects
+> cd pti-projects
+> cmake --preset Release
+> cmake --build --preset Release
+```
 
 ## License
 

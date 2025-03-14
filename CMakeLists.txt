@@ -6,7 +6,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(pti)
+project(pti-projects)
 
 set(THIRDPARTY_DIR libs)
 
@@ -18,10 +18,12 @@ add_compile_options(-Wno-reorder-init-list)
 include("extra/cmake/macros.cmake")
 
 # thirdparty
+
 # include("extra/cmake/dbgui.cmake")
 include("extra/cmake/imgui.cmake")
 include("extra/cmake/sokol.cmake")
 include("extra/cmake/tracy.cmake")
+include("extra/cmake/pti.cmake")
 
 include_directories(${THIRDPARTY_DIR})
 
