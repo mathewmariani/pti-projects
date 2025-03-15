@@ -2,7 +2,7 @@
 
 #include <unordered_map>
 
-#include "pti.h"
+#include "pti/pti.h"
 
 #define CUTE_ASEPRITE_IMPLEMENTATION
 #include "cute_aseprite.h"

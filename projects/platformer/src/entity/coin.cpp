@@ -4,7 +4,7 @@
 
 #include "../bank.h"
 
-#include "pti.h"
+#include "pti/pti.h"
 
 template<>
 bool EntityBase::Is<Coin>() const {

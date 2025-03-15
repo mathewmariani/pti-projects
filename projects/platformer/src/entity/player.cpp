@@ -3,7 +3,7 @@
 #include "registry.h"
 #include "../gamestate.h"
 #include "../bank.h"
-#include "pti.h"
+#include "pti/pti.h"
 
 template<>
 bool EntityBase::Is<Player>() const {

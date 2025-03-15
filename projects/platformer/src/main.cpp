@@ -1,5 +1,5 @@
 /* engine */
-#include "pti.h"
+#include "pti/pti.h"
 
 #include "bank.h"
 #include "gamestate.h"

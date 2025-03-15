@@ -1,4 +1,4 @@
-#include "pti.h"
+#include "pti/pti.h"
 
 #include "base.h"
 #include "../bank.h"

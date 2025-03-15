@@ -9,6 +9,6 @@ if(BUILD_WITH_PTI)
     ${PTI_DIR}/platform.c
     ${PTI_DIR}/pti.h)
 
-  add_library(pti INTERFACE ${PTI_FILES})
+  add_library(pti STATIC ${PTI_FILES})
   target_link_libraries(pti PRIVATE sokol)
 endif()

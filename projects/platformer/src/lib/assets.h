@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include "pti.h"
+#include "pti/pti.h"
 
 namespace assets {
 

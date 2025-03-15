@@ -38,10 +38,12 @@ else()
     add_executable(platformer src/main.cpp ${PLATFORMER_SRC} ${PLATFORMER_HEADERS})
 endif()
 
-target_link_libraries(platformer PRIVATE engine)
+target_link_libraries(platformer PRIVATE pti)
 target_link_libraries(platformer PRIVATE imgui)
 # target_link_libraries(platformer PRIVATE dbgui)
 target_link_libraries(platformer PRIVATE tracy)
+
+emscripten(platformer)
 
 # assets
 add_custom_command(TARGET platformer POST_BUILD

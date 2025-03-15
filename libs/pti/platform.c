@@ -5,7 +5,7 @@
 #include "sokol/sokol_log.h"
 
 #define PTI_IMPL
-#include "pti.h"
+#include "pti/pti.h"
 
 // forward declarations
 static void init(void);
