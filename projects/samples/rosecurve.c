@@ -25,14 +25,6 @@ uint32_t pal[] = {
 		0xff333c57,
 };
 
-#define PTI_ARGB(a, r, g, b)                                    \
-	(uint32_t) (((uint8_t) (a) << 24) | ((uint8_t) (r) << 16) | \
-				((uint8_t) (g) << 8) | ((uint8_t) (b) << 0))
-
-#define PTI_RGBA(r, g, b, a)                                    \
-	(uint32_t) (((uint8_t) (a) << 24) | ((uint8_t) (r) << 16) | \
-				((uint8_t) (g) << 8) | ((uint8_t) (b) << 0))
-
 static void init(void) {
 	// gfx state
 	// pti_dither(0x5a5a);
@@ -42,41 +34,49 @@ static void init(void) {
 
 static void cleanup(void) {}
 
-float t = 0.0f;
+float time = 0.0f;
 static void frame(void) {
-	int a = 32;
-	int n = 5;
-	int b = 16;
-
-	float rotation = cosf(t) + t;
-	float growth = sinf(t) * sinf(t) * t;
-	float offset = 0.2f;
-
+	// framebuffer dimensions
 	const int width = 128;
 	const int height = 128;
-	const int cx = width / 2;
-	const int cy = width / 2;
+	const int center_x = width / 2;
+	const int center_y = height / 2;
 
-	for (int j = 0; j < width; j++) {
-		for (int i = 0; i < height; i++) {
-			// center:
-			int x = cx - i;
-			int y = cy - j;
+	// rose curve parameters
+	const int petal_radius = 32;
+	const int petal_count = 5;
+	const int color_scale = 16;
 
-			// rosecurve:
-			float theta = atan2f(y, x);// + rotation;
-			float d = sqrtf(x * x + y * y);
-			float r = a * cosf(n * theta);
+	// time-dependent effects
+	float rotation_angle = cosf(time) + time;
+	float growth_bias = sinf(time) * sinf(time) * time;
+	float palette_offset = 0.2f;
 
-			// color:
-			uint8_t c = (uint8_t) (r + d - growth) / 16;
-			uint8_t low = (uint8_t) (c + offset) % 16;
-			uint8_t high = (uint8_t) (c - offset) % 16;
-			pti_pset(i, j, ((unsigned long int) pal[low] << 32) | pal[high]);
+	for (int py = 0; py < height; py++) {
+		for (int px = 0; px < width; px++) {
+			// position relative to the center (cartesian coordinates)
+			int rel_x = center_x - px;
+			int rel_y = center_y - py;
+
+			// convert to polar coordinates
+			float angle_rad = atan2f((float) rel_y, (float) rel_x);           // θ
+			float pixel_dist = sqrtf((float) (rel_x * rel_x + rel_y * rel_y));// distance from center
+
+			// ideal rose-curve radius at this angle: r(θ) = a * cos(nθ)
+			float rose_radius = petal_radius * cosf(petal_count * angle_rad + rotation_angle);
+
+			// color calculation: combine geometry
+			uint8_t color_index = (uint8_t) ((rose_radius + pixel_dist - growth_bias) / color_scale);
+			uint8_t low_index = (uint8_t) (color_index + palette_offset) % 16;
+			uint8_t high_index = (uint8_t) (color_index - palette_offset) % 16;
+
+			pti_pset(px, py, ((unsigned long) pal[low_index] << 32) | pal[high_index]);
 		}
 	}
-	t += 1.0f / 30.0f;
+
+	time += PTI_DELTA;
 }
+
 
 pti_desc pti_main(int argc, char *argv[]) {
 	return (pti_desc) {
