@@ -67,22 +67,22 @@ typedef struct pti_window {
 } pti_window;
 
 typedef struct pti_bitmap_t {
-	int32_t frames;
-	int32_t width;
-	int32_t height;
+	uint32_t frames;
+	uint32_t width;
+	uint32_t height;
 	void *pixels;// (width) x (height x frames)
 } pti_bitmap_t;
 
 typedef struct pti_tileset_t {
-	int32_t count;
-	int16_t width;
-	int16_t height;
+	uint32_t count;
+	uint16_t width;
+	uint16_t height;
 	void *pixels;// (width) x (height x count)
 } pti_tileset_t;
 
 typedef struct pti_tilemap_t {
-	int16_t width;
-	int16_t height;
+	uint16_t width;
+	uint16_t height;
 	int *tiles;
 } pti_tilemap_t;
 
@@ -134,7 +134,7 @@ bool pti_released(pti_button btn);
 //>> map api
 uint32_t pti_mget(const pti_tilemap_t *tilemap, int x, int y);
 void pti_mset(pti_tilemap_t *tilemap, int x, int y, int value);
-short pti_fget(const pti_tilemap_t *tilemap, int x, int y);
+uint16_t pti_fget(const pti_tilemap_t *tilemap, int x, int y);
 
 uint16_t pti_prand(void);
 
@@ -161,7 +161,7 @@ void pti_print(const pti_bitmap_t *font, const char *text, int x, int y);
 // reference-based equivalents for C++
 inline uint32_t pti_mget(const pti_tilemap_t &tilemap, int x, int y) { return pti_mget(&tilemap, x, y); }
 inline void pti_mset(pti_tilemap_t &tilemap, int x, int y, int value) { pti_mset(&tilemap, x, y, value); }
-inline short pti_fget(const pti_tilemap_t &tilemap, int x, int y) { return pti_fget(&tilemap, x, y); }
+inline uint16_t pti_fget(const pti_tilemap_t &tilemap, int x, int y) { return pti_fget(&tilemap, x, y); }
 inline void pti_map(const pti_tilemap_t &tilemap, const pti_tileset_t &tileset, int x, int y) { pti_map(&tilemap, &tileset, x, y); }
 inline void pti_spr(const pti_bitmap_t &bitmap, int n, int x, int y, bool flip_x, bool flip_y) { pti_spr(&bitmap, n, x, y, flip_x, flip_y); }
 inline void pti_print(const pti_bitmap_t &font, const char *text, int x, int y) { pti_print(&font, text, x, y); }
@@ -253,7 +253,7 @@ typedef struct {
 } _pti__t;
 static _pti__t _pti;
 
-_PTI_PRIVATE inline void *map_pointer_to_bank(void *ptr) {
+_PTI_PRIVATE inline void *_pti__ptr_to_bank(void *ptr) {
 	return (void *) ((uintptr_t) ptr + ((uintptr_t) _pti.data - (uintptr_t) _pti.cart.begin));
 }
 
@@ -512,17 +512,17 @@ uint16_t pti_prand(void) {
 }
 
 uint32_t pti_mget(const pti_tilemap_t *tilemap, int x, int y) {
-	int *tiles = (int *) map_pointer_to_bank((void *) tilemap->tiles);
+	int *tiles = (int *) _pti__ptr_to_bank((void *) tilemap->tiles);
 	return *(tiles + x + y * tilemap->width);
 }
 
 void pti_mset(pti_tilemap_t *tilemap, int x, int y, int value) {
-	int *tiles = (int *) map_pointer_to_bank((void *) tilemap->tiles);
+	int *tiles = (int *) _pti__ptr_to_bank((void *) tilemap->tiles);
 	*(tiles + x + y * tilemap->width) = value;
 }
 
-short pti_fget(const pti_tilemap_t *tilemap, int x, int y) {
-	return (short) pti_mget(tilemap, x, y);
+uint16_t pti_fget(const pti_tilemap_t *tilemap, int x, int y) {
+	return (uint16_t) pti_mget(tilemap, x, y);
 }
 
 _PTI_PRIVATE inline bool _pti__get_dither_bit(const int x, const int y) {
@@ -536,6 +536,15 @@ _PTI_PRIVATE inline void _pti__transform(int *x, int *y) {
 }
 
 _PTI_PRIVATE inline void _pti__set_pixel(int x, int y, uint64_t c) {
+	const int16_t clip_x0 = _pti.vm.draw.clip_x0;
+	const int16_t clip_y0 = _pti.vm.draw.clip_y0;
+	const int16_t clip_x1 = _pti.vm.draw.clip_x1;
+	const int16_t clip_y1 = _pti.vm.draw.clip_y1;
+
+	if ((x >= clip_x1 || x < clip_x0) || (y >= clip_y1 || y < clip_y0)) {
+		return;
+	}
+
 	*(_pti.screen + (x + y * _pti.vm.screen.width)) = _pti__get_dither_bit(x, y) ? (c >> 32) & 0xffffffff : (c >> 0) & 0xffffffff;
 }
 
@@ -678,6 +687,8 @@ void pti_pset(const int x, const int y, uint64_t color) {
 }
 
 void pti_circ(const int x, const int y, const int r, uint64_t color) {
+	// adjust camera:
+	_pti__transform(&x, &y);
 	int32_t dx = r;
 	int32_t dy = 0;
 	int32_t err = 1 - dx;
@@ -686,6 +697,7 @@ void pti_circ(const int x, const int y, const int r, uint64_t color) {
 		_pti__set_pixel(-dx + x, dy + y, color);
 		_pti__set_pixel(dx + x, -dy + y, color);
 		_pti__set_pixel(-dx + x, -dy + y, color);
+
 		_pti__set_pixel(dy + x, dx + y, color);
 		_pti__set_pixel(-dy + x, dx + y, color);
 		_pti__set_pixel(dy + x, -dx + y, color);
@@ -701,6 +713,8 @@ void pti_circ(const int x, const int y, const int r, uint64_t color) {
 }
 
 void pti_circf(const int x, const int y, const int r, uint64_t color) {
+	// adjust camera:
+	_pti__transform(&x, &y);
 	int32_t dx = r;
 	int32_t dy = 0;
 	int32_t err = 1 - dx;
@@ -758,8 +772,10 @@ void pti_line(int x0, int y0, int x1, int y1, uint64_t c) {
 
 	for (int x = x0; x <= x1; x++) {
 		if (steep) {
+			_pti__transform(&y, &x);
 			_pti__set_pixel(y, x, c);
 		} else {
+			_pti__transform(&x, &y);
 			_pti__set_pixel(x, y, c);
 		}
 		err += de;
@@ -770,14 +786,7 @@ void pti_line(int x0, int y0, int x1, int y1, uint64_t c) {
 	}
 }
 
-void pti_rect(int x, int y, int w, int h, uint64_t color) {
-	_pti__transform(&x, &y);
-
-	int x0 = _pti_max(_pti.vm.draw.clip_x0, x);
-	int y0 = _pti_max(_pti.vm.draw.clip_y0, y);
-	int x1 = _pti_min(_pti.vm.draw.clip_x1, x + w - 1);
-	int y1 = _pti_min(_pti.vm.draw.clip_y1, y + h - 1);
-
+void pti_rect(int x0, int y0, int x1, int y1, uint64_t color) {
 	pti_line(x0, y0, x1, y0, color);
 	pti_line(x0, y1, x1, y1, color);
 	pti_line(x0, y0, x0, y1, color);
@@ -792,6 +801,10 @@ void pti_rectf(int x0, int y0, int x1, int y1, uint64_t color) {
 		_pti_swap(y0, y1);
 	}
 
+	// adjust camera:
+	_pti__transform(&x0, &y0);
+	_pti__transform(&x1, &y1);
+
 	for (int y = y0; y <= y1; y++) {
 		for (int x = x0; x <= x1; x++) {
 			_pti__set_pixel(x, y, color);
@@ -805,8 +818,8 @@ void pti_map(const pti_tilemap_t *tilemap, const pti_tileset_t *tileset, int x, 
 	const int tile_w = tileset->width;
 	const int tile_h = tileset->height;
 
-	int *tiles = (int *) map_pointer_to_bank((void *) tilemap->tiles);
-	void *pixels = (void *) map_pointer_to_bank((void *) tileset->pixels);
+	int *tiles = (int *) _pti__ptr_to_bank((void *) tilemap->tiles);
+	void *pixels = (void *) _pti__ptr_to_bank((void *) tileset->pixels);
 
 	int i, j, t;
 	for (j = 0; j < map_h; j++) {
@@ -823,7 +836,7 @@ void pti_map(const pti_tilemap_t *tilemap, const pti_tileset_t *tileset, int x, 
 void pti_spr(const pti_bitmap_t *sprite, int n, int x, int y, bool flip_x, bool flip_y) {
 	const int bmp_w = sprite->width;
 	const int bmp_h = sprite->height;
-	void *pixels = (void *) map_pointer_to_bank((void *) sprite->pixels);
+	void *pixels = (void *) _pti__ptr_to_bank((void *) sprite->pixels);
 	_pti__plot(pixels, n, x, y, bmp_w, bmp_h, 0, 0, bmp_w, bmp_h, flip_x, flip_y);
 }
 
@@ -857,7 +870,7 @@ uint32_t _pti__next_utf8_code_point(const char *data, uint32_t *index, uint32_t 
 #define FONT_TAB_SIZE (3)
 
 void pti_print(const pti_bitmap_t *font, const char *text, int x, int y) {
-	void *pixels = (void *) map_pointer_to_bank((void *) font->pixels);
+	void *pixels = (void *) _pti__ptr_to_bank((void *) font->pixels);
 	int cursor_x = x;
 	int cursor_y = y;
 	uint32_t text_length = strlen(text);
