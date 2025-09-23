@@ -1,5 +1,9 @@
+if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  set(IS_EMSCRIPTEN 1)
+endif()
+
 macro(emscripten target)
-  if (CMAKE_SYSTEM_NAME STREQUAL Emscripten)
+  if (IS_EMSCRIPTEN)
     set(CMAKE_EXECUTABLE_SUFFIX ".js")
     target_link_options(${target} PRIVATE
       -sINITIAL_MEMORY=50MB
@@ -12,11 +16,17 @@ macro(emscripten target)
 endmacro()
 
 macro(copy_assets target)
-  # assets
-  add_custom_command(TARGET ${target} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E create_symlink
-    "${CMAKE_CURRENT_SOURCE_DIR}/assets"
-    "$<TARGET_FILE_DIR:${target}>/assets")
+  if (IS_EMSCRIPTEN)
+    set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
+    if(EXISTS "${ASSETS_DIR}")
+      target_link_options(${target} PRIVATE "--embed-file;${ASSETS_DIR}@/assets")
+    endif()
+  else()
+    add_custom_command(TARGET ${target} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E create_symlink
+      "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+      "$<TARGET_FILE_DIR:${target}>/assets")
+  endif()
 endmacro()
 
 macro(pti_executable target files)
