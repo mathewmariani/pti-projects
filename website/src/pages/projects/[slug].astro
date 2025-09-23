@@ -31,7 +31,11 @@ const project = Astro.props;
 				<a class="game-menu-link" href={project.data.src}>src</a>
 			</span>
 		</div>
-		<Demo dir="projects" name=`${project.slug}` />
+		<Demo
+			dir="projects"
+			name={project.slug}
+			dimensions={project.data.dimensions}
+		/>
 	</body>
 </html>
 <style>
@@ -42,22 +46,6 @@ const project = Astro.props;
 		align-items: center;
 		height: 100vh;
 		margin: 0;
-	}
-
-	.game {
-		border: 0;
-		width: 128px;
-		height: 128px;
-		overflow: hidden;
-		display: block;
-		image-rendering: optimizeSpeed;
-		image-rendering: -moz-crisp-edges;
-		image-rendering: -o-crisp-edges;
-		image-rendering: -webkit-optimize-contrast;
-		image-rendering: optimize-contrast;
-		image-rendering: crisp-edges;
-		image-rendering: pixelated;
-		-ms-interpolation-mode: nearest-neighbor;
 	}
 
 	.game-title {

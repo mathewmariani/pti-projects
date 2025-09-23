@@ -1,14 +1,17 @@
 ---
-interface Props {
-  dir: string;
-  name: string;
-}
+const { dir, name, dimensions } = Astro.props;
 
-const { dir, name } = Astro.props;
+const width = dimensions.width * dimensions.scale;
+const height = dimensions.height * dimensions.scale;
 ---
 
-<canvas class="demo" id="canvas" oncontextmenu="event.preventDefault()"
-></canvas>
+<main>
+  <canvas
+    class="demo"
+    id="canvas"
+    oncontextmenu="event.preventDefault()"
+    style={`width: ${width}px; height: ${height}px;`}></canvas>
+</main>
 <script type="text/javascript" is:inline>
   var Module = {
     preRun: [],
@@ -42,15 +45,13 @@ const { dir, name } = Astro.props;
     console.log("onerror: " + event.message);
   };
 </script>
-<script type="text/javascript" src=`${dir}/${name}/${name}.js` async is:inline
+<script type="text/javascript" src={`${dir}/${name}/${name}.js`} async is:inline
 ></script>
 <style>
   .demo {
     margin-right: auto;
     margin-left: auto;
     border: 0;
-    width: 512px;
-    height: 512px;
     overflow: hidden;
     display: block;
     image-rendering: optimizeSpeed;

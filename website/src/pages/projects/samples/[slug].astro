@@ -31,7 +31,11 @@ const sample = Astro.props;
 				<a class="game-menu-link" href={sample.data.src}>src</a>
 			</span>
 		</div>
-		<Demo dir="projects/samples" name=`${sample.slug}` />
+		<Demo
+			dir="projects/samples"
+			name={sample.slug}
+			dimensions={sample.data.dimensions}
+		/>
 	</body>
 </html>
 <style>
