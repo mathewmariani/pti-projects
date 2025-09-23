@@ -5,6 +5,14 @@ macro(pti_executable target files)
   # target_link_libraries(platformer PRIVATE dbgui)
   # target_link_libraries(platformer PRIVATE tracy)
 
+  set_target_properties(${target} PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY_RELEASE
+      "${CMAKE_CURRENT_BINARY_DIR}/Release/${target}"
+  RUNTIME_OUTPUT_DIRECTORY_DEBUG
+      "${CMAKE_CURRENT_BINARY_DIR}/Debug/${target}"
+)
+
+
   emscripten(${target})
 endmacro()
 

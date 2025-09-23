@@ -1,9 +1,15 @@
 ---
-import Meta from "../components/Meta.astro";
-import Footer from "../components/Footer.astro";
+import Meta from "@/components/Meta.astro";
+import Footer from "@/components/Footer.astro";
 
 const projects = [
   { href: "projects/platformer/index.html", name: "platformer" },
+];
+
+const samples = [
+  { href: "projects/samples/moire/index.html", name: "moire" },
+  { href: "projects/samples/mosaic/index.html", name: "mosaic" },
+  { href: "projects/samples/rosecurve/index.html", name: "rosecurve" },
 ];
 ---
 
@@ -25,6 +31,33 @@ const projects = [
         <div class="row row-cols-1 row-cols-sm-4 g-4">
           {
             projects.map(({ href, name }) => (
+              <div class="col">
+                <div class="card h-100">
+                  <a href={href}>
+                    <img
+                      src={`/pti-projects/images/256x256.png`}
+                      class="card-img-top"
+                      alt={name}
+                      width={128}
+                      height={128}
+                    />
+                  </a>
+                  <div class="card-footer">
+                    <small class="text-body-secondary">{name}</small>
+                  </div>
+                </div>
+              </div>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- Samples -->
+      <section>
+        <h2>Samples</h2>
+        <div class="row row-cols-1 row-cols-sm-4 g-4">
+          {
+            samples.map(({ href, name }) => (
               <div class="col">
                 <div class="card h-100">
                   <a href={href}>

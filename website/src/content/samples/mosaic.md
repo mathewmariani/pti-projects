@@ -1,0 +1,4 @@
+---
+title: Mosaic
+src: empty
+---

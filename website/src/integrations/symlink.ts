@@ -6,38 +6,43 @@ import {
 } from "../consts";
 
 import type { AstroIntegration } from "astro";
-import fs from 'fs';
-import path from 'path';
+import fs from "fs";
+import path from "path";
 
-export const symlinkIntegration = () => {
+export const symlinkIntegration = (): AstroIntegration => {
   const symlinks = [
     { source: SYMLINK_SAMPLES_SRC, target: SYMLINK_SAMPLES_DST },
     { source: SYMLINK_TESTS_SRC, target: SYMLINK_TESTS_DST },
   ] as const;
 
-  let integration: AstroIntegration = {
+  return {
     name: "astro-lifecycle-logs",
     hooks: {
-      'astro:build:setup': async () => {
-        try {
-          for (const symlink of symlinks) {
-            const sourcePath = path.resolve(process.cwd(), symlink.source);
-            const targetPath = path.resolve(process.cwd(), symlink.target);
-            if (!fs.existsSync(targetPath)) {
-              fs.symlinkSync(sourcePath, targetPath, 'dir');
-              console.log(`Symlink created: ${sourcePath} -> ${targetPath}`);
-            } else {
-              console.log(`Symlink already exists: ${targetPath}`);
+      "astro:config:setup": async ({ command }) => {
+        const suffix = command === "build" ? "Release" : "Debug";
+        const symlinkType = process.platform === "win32" ? "junction" : "dir";
+
+        for (const { source, target } of symlinks) {
+          const sourcePath = path.resolve(process.cwd(), source, suffix);
+          const targetPath = path.resolve(process.cwd(), target);
+
+          fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+
+          if (fs.existsSync(targetPath)) {
+            const stat = fs.lstatSync(targetPath);
+            if (stat.isSymbolicLink()) fs.unlinkSync(targetPath);
+            else {
+              console.log(`Destination exists and is not a symlink: ${targetPath}`);
+              continue;
             }
           }
-        } catch (error: any) {
-          console.log(`Failed to create symlink: ${error.message}`);
+
+          fs.symlinkSync(sourcePath, targetPath, symlinkType);
+          console.log(`Symlink created: ${sourcePath} -> ${targetPath}`);
         }
       },
     },
   };
-
-  return integration;
 };
 
 export default symlinkIntegration;

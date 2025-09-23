@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(pti-projects)
 
-set(THIRDPARTY_DIR libs)
+set(THIRDPARTY_DIR "libs")
 
 # suppress warnings
 add_compile_options(-Wno-c99-designator)

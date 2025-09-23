@@ -12,5 +12,14 @@
     "libs",
     "samples",
     "tests"
-  ]
+  ],
+  "compilerOptions": {
+    "jsx": "preserve",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "website/src/*"
+      ]
+    }
+  }
 }
