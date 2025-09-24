@@ -3,7 +3,7 @@
 
 #include "bank.h"
 #include "gamestate.h"
-#include "lib/assets.h"
+#include "batteries/assets.h"
 
 #include "entity/coin.h"
 #include "entity/goomba.h"
@@ -55,7 +55,7 @@ namespace {
 
 static void load(void) {
 	GameStateInit();
-	assets::reload();
+	batteries::reload();
 
 	int i, j, t;
 	for (i = 0; i < EN_ROOM_COLS; i++) {
@@ -88,20 +88,20 @@ static void load(void) {
 }
 
 static void init(void) {
-	assets::init();
-	tileset = assets::tileset("assets/tilemap_2.ase");
-	tilemap = assets::tilemap("assets/tilemap_2.ase");
+	batteries::init();
+	tileset = batteries::tileset("assets/tilemap_2.ase");
+	tilemap = batteries::tilemap("assets/tilemap_2.ase");
 
-	bitmap_bullet = assets::sprite("assets/bullet.ase");
-	bitmap_coin = assets::sprite("assets/coin.ase");
-	bitmap_goomba = assets::sprite("assets/goomba.ase");
-	bitmap_player = assets::sprite("assets/dog.ase");
-	bitmap_shooter = assets::sprite("assets/goomba.ase");
-	bitmap_font = assets::sprite("assets/font.ase");
+	bitmap_bullet = batteries::sprite("assets/bullet.ase");
+	bitmap_coin = batteries::sprite("assets/coin.ase");
+	bitmap_goomba = batteries::sprite("assets/goomba.ase");
+	bitmap_player = batteries::sprite("assets/dog.ase");
+	bitmap_shooter = batteries::sprite("assets/goomba.ase");
+	bitmap_font = batteries::sprite("assets/font.ase");
 
-	bitmap_fx_collect = assets::sprite("assets/collect.ase");
-	bitmap_fx_dust1 = assets::sprite("assets/dust1.ase");
-	bitmap_fx_dust2 = assets::sprite("assets/dust2.ase");
+	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
+	bitmap_fx_dust1 = batteries::sprite("assets/dust1.ase");
+	bitmap_fx_dust2 = batteries::sprite("assets/dust2.ase");
 
 	load();
 

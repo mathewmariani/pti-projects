@@ -5,7 +5,7 @@
 #include "pti/pti.h"
 #include "cute/cute_aseprite.h"
 
-namespace assets {
+namespace batteries {
 
 	static std::unordered_map<std::string, pti_bitmap_t> _sprite_cache;
 	static std::unordered_map<std::string, pti_tileset_t> _tileset_cache;
@@ -113,4 +113,4 @@ namespace assets {
 		}
 		return &_tilemap_cache[path];
 	}
-}// namespace assets
+}// namespace batteries

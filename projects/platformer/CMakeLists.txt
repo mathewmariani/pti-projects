@@ -12,9 +12,7 @@ set(PLATFORMER_HEADERS
     src/entity/player.h
     src/entity/projectile.h
     src/entity/registry.h
-    src/entity/shooter.h
-
-    src/lib/assets.h)
+    src/entity/shooter.h)
 
 set(PLATFORMER_SRC
     src/bank.cpp
@@ -27,9 +25,7 @@ set(PLATFORMER_SRC
     src/entity/player.cpp
     src/entity/projectile.cpp
     src/entity/registry.cpp
-    src/entity/shooter.cpp
-    
-    src/lib/assets.cpp)
+    src/entity/shooter.cpp)
 
 if(CMAKE_SYSTEM_NAME STREQUAL Windows)
     add_executable(platformer WIN32 ${PLATFORMER_SRC} ${PLATFORMER_HEADERS})
@@ -37,6 +33,7 @@ else()
     add_executable(platformer src/main.cpp ${PLATFORMER_SRC} ${PLATFORMER_HEADERS})
 endif()
 
+target_link_libraries(platformer PRIVATE batteries)
 target_link_libraries(platformer PRIVATE cute)
 target_link_libraries(platformer PRIVATE pti)
 target_link_libraries(platformer PRIVATE imgui)
