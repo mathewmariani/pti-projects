@@ -38,6 +38,7 @@ else()
     add_executable(platformer src/main.cpp ${PLATFORMER_SRC} ${PLATFORMER_HEADERS})
 endif()
 
+target_link_libraries(platformer PRIVATE cute)
 target_link_libraries(platformer PRIVATE pti)
 target_link_libraries(platformer PRIVATE imgui)
 # target_link_libraries(platformer PRIVATE dbgui)

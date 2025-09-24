@@ -3,9 +3,7 @@
 #include <unordered_map>
 
 #include "pti/pti.h"
-
-#define CUTE_ASEPRITE_IMPLEMENTATION
-#include "cute_aseprite.h"
+#include "cute/cute_aseprite.h"
 
 namespace assets {
 
