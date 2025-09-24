@@ -12,8 +12,8 @@ build/
 dist/
 
 # symlinks
-website/public/samples
-website/public/tests
+website/public/projects
+*.symlink
 
 # emscripten
 emsdk/
