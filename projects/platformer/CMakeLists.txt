@@ -14,8 +14,7 @@ set(PLATFORMER_HEADERS
     src/entity/registry.h
     src/entity/shooter.h
 
-    src/lib/assets.h
-    src/lib/cute_aseprite.h)
+    src/lib/assets.h)
 
 set(PLATFORMER_SRC
     src/bank.cpp
