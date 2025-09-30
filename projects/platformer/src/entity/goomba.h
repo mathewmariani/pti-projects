@@ -28,6 +28,7 @@ struct Goomba : EntityBase {
 	void PostUpdate() override;
 	void Render() override;
 
+	bool PreSolidCollisionWith(EntityBase *const other, const CoordXY<int> &dir) override;
 	const EntityReaction Interact(const EntityInteraction interaction, EntityBase *const from, const CoordXY<int> &dir) override;
 
 private:

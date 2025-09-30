@@ -6,11 +6,12 @@
 
 #include <algorithm>
 
-constexpr int EN_ROOM_COLS = 64;
-constexpr int EN_ROOM_ROWS = 46;
-constexpr int EN_GRID_SIZE = 8;
+
+constexpr int EN_TILE_SIZE = 8;
 constexpr int EN_ROOM_WIDTH = 512;
 constexpr int EN_ROOM_HEIGHT = 368;
+constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / EN_TILE_SIZE;
+constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / EN_TILE_SIZE;
 
 template<>
 bool EntityBase::Is<EntityBase>() const {
@@ -126,10 +127,10 @@ bool EntityBase::Overlaps(const EntityBase *other, const CoordXY<int> &dir) cons
 }
 
 bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
-	const auto top = std::max(0, (y + by + dir.y) / EN_GRID_SIZE);
-	const auto left = std::max(0, (x + bx + dir.x) / EN_GRID_SIZE);
-	const auto bottom = std::min(EN_ROOM_ROWS - 1, (y + by + bh + dir.y - 1) / EN_GRID_SIZE);
-	const auto right = std::min(EN_ROOM_COLS - 1, (x + bx + bw + dir.x - 1) / EN_GRID_SIZE);
+	const auto top = std::max(0, (y + by + dir.y) / EN_TILE_SIZE);
+	const auto left = std::max(0, (x + bx + dir.x) / EN_TILE_SIZE);
+	const auto bottom = std::min(EN_ROOM_ROWS - 1, (y + by + bh + dir.y - 1) / EN_TILE_SIZE);
+	const auto right = std::min(EN_ROOM_COLS - 1, (x + bx + bw + dir.x - 1) / EN_TILE_SIZE);
 
 	for (auto j = top; j <= bottom; ++j) {
 		for (auto i = left; i <= right; ++i) {
@@ -144,27 +145,27 @@ bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
 
 				// Slope handling
 				case 31: {// Shallow slope bottom (right)
-					auto cx = (x + bx + bw + dir.x) - (i * EN_GRID_SIZE);
-					auto top = -0.5f * cx + ((j + 1) * EN_GRID_SIZE);
-					if (y + by + bh + dir.y > top) return true;
+					auto cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
+					auto slope_y = (j + 1) * EN_TILE_SIZE - 0.5f * cx;
+					if (y + by + bh + dir.y > slope_y) return true;
 					continue;
 				}
 				case 32: {// Shallow slope top (right)
-					auto cx = (x + bx + bw + dir.x) - (i * EN_GRID_SIZE);
-					auto top = -0.5f * cx + ((j + 1) * EN_GRID_SIZE - 4);
-					if (y + by + bh + dir.y > top) return true;
+					auto cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
+					auto slope_y = (j + 1) * EN_TILE_SIZE - 4 - 0.5f * cx;
+					if (y + by + bh + dir.y > slope_y) return true;
 					continue;
 				}
 				case 33: {// Shallow slope top (left)
-					auto cx = (x + bx + dir.x) - (i * EN_GRID_SIZE);
-					auto top = 0.5f * cx + (j * EN_GRID_SIZE);
-					if (y + by + bh + dir.y > top) return true;
+					auto cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
+					auto slope_y = j * EN_TILE_SIZE + 0.5f * cx;
+					if (y + by + bh + dir.y > slope_y) return true;
 					continue;
 				}
 				case 34: {// Shallow slope bottom (left)
-					auto cx = (x + bx + dir.x) - (i * EN_GRID_SIZE);
-					auto top = 0.5f * cx + ((j + 1) * EN_GRID_SIZE - 4);
-					if (y + by + bh + dir.y > top) return true;
+					auto cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
+					auto slope_y = (j + 1) * EN_TILE_SIZE - 4 + 0.5f * cx;
+					if (y + by + bh + dir.y > slope_y) return true;
 					continue;
 				}
 
@@ -178,7 +179,7 @@ bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
 				case 40:
 				case 41: {
 					// Allow collision only if the entity was entirely above the platform before the movement
-					if ((y + by + bh - sy) <= (j * EN_GRID_SIZE)) return true;
+					if ((y + by + bh - sy) <= (j * EN_TILE_SIZE)) return true;
 					continue;
 				}
 
@@ -194,6 +195,50 @@ bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
 
 bool EntityBase::IsTouching() const {
 	return PlaceMeeting({direction, 0});
+}
+
+bool EntityBase::IsTouchingWall() const {
+	const auto top = std::max(0, (y + by) / EN_TILE_SIZE);
+	const auto left = std::max(0, (x + bx + direction) / EN_TILE_SIZE);
+	const auto bottom = std::min(EN_ROOM_ROWS - 1, (y + by + bh - 1) / EN_TILE_SIZE);
+	const auto right = std::min(EN_ROOM_COLS - 1, (x + bx + bw + direction - 1) / EN_TILE_SIZE);
+
+	for (auto j = top; j <= bottom; ++j) {
+		for (auto i = left; i <= right; ++i) {
+			auto flags = pti_fget(tilemap, i, j);
+			switch (flags) {
+				// --- Non-colliding tiles ---
+				case 0:
+				case 46:
+				case 47:
+					continue;
+
+				// --- Slopes (walkable, not walls) ---
+				case 31:
+				case 32:
+				case 33:
+				case 34:
+					continue;
+
+				// --- One-way platforms (also not walls) ---
+				case 27:
+				case 28:
+				case 29:
+				case 30:
+				case 38:
+				case 39:
+				case 40:
+				case 41:
+					continue;
+
+				// --- Solid tiles (true walls) ---
+				default:
+					return true;
+			}
+		}
+	}
+
+	return false;
 }
 
 bool EntityBase::CanWiggle() {

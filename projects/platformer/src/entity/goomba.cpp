@@ -26,7 +26,7 @@ void Goomba::Create(const CoordXY<int> &location) {
 }
 
 void Goomba::Update() {
-	if (IsTouching()) {
+	if (IsTouchingWall()) {
 		direction *= -1;
 		x += direction;
 		sx = -sx;
@@ -50,6 +50,28 @@ void Goomba::Render() {
 	}
 
 	pti_spr(bitmap_goomba, frame, x - kGoombaOffsetX, y - kGoombaOffsetY, false, false);
+}
+
+bool Goomba::PreSolidCollisionWith(EntityBase *const other, const CoordXY<int> &dir) {
+	auto reaction = other->Interact(EntityInteraction::Hurt, this, dir);
+
+	// if (reaction == EntityReaction::Collected) {
+	// 	return false;
+	// }
+
+	// if (reaction == EntityReaction::None) {
+	// 	reaction = other->Interact(EntityInteraction::Touch, this, dir);
+
+	// 	if (reaction == EntityReaction::Bump) {
+	// 		bumped = true;
+	// 		return true;
+	// 	} else if (reaction == EntityReaction::Hurt) {
+	// 		flags |= EntityFlags::MarkedForGarbage;
+	// 		return true;
+	// 	}
+	// }
+
+	return false;
 }
 
 const EntityReaction Goomba::Interact(const EntityInteraction interaction, EntityBase *const from, const CoordXY<int> &dir) {

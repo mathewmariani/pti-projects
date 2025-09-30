@@ -44,7 +44,7 @@ namespace {
 	constexpr int EN_ROOM_ROWS = 46;
 	constexpr int EN_GRID_SIZE = 8;
 	constexpr int EN_ROOM_WIDTH = 512;
-	constexpr int EN_ROOM_HEIGHT = 368;
+	constexpr int EN_ROOM_HEIGHT = 288;
 
 
 	float resetTimer = 0.0f;
@@ -89,8 +89,8 @@ static void load(void) {
 
 static void init(void) {
 	batteries::init();
-	tileset = batteries::tileset("assets/tilemap_2.ase");
-	tilemap = batteries::tilemap("assets/tilemap_2.ase");
+	tileset = batteries::tileset("assets/tilemap.ase");
+	tilemap = batteries::tilemap("assets/tilemap.ase");
 
 	bitmap_bullet = batteries::sprite("assets/bullet.ase");
 	bitmap_coin = batteries::sprite("assets/coin.ase");
@@ -117,6 +117,7 @@ static void cleanup(void) {
 static void frame(void) {
 	auto &gameState = GetGameState();
 	if (pti_down(PTI_DBG)) {
+		GameStateReset();
 		load();
 		return;
 	}
@@ -124,8 +125,7 @@ static void frame(void) {
 	if (gameState.PlayerIsDead) {
 		gameState.ResetTimer += PTI_DELTA;
 		if (gameState.ResetTimer >= kDeathResetTimer) {
-			gameState.PlayerIsDead = false;
-			gameState.ResetTimer = 0.0f;
+			GameStateReset();
 			load();
 			return;
 		}
@@ -150,10 +150,11 @@ static void frame(void) {
 	std::snprintf(buffer, sizeof(buffer), "coins: %d\n", gameState.Coins);
 	std::string coin_str(buffer);
 
-	pti_print(bitmap_font, coin_str.c_str(), 0, 64);
+	pti_print(bitmap_font, coin_str.c_str(), 4, 0);
 }
 
 pti_desc pti_main(int argc, char *argv[]) {
+
 	return (pti_desc) {
 			.init_cb = init,
 			.frame_cb = frame,

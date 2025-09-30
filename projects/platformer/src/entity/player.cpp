@@ -74,6 +74,14 @@ bool Player::PreSolidCollisionWith(EntityBase *const other, const CoordXY<int> &
 	return false;
 }
 
+const EntityReaction Player::Interact(const EntityInteraction interaction, EntityBase *const from, const CoordXY<int> &dir) {
+	if (interaction == EntityInteraction::Hurt) {
+		flags |= EntityFlags::MarkedForGarbage;
+	}
+	return EntityReaction::None;
+}
+
+
 void Player::HandleHorizontalMovement() {
 	if (pti_down(PTI_LEFT)) {
 		_pti_appr(sx, -kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);

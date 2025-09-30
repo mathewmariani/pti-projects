@@ -21,6 +21,7 @@ enum class EntityType : uint8_t {
 enum class EntityInteraction : uint8_t {
 	CollectDirect,
 	Touch,
+	Hurt,
 
 	// always last.
 	Count,
@@ -88,5 +89,6 @@ struct EntityBase {
 	bool Overlaps(const EntityBase *other, const CoordXY<int> &dir) const;
 	bool PlaceMeeting(const CoordXY<int> &dir) const;
 	bool IsTouching() const;
+	bool IsTouchingWall() const;
 	bool CanWiggle();
 };

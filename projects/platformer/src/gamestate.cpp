@@ -12,6 +12,12 @@ void GameStateInit() {
 	ResetAllEntities();
 }
 
+void GameStateReset() {
+	ResetAllEntities();
+	_gameState->PlayerIsDead = false;
+	_gameState->ResetTimer = 0.0f;
+}
+
 void GameStateTick() {
 	auto GetEntityBase = [](auto &entity) -> EntityBase * { return &entity; };
 

@@ -26,4 +26,5 @@ struct GameState_t {
 GameState_t &GetGameState();
 
 void GameStateInit();
+void GameStateReset();
 void GameStateTick();
