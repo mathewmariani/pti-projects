@@ -4,9 +4,8 @@ import Footer from "@/components/Footer.astro";
 
 const projects = [
   { href: "projects/platformer/index.html", name: "platformer" },
-];
 
-const samples = [
+  // samples
   { href: "projects/samples/moire/index.html", name: "moire" },
   { href: "projects/samples/mosaic/index.html", name: "mosaic" },
   { href: "projects/samples/rosecurve/index.html", name: "rosecurve" },
@@ -20,63 +19,35 @@ const samples = [
 
   <body class="container" id="top">
     <main>
-      <h1 class="display-2"><b>pti-projects 👋</b></h1>
+      <h1 class="display-2"><b>pti showcase</b></h1>
       <div class="highlight"></div>
 
-      <p class="lead">A collection of projects created using pti.</p>
+      <p class="lead">
+        pti is an *small* framework you can use to make 2D games in C/C++.
+      </p>
 
       <!-- projects -->
-      <section>
-        <h2>Projects</h2>
-        <div class="row row-cols-1 row-cols-sm-4 g-4">
-          {
-            projects.map(({ href, name }) => (
-              <div class="col">
-                <div class="card h-100">
-                  <a href={href}>
-                    <img
-                      src={`/pti-projects/images/256x256.png`}
-                      class="card-img-top"
-                      alt={name}
-                      width={128}
-                      height={128}
-                    />
-                  </a>
-                  <div class="card-footer">
-                    <small class="text-body-secondary">{name}</small>
-                  </div>
+      <section class="row row-cols-1 row-cols-sm-4 g-4">
+        {
+          projects.map(({ href, name }) => (
+            <div class="col">
+              <div class="card h-100">
+                <a href={href}>
+                  <img
+                    src={`/pti-projects/images/${name}.png`}
+                    class="card-img-top"
+                    alt={name}
+                    width={128}
+                    height={128}
+                  />
+                </a>
+                <div class="card-footer">
+                  <small class="text-body-secondary">{name}</small>
                 </div>
               </div>
-            ))
-          }
-        </div>
-      </section>
-
-      <!-- Samples -->
-      <section>
-        <h2>Samples</h2>
-        <div class="row row-cols-1 row-cols-sm-4 g-4">
-          {
-            samples.map(({ href, name }) => (
-              <div class="col">
-                <div class="card h-100">
-                  <a href={href}>
-                    <img
-                      src={`/pti-projects/images/256x256.png`}
-                      class="card-img-top"
-                      alt={name}
-                      width={128}
-                      height={128}
-                    />
-                  </a>
-                  <div class="card-footer">
-                    <small class="text-body-secondary">{name}</small>
-                  </div>
-                </div>
-              </div>
-            ))
-          }
-        </div>
+            </div>
+          ))
+        }
       </section>
     </main>
 
