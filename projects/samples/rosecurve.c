@@ -16,7 +16,7 @@ static void init(void) {
 
 static void cleanup(void) {}
 
-float time = 0.0f;
+double time = 0.0;
 static void frame(void) {
 	// framebuffer dimensions
 	const int width = 128;
@@ -48,15 +48,18 @@ static void frame(void) {
 			float rose_radius = petal_radius * cosf(petal_count * angle_rad + rotation_angle);
 
 			// color calculation: combine geometry
-			uint8_t color_index = (uint8_t) ((rose_radius + pixel_dist - growth_bias) / color_scale);
-			uint8_t low_index = (uint8_t) (color_index + palette_offset) % 16;
-			uint8_t high_index = (uint8_t) (color_index - palette_offset) % 16;
+			int color_index = (int) ((rose_radius + pixel_dist - growth_bias) / color_scale);
 
-			pti_pset(px, py, ((unsigned long) pal[low_index] << 32) | pal[high_index]);
+			// normalize into [0, 15]
+			int low_index = ((color_index % 16) + 16) % 16;
+			int high_index = (low_index + 1) % 16;
+
+			uint64_t color = ((uint64_t) pal[low_index] << 32) | pal[high_index];
+			pti_pset(px, py, color);
 		}
 	}
 
-	time += PTI_DELTA;
+	time += (1.0 / 30.0);
 }
 
 
@@ -66,12 +69,7 @@ pti_desc pti_main(int argc, char *argv[]) {
 			.frame_cb = frame,
 			.cleanup_cb = cleanup,
 			.memory_size = _pti_kilobytes(128),
-			.window =
-					(pti_window) {
-							.name = "pti - rosecurve",
-							.width = 128,
-							.height = 128,
-							.flags = PTI_SCALE3X,
-					},
+			.width = 128,
+			.height = 128,
 	};
 }

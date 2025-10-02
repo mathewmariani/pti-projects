@@ -15,23 +15,25 @@ static void input(const sapp_event *);
 
 int main(int argc, char *argv[]) {
 	pti_desc desc = pti_main(argc, argv);
-
 	pti_init(&desc);
 
-	int width = desc.window.width;
-	int height = desc.window.height;
-	_pti__scale_size_by_flags(&width, &height, desc.window.flags);
-
-	const char *name = desc.window.name ? desc.window.name : "pti";
+	const char *name = "pti";
 	sapp_run(&(sapp_desc) {
+#if defined(SOKOL_GLCORE)
+#if defined(_PTI_APPLE)
+			.gl_major_version = 4,
+			.gl_minor_version = 1,
+#else
 			.gl_major_version = 4,
 			.gl_minor_version = 2,
+#endif
+#endif
 			.init_cb = init,
 			.frame_cb = frame,
 			.cleanup_cb = cleanup,
 			.event_cb = input,
-			.width = width,
-			.height = height,
+			.width = desc.width * 3,
+			.height = desc.height * 3,
 			.window_title = name,
 			.logger.func = slog_func,
 	});
@@ -139,8 +141,8 @@ static void sokol_init_gfx(void) {
 
 	/* bindings */
 	state.gfx.target = sg_make_image(&(sg_image_desc) {
-			.width = _pti.desc.window.width,
-			.height = _pti.desc.window.height,
+			.width = _pti.desc.width,
+			.height = _pti.desc.height,
 			.pixel_format = SG_PIXELFORMAT_RGBA8,
 			.usage = {.stream_update = true},
 			.label = "screen-image",
@@ -213,6 +215,9 @@ static void cleanup(void) {
 	sg_shutdown();
 }
 
+
+#define PTI_FRAMERATE (30.0)
+#define PTI_DELTA (1.0 / PTI_FRAMERATE)
 #define TICK_DURATION_NS (PTI_DELTA * 1e9)
 #define TICK_TOLERANCE_NS (1000000)
 

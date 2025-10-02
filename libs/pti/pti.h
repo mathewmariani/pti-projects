@@ -1,11 +1,7 @@
-#if defined(PTI_IMPL) && !defined(PTI_API_IMPL)
-#define PTI_API_IMPL
-#endif
-#ifndef PTI_INCLUDED
+#pragma once
 /*
     pti.h -- docs
 */
-#define PTI_INCLUDED (1)
 
 // >>includes
 #include <stdbool.h>
@@ -27,23 +23,9 @@
 #define _pti_sign(x) ((x) > 0 ? 1 : ((x) < 0 ? -1 : 0))
 #define _pti_swap(a, b) (((a) ^= (b)), ((b) ^= (a)), ((a) ^= (b)))
 
-#define PTI_FRAMERATE (30.0f)
-#define PTI_DELTA (1.0f / PTI_FRAMERATE)
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-enum {
-	PTI_SCALE2X = (1 << 0),
-	PTI_SCALE3X = (1 << 1),
-	PTI_SCALE4X = (1 << 2),
-	PTI_HIDECURSOR = (1 << 3),
-	PTI_FPS30 = (1 << 4),
-	PTI_FPS60 = (1 << 5),
-	PTI_FPS144 = (1 << 6),
-	PTI_FPSINF = (1 << 7),
-};
 
 typedef enum pti_button {
 	PTI_LEFT,
@@ -58,13 +40,6 @@ typedef enum pti_button {
 	// always last.
 	PTI_BUTTON_COUNT
 } pti_button;
-
-typedef struct pti_window {
-	const char *name;
-	int width;
-	int height;
-	int flags;
-} pti_window;
 
 typedef struct pti_bitmap_t {
 	uint32_t frames;
@@ -99,7 +74,8 @@ typedef struct pti_desc {
 	void (*cleanup_cb)(void);
 
 	int memory_size;
-	pti_window window;
+	int width;
+	int height;
 } pti_desc;
 
 // user-provided function
@@ -136,6 +112,7 @@ uint32_t pti_mget(const pti_tilemap_t *tilemap, int x, int y);
 void pti_mset(pti_tilemap_t *tilemap, int x, int y, int value);
 uint16_t pti_fget(const pti_tilemap_t *tilemap, int x, int y);
 
+//>> random api
 uint16_t pti_prand(void);
 
 //>> gfx api
@@ -144,10 +121,10 @@ void pti_get_camera(int *x, int *y);
 void pti_cls(const uint32_t color);
 void pti_colorkey(const uint32_t color);
 void pti_dither(const uint16_t bstr);
-void pti_clip(const int x0, const int y0, const int x1, const int y1);
-void pti_pset(const int x, const int y, uint64_t color);
-void pti_circ(const int x, const int y, const int r, uint64_t color);
-void pti_circf(const int x, const int y, const int r, uint64_t color);
+void pti_clip(int x0, int y0, int x1, int y1);
+void pti_pset(int x, int y, uint64_t color);
+void pti_circ(int x, int y, int r, uint64_t color);
+void pti_circf(int x, int y, int r, uint64_t color);
 void pti_line(int x0, int y0, int x1, int y1, uint64_t color);
 void pti_rect(int x, int y, int w, int h, uint64_t color);
 void pti_rectf(int x0, int y0, int x1, int y1, uint64_t color);
@@ -168,10 +145,7 @@ inline void pti_print(const pti_bitmap_t &font, const char *text, int x, int y) 
 
 #endif
 
-#endif// PTI_INCLUDED
-
-#ifdef PTI_API_IMPL
-#define PTI_API_IMPL_INCLUDED (1)
+#ifdef PTI_IMPL
 
 #include <stdlib.h>// malloc, free
 
@@ -258,10 +232,7 @@ _PTI_PRIVATE inline void *_pti__ptr_to_bank(void *ptr) {
 }
 
 _PTI_PRIVATE void *_pti__virtual_reserve(void *ptr, const uint32_t size) {
-#if defined(_PTI_EMSCRIPTEN)
-	ptr = malloc(size);
-	PTI_ASSERT(ptr);
-#elif defined(_PTI_WIN32)
+#if defined(_PTI_WIN32)
 	// Reserves a range of the process's virtual offsetess space without
 	// allocating any actual physical storage in memory or in the paging file on
 	// disk.
@@ -280,17 +251,15 @@ _PTI_PRIVATE void *_pti__virtual_reserve(void *ptr, const uint32_t size) {
 	ptr = mmap((void *) ptr, size, prot, flags, -1, 0);
 	PTI_ASSERT(ptr != MAP_FAILED);
 	msync(ptr, size, (MS_SYNC | MS_INVALIDATE));
+#else
+	ptr = malloc(size);
+	PTI_ASSERT(ptr);
 #endif
 	return ptr;
 }
 
 _PTI_PRIVATE void *_pti__virtual_commit(void *ptr, const uint32_t size) {
-#if defined(_PTI_EMSCRIPTEN)
-	if (!ptr) {
-		ptr = malloc(size);
-		PTI_ASSERT(ptr);
-	}
-#elif defined(_PTI_WIN32)
+#if defined(_PTI_WIN32)
 	// Enables read-only or read/write access to the committed region of pages.
 	ptr = VirtualAlloc(ptr, size, MEM_COMMIT, PAGE_READWRITE);
 	PTI_ASSERT(ptr);
@@ -302,20 +271,25 @@ _PTI_PRIVATE void *_pti__virtual_commit(void *ptr, const uint32_t size) {
 	// Asks to invalidate other mappings of the same file (so
 	// that they can be updated with the fresh values just written).
 	msync(ptr, size, (MS_SYNC | MS_INVALIDATE));
+#else
+	if (!ptr) {
+		ptr = malloc(size);
+		PTI_ASSERT(ptr);
+	}
 #endif
 	return ptr;
 }
 
 _PTI_PRIVATE void *_pti__virtual_decommit(void *ptr, const uint32_t size) {
-#if defined(_PTI_EMSCRIPTEN)
-	(void) ptr;
-	(void) size;
-#elif defined(_PTI_WIN32)
+#if defined(_PTI_WIN32)
 	VirtualFree(ptr, size, LMEM_DECOMMIT);
 #elif defined(_PTI_LINUX)
 	uint16_t flags = (MAP_FIXED | MAP_SHARED | MAP_ANON);
 	mmap(ptr, size, PROT_NONE, flags, -1, 0);
 	msync(ptr, size, (MS_SYNC | MS_INVALIDATE));
+#else
+	(void) ptr;
+	(void) size;
 #endif
 	return ptr;
 }
@@ -326,16 +300,16 @@ _PTI_PRIVATE void *_pti__virtual_alloc(void *ptr, const uint32_t size) {
 }
 
 _PTI_PRIVATE void _pti__virtual_free(void *ptr, const uint32_t size) {
-#if defined(_PTI_EMSCRIPTEN)
-	free(ptr);
-	(void) size;
-#elif defined(_PTI_WIN32)
+#if defined(_PTI_WIN32)
 	_PTI_UNUSED(size);
 	VirtualFree((void *) ptr, 0, LMEM_RELEASE);
 #elif defined(_PTI_LINUX)
 	// Requests an update and waits for it to complete.
 	msync(ptr, size, MS_SYNC);
 	munmap(ptr, size);
+#else
+	free(ptr);
+	(void) size;
 #endif
 }
 
@@ -367,36 +341,18 @@ bool pti_released(pti_button btn) {
 // >>random
 
 // >>internals
-_PTI_PRIVATE void _pti__scale_size_by_flags(int *w, int *h, int flags) {
-	if (flags & PTI_SCALE2X) {
-		*w *= 2;
-		*h *= 2;
-	} else if (flags & PTI_SCALE3X) {
-		*w *= 3;
-		*h *= 3;
-	} else if (flags & PTI_SCALE4X) {
-		*w *= 4;
-		*h *= 4;
-	}
-}
-
-_PTI_PRIVATE void _pti__random_init(const pti_desc *desc) {
-	for (int i = 0; i < 4; ++i) {
-		_pti.vm.hardware.rnd_reg[i] = 0x0;
-	}
-}
 
 // >>public
 void pti_init(const pti_desc *desc) {
 	// cache description
 	_pti.desc = *desc;
 
-	_pti.vm.screen.width = desc->window.width;
-	_pti.vm.screen.height = desc->window.height;
+	_pti.vm.screen.width = desc->width;
+	_pti.vm.screen.height = desc->height;
 
 	// calculate sizes
 	const size_t vm_size = sizeof(_pti__vm_t);
-	const size_t vram_size = desc->window.width * desc->window.height * sizeof(uint32_t);
+	const size_t vram_size = desc->width * desc->height * sizeof(uint32_t);
 	const size_t capacity = desc->memory_size + vram_size;
 
 	// init memory
@@ -405,6 +361,11 @@ void pti_init(const pti_desc *desc) {
 	// allocate virtual machine
 	_pti.screen = pti_alloc(&_pti.ram, vram_size);
 	_pti.data = pti_alloc(&_pti.ram, desc->memory_size);
+
+	// init random
+	for (int i = 0; i < 4; ++i) {
+		_pti.vm.hardware.rnd_reg[i] = 0x0;
+	}
 }
 
 // >>memory api
@@ -597,7 +558,7 @@ _PTI_PRIVATE void _pti__plot(void *pixels, int n, int x, int y, int w, int h, in
 	uint32_t *src = pixels + size * n;
 	uint32_t *dst = _pti.screen;
 
-	const int dst_width = _pti.desc.window.width;
+	const int dst_width = _pti.desc.width;
 	const int src_width = sw;
 
 	const int clipped_width = dst_x2 - dst_x1 + 1;
@@ -672,18 +633,18 @@ void pti_dither(const uint16_t bstr) {
 	_pti.vm.draw.dither = bstr;
 }
 
-void pti_clip(const int x0, const int y0, const int x1, const int y1) {
+void pti_clip(int x0, int y0, int x1, int y1) {
 	_pti.vm.draw.clip_x0 = x0;
 	_pti.vm.draw.clip_y0 = y0;
 	_pti.vm.draw.clip_x1 = x1;
 	_pti.vm.draw.clip_y1 = y1;
 }
 
-void pti_pset(const int x, const int y, uint64_t color) {
+void pti_pset(int x, int y, uint64_t color) {
 	_pti__set_pixel(x, y, color);
 }
 
-void pti_circ(const int x, const int y, const int r, uint64_t color) {
+void pti_circ(int x, int y, int r, uint64_t color) {
 	// adjust camera:
 	_pti__transform(&x, &y);
 	int32_t dx = r;
@@ -709,7 +670,7 @@ void pti_circ(const int x, const int y, const int r, uint64_t color) {
 	}
 }
 
-void pti_circf(const int x, const int y, const int r, uint64_t color) {
+void pti_circf(int x, int y, int r, uint64_t color) {
 	// adjust camera:
 	_pti__transform(&x, &y);
 	int32_t dx = r;
@@ -818,7 +779,6 @@ void pti_map(const pti_tilemap_t *tilemap, const pti_tileset_t *tileset, int x, 
 	int *tiles = (int *) _pti__ptr_to_bank((void *) tilemap->tiles);
 	void *pixels = (void *) _pti__ptr_to_bank((void *) tileset->pixels);
 
-	// adjust camera:
 	_pti__transform(&x, &y);
 
 	int i, j, t;
@@ -837,7 +797,6 @@ void pti_spr(const pti_bitmap_t *sprite, int n, int x, int y, bool flip_x, bool 
 	const int bmp_w = sprite->width;
 	const int bmp_h = sprite->height;
 	void *pixels = (void *) _pti__ptr_to_bank((void *) sprite->pixels);
-	// adjust camera:
 	_pti__transform(&x, &y);
 	_pti__plot(pixels, n, x, y, bmp_w, bmp_h, 0, 0, bmp_w, bmp_h, flip_x, flip_y);
 }
@@ -905,4 +864,4 @@ void pti_print(const pti_bitmap_t *font, const char *text, int x, int y) {
 	}
 }
 
-#endif// PTI_API_IMPL
+#endif// PTI_IMPL

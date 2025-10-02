@@ -5,6 +5,9 @@
 #include <algorithm>
 #include <stdint.h>
 
+// FIXME: this can't be it.
+#define PTI_DELTA (1.0 / 30.0)
+
 enum class EntityType : uint8_t {
 	Coin,
 	Effect,

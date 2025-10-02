@@ -160,12 +160,7 @@ pti_desc pti_main(int argc, char *argv[]) {
 			.frame_cb = frame,
 			.cleanup_cb = cleanup,
 			.memory_size = _pti_kilobytes(256), /* 256KB */
-			.window =
-					(pti_window) {
-							.name = "pti - platformer",
-							.width = 240,
-							.height = 135,
-							.flags = PTI_SCALE3X,
-					},
+			.width = 240,
+			.height = 135,
 	};
 }
