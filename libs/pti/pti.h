@@ -189,6 +189,7 @@ inline void pti_print(const pti_bitmap_t &font, const char *text, int x, int y) 
 #include <sys/mman.h>
 #endif
 
+#define PTI_SIMD 1
 #if defined(PTI_SIMD)
 #include <emmintrin.h>
 #include <tmmintrin.h>
@@ -579,19 +580,69 @@ _PTI_PRIVATE void _pti__plot(void *pixels, int n, int x, int y, int w, int h, in
 
 
 #if defined(PTI_SIMD)
-	__m128i key = _mm_set1_epi32(color_key);
-	for (int dst_y = dst_y1; dst_y <= dst_y2; dst_y++) {
-		for (int i = 0; i < clipped_width; i += 4) {
-			__m128i src_vals = _mm_loadu_si128((__m128i *) src_pixel);
-			__m128i dst_vals = _mm_loadu_si128((__m128i *) dst_pixel);
+	const int rows = dst_y2 - dst_y1 + 1;
+	const int cols = clipped_width;
+
+	__m128i key = _mm_set1_epi32((int) color_key);
+	const __m128i all_ones = _mm_set1_epi32(-1);
+
+	for (int row = 0; row < rows; ++row) {
+		// compute source Y for this row (safer than pointer arithmetic inferring sign)
+		int src_row = src_y1 + row * (flip_y ? -1 : 1);
+		uint32_t *src_row_start = src + src_row * src_width + src_x1;
+		uint32_t *dst_ptr = dst + (dst_y1 + row) * dst_width + dst_x1;
+
+		int col = 0;
+		int quads = cols / 4;
+		for (int q = 0; q < quads; ++q) {
+			uint32_t *src_load_ptr;
+			__m128i src_vals;
+
+			if (!flip_x) {
+				// load 4 pixels starting at src_row_start + col
+				src_load_ptr = src_row_start + col;
+				src_vals = _mm_loadu_si128((__m128i const *) src_load_ptr);
+				// advance source by 4 to match dst increment
+				// we'll advance col by 4 below
+			} else {
+				// For flipped X we want src pixels in this order:
+				//   dst[0] = src_row_start[col + 0 * (-1)]  <-- that's src_index
+				// If src_row_start points at the rightmost pixel for the row (src_x1 already accounts for flip),
+				// the 4 source pixels (in memory ascending order) are at addresses:
+				//   src_load_ptr = src_row_start + (col - 3)
+				// then load those 4 and reverse 32-bit lanes so lane order becomes [A3,A2,A1,A0]
+				src_load_ptr = src_row_start + (col - 3);
+				src_vals = _mm_loadu_si128((__m128i const *) src_load_ptr);
+				// reverse 32-bit lanes to get correct left-to-right order for dst
+				src_vals = _mm_shuffle_epi32(src_vals, _MM_SHUFFLE(0, 1, 2, 3));// reverses lane order
+			}
+
+			__m128i dst_vals = _mm_loadu_si128((__m128i const *) dst_ptr);
+
+			// mask = (src_vals == key)
 			__m128i mask = _mm_cmpeq_epi32(src_vals, key);
-			__m128i final = _mm_blendv_epi8(dst_vals, src_vals, _mm_andnot_si128(mask, _mm_set1_epi32(-1)));
-			_mm_storeu_si128((__m128i *) dst_pixel, final);
-			src_pixel += 4 * ix;
-			dst_pixel += 4;
+
+			// final = (mask ? dst_vals : src_vals)
+			// final = (src_vals & ~mask) | (dst_vals & mask)
+			__m128i src_and_not_mask = _mm_andnot_si128(mask, src_vals);
+			__m128i dst_and_mask = _mm_and_si128(dst_vals, mask);
+			__m128i final = _mm_or_si128(src_and_not_mask, dst_and_mask);
+
+			_mm_storeu_si128((__m128i *) dst_ptr, final);
+
+			// Advance by 4 dst pixels and by 4 source "columns" in memory sense
+			dst_ptr += 4;
+			// For column index: in the non-flip case we consumed cols at +4,
+			// in flip case we consumed addresses starting at (col - 3) .. (col)
+			col += 4;
 		}
-		src_pixel += src_next_row * iy;
-		dst_pixel += dst_next_row;
+
+		// scalar tail for leftover pixels
+		for (; col < cols; ++col) {
+			uint32_t src_color = *(src_row_start + (flip_x ? (col * -1 + 0) : col));
+			uint32_t *dst_p = dst + (dst_y1 + row) * dst_width + dst_x1 + col;
+			if (src_color != color_key) *dst_p = src_color;
+		}
 	}
 #else
 	for (int dst_y = dst_y1; dst_y <= dst_y2; dst_y++) {
