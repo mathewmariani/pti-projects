@@ -1,2 +1,3 @@
 add_subdirectory(platformer)
 add_subdirectory(samples)
+add_subdirectory(towerfall-physics)
