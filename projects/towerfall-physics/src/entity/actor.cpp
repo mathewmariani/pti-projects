@@ -48,7 +48,7 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 				y += dy;
 				move -= dy;
 			} else {
-				if (func) {
+				if ((dy < 0 && !CanWiggle()) && func) {
 					(this->*func)();
 				}
 				break;
@@ -56,6 +56,19 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 		}
 		ry = 0;
 	}
+}
+
+bool Actor::CanWiggle() {
+	for (auto i = 0; i < 4; ++i) {
+		for (auto j : {-1, 1}) {
+			const CoordXY<int> dir{i * j, -1};
+			if (!PlaceMeeting(dir) && !CollidesWithSolids(dir)) {
+				x += (i * j);
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 void Actor::Squish(void) {

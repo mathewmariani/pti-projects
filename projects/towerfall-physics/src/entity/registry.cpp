@@ -13,34 +13,35 @@ namespace {
 	auto GetEntityBase = [](auto &entity) -> EntityBase * { return &entity; };
 }// namespace
 
-#define CASE_FOR(T)                                                    \
-	case EntityType::T:                                                \
-		entity = (EntityBase *) &gameState.Entities[idx].emplace<T>(); \
-		break
+#include "actor/player.h"
+#include "solid/platform.h"
 
-EntityBase *CreateEntity(EntityType type) {
+template<typename T, typename... Args>
+EntityBase *CreateEntity(Args &&...args) {
+	auto &gameState = GetGameState();
+	if (_freeIdList.empty()) return nullptr;
 	auto idx = _freeIdList.back();
-	if (idx >= kMaxEntities) {
-		return nullptr;
-	}
 	_freeIdList.pop_back();
 
-	auto &gameState = GetGameState();
-	EntityBase *entity;
-	switch (type) {
-		CASE_FOR(Player);
-		CASE_FOR(Platform);
-		default:
-			return nullptr;
-	}
+	EntityBase *entity = nullptr;
 
-	entity->type = type;
+	if constexpr (std::is_same_v<T, Player>)
+		entity = reinterpret_cast<EntityBase *>(&gameState.Entities[idx].emplace<Player>(std::forward<Args>(args)...));
+	else if constexpr (std::is_same_v<T, Platform>)
+		entity = reinterpret_cast<EntityBase *>(&gameState.Entities[idx].emplace<Platform>(std::forward<Args>(args)...));
+	else
+		return nullptr;
+
+	entity->type = T::cEntityType;
 	entity->id = idx;
 	entity->x = 0;
 	entity->y = 0;
-
 	return entity;
 }
+
+// Explicit instantiations (optional)
+template EntityBase *CreateEntity<Player>();
+template EntityBase *CreateEntity<Platform, Platform::Type>(Platform::Type &&);
 
 void RemoveEntity(EntityBase *entity) {
 	// add to free list

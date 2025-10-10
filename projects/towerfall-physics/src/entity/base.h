@@ -46,7 +46,7 @@ struct EntityBase {
 	int32_t start_x;
 	int32_t start_y;// position
 
-	int8_t direction;
+	CoordXY<int> direction;
 
 	template<typename T>
 	bool Is(void) const;

@@ -43,11 +43,18 @@ static void load(void) {
 						pti_mset(tilemap, i, j, 0);
 					}
 				} break;
-				case 49:
-					if (auto *e = CreateEntity<Platform>(); e) {
+				case 51:
+					if (auto *e = CreateEntity<Platform>(Platform::Type::Vertical); e) {
 						e->SetLocation({XPOS(i), YPOS(j)});
 						pti_mset(tilemap, i, j, 0);
 					}
+					break;
+				case 52:
+					if (auto *e = CreateEntity<Platform>(Platform::Type::Horizontal); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(tilemap, i, j, 0);
+					}
+					break;
 			}
 		}
 	}

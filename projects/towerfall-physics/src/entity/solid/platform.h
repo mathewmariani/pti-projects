@@ -2,7 +2,7 @@
 
 #include "../solid.h"
 
-constexpr float kPlatformRange = 16.0f;
+constexpr float kPlatformRange = 56.0f;
 constexpr float kPlatformMaxSpeed = 12.0f;
 constexpr float kPlatformAcceleration = 20.0f;
 constexpr float kPlatformFriction = 15.0f;
@@ -20,17 +20,26 @@ constexpr int kPlatformHeight = 8;
 constexpr int kPlatformFrameCount = 8;
 constexpr int kPlatformFrameMod = 2;
 
+
 struct Platform : Solid {
 	static constexpr auto cEntityType = EntityType::Platform;
 
-	Platform() {
+	enum class Type {
+		Horizontal,
+		Vertical
+	};
+
+	Platform(const Type t) {
 		bx = 0;
 		by = 0;
 		bw = kPlatformWidth;
 		bh = kPlatformHeight;
-		direction = 1;
+		direction = (t == Type::Horizontal) ? CoordXY{+1, 0} : CoordXY{0, -1};
+		type = t;
 	}
 
 	void Update() override;
 	void Render() override;
+
+	Type type;
 };

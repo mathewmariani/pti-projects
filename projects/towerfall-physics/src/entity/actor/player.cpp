@@ -43,21 +43,29 @@ void Player::HandleHorizontalMovement() {
 
 void Player::HandleVerticalMovement() {
 	static int hang_time = 0;
+	const auto grounded = IsGrounded();
 
-	if (IsGrounded() && state == PlayerState::Jump) {
+	float grav = kPlayerPhysicsVerticalGravFall;
+	if (!grounded && coyoteTime > 0.0f) {
+		grav *= 0.5f;// slow fall when walking off ledge
+	}
+
+	if (!grounded && state == PlayerState::Jump) {
 		if (sy <= -0.5f) {
 			hang_time = 3;
-			sy += kPlayerPhysicsVerticalGravFall;
+			sy += grav;
 		} else {
 			if (hang_time > 0) {
 				--hang_time;
 				sy = 0;
 			} else {
-				sy += kPlayerPhysicsVerticalGravFall;
+				sy += grav;
 			}
 		}
 	} else {
-		sy += kPlayerPhysicsVerticalGravFall;
+		if (!grounded) {
+			sy += grav;
+		}
 	}
 
 	// Limit vertical speed
@@ -67,23 +75,37 @@ void Player::HandleVerticalMovement() {
 }
 
 void Player::HandleJump() {
-	auto kJump = pti_pressed(PTI_UP);
-	auto grounded = IsGrounded();
+	bool kJumpPressed = pti_pressed(PTI_UP);
+	bool kJumpReleased = pti_released(PTI_UP);
+	bool grounded = IsGrounded();
 
-	// Revert state
+	if (kJumpPressed) {
+		jumpBuffer = kPlayerJumpBuffer;
+	} else if (jumpBuffer > 0.0f) {
+		jumpBuffer -= PTI_DELTA;
+		if (jumpBuffer < 0.0f) jumpBuffer = 0.0f;
+	}
+
+	if (grounded) {
+		coyoteTime = kPlayerCoyoteTime;
+	} else if (coyoteTime > 0.0f) {
+		coyoteTime -= PTI_DELTA;
+		if (coyoteTime < 0.0f) coyoteTime = 0.0f;
+	}
+
 	if (state == PlayerState::Jump && grounded) {
 		state = PlayerState::Normal;
 	}
 
-	// Full jump
-	if (kJump && grounded) {
+	if ((kJumpPressed || jumpBuffer > 0.0f) && (grounded || coyoteTime > 0.0f)) {
 		state = PlayerState::Jump;
 		sy = -kPlayerPhysicsJumpStrength;
+		jumpBuffer = 0.0f;
+		coyoteTime = 0.0f;
 	}
 
-	// Variable jump
 	if (state == PlayerState::Jump && sy < -(kPlayerPhysicsJumpStrength * 0.5f)) {
-		if (pti_released(PTI_UP)) {
+		if (kJumpReleased) {
 			sy = -(kPlayerPhysicsJumpStrength * 0.5f);
 		}
 	}
