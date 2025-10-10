@@ -189,7 +189,7 @@ inline void pti_print(const pti_bitmap_t &font, const char *text, int x, int y) 
 #include <sys/mman.h>
 #endif
 
-#define PTI_SIMD 1
+// #define PTI_SIMD 1
 #if defined(PTI_SIMD)
 #include <emmintrin.h>
 #include <tmmintrin.h>
