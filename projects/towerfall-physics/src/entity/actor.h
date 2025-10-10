@@ -21,4 +21,7 @@ struct Actor : EntityBase {
 	bool IsGrounded(void) const;
 
 	bool CollidesWithSolids(const CoordXY<int> &dir) const;
+
+protected:
+	bool grounded;
 };

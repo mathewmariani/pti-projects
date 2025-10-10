@@ -24,7 +24,7 @@ void Player::Update() {
 
 void Player::Render() {
 	auto frame = static_cast<int>(timer * kPlayerFrameCount) % kPlayerFrameMod;
-	if (sx == 0 && IsGrounded()) {
+	if (sx == 0 && grounded) {
 		frame = 0;
 	}
 
@@ -43,7 +43,6 @@ void Player::HandleHorizontalMovement() {
 
 void Player::HandleVerticalMovement() {
 	static int hang_time = 0;
-	const auto grounded = IsGrounded();
 
 	float grav = kPlayerPhysicsVerticalGravFall;
 	if (!grounded && coyoteTime > 0.0f) {
@@ -77,7 +76,6 @@ void Player::HandleVerticalMovement() {
 void Player::HandleJump() {
 	bool kJumpPressed = pti_pressed(PTI_UP);
 	bool kJumpReleased = pti_released(PTI_UP);
-	bool grounded = IsGrounded();
 
 	if (kJumpPressed) {
 		jumpBuffer = kPlayerJumpBuffer;

@@ -14,6 +14,9 @@ bool EntityBase::Is<Actor>() const {
 void Actor::Physics() {
 	MoveX(sx, &Actor::HaltX);
 	MoveY(sy, &Actor::HaltY);
+
+	const auto dir = CoordXY<int>::Up;
+	grounded = PlaceMeeting(dir) || CollidesWithSolids(dir);
 }
 
 void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
@@ -23,6 +26,15 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 		const int dx = _pti_sign(move);
 		const CoordXY<int> dir{dx, 0};
 		while (move != 0) {
+			// moving up slope:
+			if (PlaceMeeting({dx, 0}) && !(PlaceMeeting({dx, -1}))) {
+				y -= 1;
+			}
+			// moving down slope:
+			if (!(PlaceMeeting({dx, 0})) && !(PlaceMeeting({dx, 1})) && PlaceMeeting({dx, 2})) {
+				y += 1;
+			}
+			// always last:
 			if (!PlaceMeeting(dir) && !CollidesWithSolids(dir)) {
 				x += dx;
 				move -= dx;
@@ -48,7 +60,15 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 				y += dy;
 				move -= dy;
 			} else {
-				if ((dy < 0 && !CanWiggle()) && func) {
+				auto squished = false;
+				if (dy < 0) {
+					// moving up:
+					squished = !CanWiggle();
+				} else if (dy > 0) {
+					// moving down:
+					squished = (PlaceMeeting({0, -1}) || CollidesWithSolids({0, -1}));
+				}
+				if (squished && func) {
 					(this->*func)();
 				}
 				break;

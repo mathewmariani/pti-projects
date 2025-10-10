@@ -2,7 +2,7 @@
 
 #include "../solid.h"
 
-constexpr float kPlatformRange = 56.0f;
+constexpr float kPlatformRange = 5 * 8.0f;
 constexpr float kPlatformMaxSpeed = 12.0f;
 constexpr float kPlatformAcceleration = 20.0f;
 constexpr float kPlatformFriction = 15.0f;
@@ -15,7 +15,7 @@ constexpr float kPlatformPhysicsBounceStrength = 4.5535f;
 
 constexpr int kPlatformOffsetX = 4;
 constexpr int kPlatformOffsetY = 8;
-constexpr int kPlatformWidth = 8;
+constexpr int kPlatformWidth = 24;
 constexpr int kPlatformHeight = 8;
 constexpr int kPlatformFrameCount = 8;
 constexpr int kPlatformFrameMod = 2;

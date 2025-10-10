@@ -65,6 +65,7 @@ static void init(void) {
 	tileset = batteries::tileset("assets/tilemap.ase");
 	tilemap = batteries::tilemap("assets/tilemap.ase");
 	bitmap_player = batteries::sprite("assets/dog.ase");
+	bitmap_platform = batteries::sprite("assets/platform.ase");
 
 	load();
 

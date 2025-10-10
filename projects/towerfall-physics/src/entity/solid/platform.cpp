@@ -41,8 +41,6 @@ void Platform::Update() {
 	}
 }
 
-
 void Platform::Render() {
-	auto color = 0xffff0000;
-	pti_rectf(x, y, x + kPlatformWidth - 1, y + kPlatformHeight - 1, color);
+	pti_spr(bitmap_platform, 0, x, y, false, false);
 }
