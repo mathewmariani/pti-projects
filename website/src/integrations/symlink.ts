@@ -1,28 +1,17 @@
-import {
-  SYMLINK_SAMPLES_SRC,
-  SYMLINK_SAMPLES_DST,
-  SYMLINK_TESTS_SRC,
-  SYMLINK_TESTS_DST,
-} from "../consts";
-
+import { SYMLINKS } from "../consts";
 import type { AstroIntegration } from "astro";
 import fs from "fs";
 import path from "path";
 
 export const symlinkIntegration = (): AstroIntegration => {
-  const symlinks = [
-    { source: SYMLINK_SAMPLES_SRC, target: SYMLINK_SAMPLES_DST },
-    { source: SYMLINK_TESTS_SRC, target: SYMLINK_TESTS_DST },
-  ] as const;
-
   return {
-    name: "astro-lifecycle-logs",
+    name: "astro-symlinks",
     hooks: {
       "astro:config:setup": async ({ command }) => {
         const suffix = command === "build" ? "Release" : "Debug";
         const symlinkType = process.platform === "win32" ? "junction" : "dir";
 
-        for (const { source, target } of symlinks) {
+        for (const { source, target } of SYMLINKS) {
           const sourcePath = path.resolve(process.cwd(), source, suffix);
           const targetPath = path.resolve(process.cwd(), target);
 
@@ -30,8 +19,9 @@ export const symlinkIntegration = (): AstroIntegration => {
 
           if (fs.existsSync(targetPath)) {
             const stat = fs.lstatSync(targetPath);
-            if (stat.isSymbolicLink()) fs.unlinkSync(targetPath);
-            else {
+            if (stat.isSymbolicLink()) {
+              fs.unlinkSync(targetPath);
+            } else {
               console.log(`Destination exists and is not a symlink: ${targetPath}`);
               continue;
             }
