@@ -92,7 +92,9 @@ bool Actor::CanWiggle() {
 }
 
 void Actor::Squish(void) {
-	printf("%s\n", __FUNCTION__);
+	RemoveEntity(this);
+	GetGameState().Deaths++;
+	GetGameState().PlayerIsDead = true;
 }
 
 void Actor::HaltX(void) {

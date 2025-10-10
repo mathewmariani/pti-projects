@@ -13,7 +13,7 @@ constexpr int EN_ROOM_HEIGHT = 128;
 constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / EN_TILE_SIZE;
 constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / EN_TILE_SIZE;
 
-constexpr float kDeathResetTimer = 5.0f;
+constexpr float kDeathResetTimer = 2.0f;
 
 using EntityVariant = std::variant<EntityBase, Player, Platform>;
 

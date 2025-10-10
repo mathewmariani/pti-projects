@@ -66,12 +66,13 @@ static void init(void) {
 	tilemap = batteries::tilemap("assets/tilemap.ase");
 	bitmap_player = batteries::sprite("assets/dog.ase");
 	bitmap_platform = batteries::sprite("assets/platform.ase");
+	bitmap_font = batteries::sprite("assets/font.ase");
 
 	load();
 
 	/* graphics state: */
 	pti_dither(0x5a5a);
-	pti_clip(0, 0, 240, 135);
+	pti_clip(0, 0, EN_ROOM_WIDTH, EN_ROOM_HEIGHT);
 }
 
 static void cleanup(void) {
@@ -109,6 +110,13 @@ static void frame(void) {
 
 	pti_map(tilemap, tileset, 0, 0);
 	RenderAllEntities();
+
+	// const auto status_str = std::format("coins: &d\n", coins);
+	char buffer[100];
+	std::snprintf(buffer, sizeof(buffer), "Is Dead: %s\n", gameState.PlayerIsDead ? "True" : "False");
+	std::string status_str(buffer);
+
+	pti_print(bitmap_font, status_str.c_str(), 4, 0);
 }
 
 pti_desc pti_main(int argc, char *argv[]) {
