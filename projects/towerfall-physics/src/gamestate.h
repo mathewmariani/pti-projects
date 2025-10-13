@@ -36,7 +36,7 @@ template<typename T>
 std::vector<T *> GetEntitiesOfType() {
 	const auto &entities = GetGameState().Entities;
 	std::vector<T *> result;
-	result.reserve(entities.size());
+	result.reserve(kMaxEntities);
 
 	for (auto &e : GetGameState().Entities) {
 		if (std::holds_alternative<std::monostate>(e)) {
