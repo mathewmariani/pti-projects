@@ -3,8 +3,6 @@
 #include "base.h"
 
 struct Actor : EntityBase {
-	static constexpr auto cEntityType = EntityType::Actor;
-
 	using MoveFunc = void (Actor::*)(void);
 
 	void Physics(void);

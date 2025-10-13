@@ -4,11 +4,6 @@
 #include "../../bank.h"
 #include "pti/pti.h"
 
-template<>
-bool EntityBase::Is<Player>() const {
-	return type == EntityType::Player;
-}
-
 void Player::Update() {
 	HandleHorizontalMovement();
 	HandleVerticalMovement();

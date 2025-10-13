@@ -9,15 +9,8 @@
 #define PTI_DELTA (1.0 / 30.0)
 
 enum class EntityType : uint8_t {
-	// base
 	Solid,
 	Actor,
-
-	// solids
-	Platform,
-
-	// actors
-	Player,
 
 	// always last.
 	Count,
@@ -34,7 +27,6 @@ struct BoundingBox {
 };
 
 struct EntityBase {
-	EntityType type;
 	EntityId id;
 	int32_t x, y;      // position
 	uint8_t flags;     // general entity flags

@@ -29,8 +29,6 @@ enum class PlayerState : uint8_t {
 };
 
 struct Player : Actor {
-	static constexpr auto cEntityType = EntityType::Player;
-
 	Player() {
 		bx = 0;
 		by = 0;

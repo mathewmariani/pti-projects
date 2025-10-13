@@ -2,16 +2,11 @@
 #include "../gamestate.h"
 
 #include <algorithm>
-#include <array>
 #include <variant>
 #include <vector>
-#include <cstdio>
 
 static std::vector<uint8_t> _freeIdList;
-
-namespace {
-	auto GetEntityBase = [](auto &entity) -> EntityBase * { return &entity; };
-}// namespace
+static std::vector<EntityBase *> _activeList;
 
 #include "actor/player.h"
 #include "solid/platform.h"
@@ -23,19 +18,12 @@ EntityBase *CreateEntity(Args &&...args) {
 	auto idx = _freeIdList.back();
 	_freeIdList.pop_back();
 
-	EntityBase *entity = nullptr;
-
-	if constexpr (std::is_same_v<T, Player>)
-		entity = reinterpret_cast<EntityBase *>(&gameState.Entities[idx].emplace<Player>(std::forward<Args>(args)...));
-	else if constexpr (std::is_same_v<T, Platform>)
-		entity = reinterpret_cast<EntityBase *>(&gameState.Entities[idx].emplace<Platform>(std::forward<Args>(args)...));
-	else
-		return nullptr;
-
-	entity->type = T::cEntityType;
+	EntityBase *entity = &gameState.Entities[idx].emplace<T>(std::forward<Args>(args)...);
 	entity->id = idx;
 	entity->x = 0;
 	entity->y = 0;
+
+	_activeList.push_back(entity);
 	return entity;
 }
 
@@ -44,21 +32,33 @@ template EntityBase *CreateEntity<Player>();
 template EntityBase *CreateEntity<Platform, Platform::Type>(Platform::Type &&);
 
 void RemoveEntity(EntityBase *entity) {
-	// add to free list
+	auto &gameState = GetGameState();
 	auto index = entity->id;
-	_freeIdList.insert(std::upper_bound(std::rbegin(_freeIdList), std::rend(_freeIdList), index).base(), index);
 
-	// reset entity
-	*entity = EntityBase();
-	entity->id = index;
-	entity->type = EntityType::Null;
+	// clang-format off
+	auto *base = std::visit([](auto &obj) -> EntityBase* {
+		using T = std::decay_t<decltype(obj)>;
+		if constexpr (std::is_same_v<T, std::monostate>)
+		{
+			return nullptr;
+		}
+		else return &obj;
+	}, gameState.Entities[index]);
+	// clang-format on
+
+	gameState.Entities[index].emplace<std::monostate>();
+
+	_freeIdList.insert(std::upper_bound(std::rbegin(_freeIdList), std::rend(_freeIdList), index).base(), index);
+	_activeList.erase(std::remove(_activeList.begin(), _activeList.end(), base), _activeList.end());
 }
 
 void ResetAllEntities() {
 	auto &gameState = GetGameState();
-	std::fill(std::begin(gameState.Entities), std::end(gameState.Entities), EntityBase());
+	for (auto &variant : gameState.Entities) {
+		variant.emplace<std::monostate>();
+	}
 
-	_freeIdList.clear();
+	_activeList.clear();
 	_freeIdList.resize(kMaxEntities);
 
 	auto nextId = 0;
@@ -69,16 +69,7 @@ void ResetAllEntities() {
 }
 
 bool CheckCollisionsWith(const EntityBase *self, EntityBase *&out, const CoordXY<int> &dir) {
-	for (auto &a : GetGameState().Entities) {
-		if (!self || self->type == EntityType::Null) {
-			continue;
-		}
-
-		auto *other = std::visit(GetEntityBase, a);
-		if (!other || other->type == EntityType::Null || self == other) {
-			continue;
-		}
-
+	for (auto *other : _activeList) {
 		if (self->Overlaps(other, dir)) {
 			out = other;
 			return true;
@@ -89,10 +80,7 @@ bool CheckCollisionsWith(const EntityBase *self, EntityBase *&out, const CoordXY
 }
 
 void RenderAllEntities() {
-	for (auto &e : GetGameState().Entities) {
-		auto *entity = std::visit(GetEntityBase, e);
-		if (entity && entity->type != EntityType::Null) {
-			entity->Render();
-		}
+	for (auto *entity : _activeList) {
+		entity->Render();
 	}
 }

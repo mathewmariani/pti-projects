@@ -6,11 +6,6 @@
 
 #include <cmath>
 
-template<>
-bool EntityBase::Is<Actor>() const {
-	return type == EntityType::Actor;
-}
-
 void Actor::Physics() {
 	MoveX(sx, &Actor::HaltX);
 	MoveY(sy, &Actor::HaltY);

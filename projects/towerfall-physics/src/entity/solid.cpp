@@ -6,11 +6,6 @@
 
 #include <cmath>
 
-template<>
-bool EntityBase::Is<Solid>() const {
-	return type == EntityType::Solid;
-}
-
 void Solid::Physics(void) {
 	MoveX(sx);
 	MoveY(sy);

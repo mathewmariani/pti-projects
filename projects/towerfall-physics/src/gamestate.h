@@ -15,7 +15,7 @@ constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / EN_TILE_SIZE;
 
 constexpr float kDeathResetTimer = 2.0f;
 
-using EntityVariant = std::variant<EntityBase, Player, Platform>;
+using EntityVariant = std::variant<std::monostate, Player, Platform>;
 
 struct GameState_t {
 	EntityVariant Entities[kMaxEntities]{};
@@ -34,9 +34,14 @@ void GameStateTick();
 
 template<typename T>
 std::vector<T *> GetEntitiesOfType() {
+	const auto &entities = GetGameState().Entities;
 	std::vector<T *> result;
+	result.reserve(entities.size());
 
 	for (auto &e : GetGameState().Entities) {
+		if (std::holds_alternative<std::monostate>(e)) {
+			continue;
+		}
 		// clang-format off
 		std::visit([&](auto& obj) {
 			using U = std::decay_t<decltype(obj)>;

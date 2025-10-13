@@ -7,11 +7,6 @@
 
 #include <cmath>
 
-template<>
-bool EntityBase::Is<Platform>() const {
-	return type == EntityType::Solid;
-}
-
 void Platform::Update() {
 	switch (type) {
 		case Platform::Type::Horizontal: {

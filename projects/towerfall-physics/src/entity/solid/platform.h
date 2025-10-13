@@ -22,8 +22,6 @@ constexpr int kPlatformFrameMod = 2;
 
 
 struct Platform : Solid {
-	static constexpr auto cEntityType = EntityType::Platform;
-
 	enum class Type {
 		Horizontal,
 		Vertical
@@ -34,7 +32,7 @@ struct Platform : Solid {
 		by = 0;
 		bw = kPlatformWidth;
 		bh = kPlatformHeight;
-		direction = (t == Type::Horizontal) ? CoordXY{+1, 0} : CoordXY{0, -1};
+		direction = (t == Type::Horizontal) ? CoordXY<int>::Right : CoordXY<int>::Down;
 		type = t;
 	}
 
