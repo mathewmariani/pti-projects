@@ -3,8 +3,30 @@
 #include "../../gamestate.h"
 #include "../../bank.h"
 #include "pti/pti.h"
+#include "bullet.h"
 
 void Player::Update() {
+	shoot_timer -= PTI_DELTA;
+
+	auto dir = CoordXY<int>::Zero;
+	if (pti_down(PTI_Y)) {
+		dir = CoordXY<int>::Left;
+	} else if (pti_down(PTI_A)) {
+		dir = CoordXY<int>::Right;
+	} else if (pti_down(PTI_X)) {
+		dir = CoordXY<int>::Down;
+	} else if (pti_down(PTI_B)) {
+		dir = CoordXY<int>::Up;
+	}
+
+	if (dir != CoordXY<int>::Zero && shoot_timer < 0.0f) {
+		shoot_timer = kPlayerFireRate;
+		if (auto *e = CreateEntity<Bullet>(); e) {
+			e->SetLocation({x, y});
+			e->direction = dir;
+		}
+	}
+
 	HandleHorizontalMovement();
 	HandleVerticalMovement();
 
@@ -18,7 +40,7 @@ void Player::Update() {
 
 void Player::Render() {
 	auto frame = static_cast<int>(timer * kPlayerFrameCount) % kPlayerFrameMod;
-	if (sx == 0 && grounded) {
+	if (sx == 0 && sy == 0) {
 		frame = 0;
 	}
 
@@ -37,10 +59,10 @@ void Player::HandleHorizontalMovement() {
 
 void Player::HandleVerticalMovement() {
 	if (pti_down(PTI_UP)) {
-		_pti_appr(sx, -kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
+		_pti_appr(sy, -kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
 	} else if (pti_down(PTI_DOWN)) {
-		_pti_appr(sx, kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
+		_pti_appr(sy, kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
 	} else {
-		_pti_appr(sx, 0, kPlayerFriction * PTI_DELTA);
+		_pti_appr(sy, 0, kPlayerFriction * PTI_DELTA);
 	}
 }

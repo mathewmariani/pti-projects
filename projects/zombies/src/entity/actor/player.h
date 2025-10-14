@@ -5,6 +5,7 @@
 constexpr float kPlayerMaxSpeed = 3.0f;
 constexpr float kPlayerAcceleration = 20.0f;
 constexpr float kPlayerFriction = 15.0f;
+constexpr float kPlayerFireRate = 1.0f;
 
 constexpr int kPlayerOffsetX = 4;
 constexpr int kPlayerOffsetY = 8;
@@ -36,4 +37,5 @@ private:
 
 private:
 	PlayerState state;
+	float shoot_timer;
 };

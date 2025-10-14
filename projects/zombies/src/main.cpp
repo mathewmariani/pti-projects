@@ -42,6 +42,12 @@ static void load(void) {
 						pti_mset(tilemap, i, j, 0);
 					}
 				} break;
+				case 50: {
+					if (auto *e = CreateEntity<Zombie>(); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(tilemap, i, j, 0);
+					}
+				} break;
 			}
 		}
 	}
@@ -51,7 +57,9 @@ static void init(void) {
 	batteries::init();
 	tileset = batteries::tileset("assets/tilemap.ase");
 	tilemap = batteries::tilemap("assets/tilemap.ase");
+	bitmap_bullet = batteries::sprite("assets/bullet.ase");
 	bitmap_player = batteries::sprite("assets/dog.ase");
+	bitmap_zombie = batteries::sprite("assets/zombie.ase");
 	bitmap_platform = batteries::sprite("assets/platform.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
 

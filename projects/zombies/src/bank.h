@@ -15,6 +15,7 @@ extern pti_bitmap_t *bitmap_goomba;
 extern pti_bitmap_t *bitmap_player;
 extern pti_bitmap_t *bitmap_pop;
 extern pti_bitmap_t *bitmap_platform;
+extern pti_bitmap_t *bitmap_zombie;
 
 // font
 extern pti_bitmap_t *bitmap_shooter;

@@ -12,6 +12,7 @@ pti_bitmap_t *bitmap_player = nullptr;
 pti_bitmap_t *bitmap_pop = nullptr;
 pti_bitmap_t *bitmap_shooter = nullptr;
 pti_bitmap_t *bitmap_platform = nullptr;
+pti_bitmap_t *bitmap_zombie = nullptr;
 
 // font
 pti_bitmap_t *bitmap_font = nullptr;

@@ -5,6 +5,7 @@
 
 template<typename T>
 struct CoordXY {
+	static CoordXY<T> Zero;
 	static CoordXY<T> Up;
 	static CoordXY<T> Right;
 	static CoordXY<T> Down;
@@ -37,6 +38,8 @@ struct CoordXY {
 	}
 };
 
+template<typename T>
+CoordXY<T> CoordXY<T>::Zero{0, 0};
 template<typename T>
 CoordXY<T> CoordXY<T>::Up{+0, +1};
 template<typename T>

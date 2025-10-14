@@ -36,7 +36,6 @@ void GameStateTick();
 
 template<typename T>
 std::vector<T *> GetEntitiesOfType() {
-	const auto &entities = GetGameState().Entities;
 	std::vector<T *> result;
 	result.reserve(kMaxEntities);
 
@@ -54,5 +53,29 @@ std::vector<T *> GetEntitiesOfType() {
 		// clang-format on
 	}
 
+	return result;
+}
+
+template<typename T>
+std::vector<T *> GetCollisions(EntityBase &subject, const CoordXY<int> &dir) {
+	std::vector<T *> result;
+	result.reserve(kMaxEntities);
+
+	for (auto &e : GetGameState().Entities) {
+		if (std::holds_alternative<std::monostate>(e)) {
+			continue;
+		}
+		// clang-format off
+		std::visit([&](auto& obj) {
+			using U = std::decay_t<decltype(obj)>;
+			if constexpr (std::is_base_of_v<T, U>) {
+				if (subject.Overlaps(&obj, dir))
+				{
+					result.push_back(&obj);
+				}
+			}
+		}, e);
+		// clang-format on
+	}
 	return result;
 }
