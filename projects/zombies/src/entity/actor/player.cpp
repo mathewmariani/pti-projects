@@ -5,6 +5,16 @@
 #include "pti/pti.h"
 #include "bullet.h"
 
+void Player::Hurt(const CoordXY<int> &direction) {
+	sx = direction.x * kPlayerHurtKnockback;
+	sy = direction.y * kPlayerHurtKnockback;
+	health -= 1;
+
+	if (health <= 0) {
+		RemoveEntity(this);
+	}
+}
+
 void Player::Update() {
 	shoot_timer -= PTI_DELTA;
 
@@ -24,6 +34,8 @@ void Player::Update() {
 		if (auto *e = CreateEntity<Bullet>(); e) {
 			e->SetLocation({x, y});
 			e->direction = dir;
+			sx = dir.x * -kPlayerShootingKnockback;
+			sy = dir.y * -kPlayerShootingKnockback;
 		}
 	}
 

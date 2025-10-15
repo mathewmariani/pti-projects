@@ -14,6 +14,9 @@ constexpr int kPlayerHeight = 8;
 constexpr int kPlayerFrameCount = 8;
 constexpr int kPlayerFrameMod = 2;
 
+constexpr float kPlayerShootingKnockback = 2.0f;
+constexpr float kPlayerHurtKnockback = 4.0f;
+
 enum class PlayerState : uint8_t {
 	Normal,
 	Death,
@@ -28,6 +31,8 @@ struct Player : Actor {
 		state = PlayerState::Normal;
 	}
 
+	void Hurt(const CoordXY<int> &direction);
+
 	void Update() override;
 	void Render() override;
 
@@ -38,4 +43,5 @@ private:
 private:
 	PlayerState state;
 	float shoot_timer;
+	int health = 5;
 };

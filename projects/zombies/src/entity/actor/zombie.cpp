@@ -17,6 +17,12 @@ void Zombie::Hurt(const CoordXY<int> &direction) {
 void Zombie::Update() {
 	_pti_appr(sx, 0.0f, kZombieFriction * PTI_DELTA);
 	_pti_appr(sy, 0.0f, kZombieFriction * PTI_DELTA);
+
+	auto collision = false;
+	for (auto *player : GetCollisions<Player>(*this, direction)) {
+		player->Hurt(CoordXY<int>::Left);
+		collision = true;
+	}
 }
 
 void Zombie::Render() {
