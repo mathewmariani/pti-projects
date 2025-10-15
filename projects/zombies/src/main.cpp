@@ -62,6 +62,7 @@ static void init(void) {
 	bitmap_zombie = batteries::sprite("assets/zombie.ase");
 	bitmap_platform = batteries::sprite("assets/platform.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
+	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
 
 	load();
 

@@ -13,6 +13,7 @@ constexpr int kZombieWidth = 8;
 constexpr int kZombieHeight = 8;
 constexpr int kZombieFrameCount = 8;
 constexpr int kZombieFrameMod = 2;
+constexpr int kZombieHealth = 3;
 
 enum class ZombieState : uint8_t {
 	Normal,
@@ -25,6 +26,7 @@ struct Zombie : Actor {
 		bw = kZombieWidth;
 		bh = kZombieHeight;
 		state = ZombieState::Normal;
+		health = kZombieHealth;
 	}
 
 	void Hurt(const CoordXY<int> &direction);
@@ -34,4 +36,5 @@ struct Zombie : Actor {
 
 private:
 	ZombieState state;
+	int health;
 };

@@ -9,6 +9,7 @@ static std::vector<uint8_t> _freeIdList;
 static std::vector<EntityBase *> _activeList;
 
 #include "actor/bullet.h"
+#include "actor/effect.h"
 #include "actor/player.h"
 #include "actor/zombie.h"
 
@@ -19,10 +20,13 @@ EntityBase *CreateEntity(Args &&...args) {
 	auto idx = _freeIdList.back();
 	_freeIdList.pop_back();
 
-	EntityBase *entity = &gameState.Entities[idx].emplace<T>(std::forward<Args>(args)...);
+	auto *entity = &gameState.Entities[idx].emplace<T>(std::forward<Args>(args)...);
 	entity->id = idx;
 	entity->x = 0;
 	entity->y = 0;
+	entity->sx = 0;
+	entity->sy = 0;
+	entity->timer = 0.0f;
 
 	_activeList.push_back(entity);
 	return entity;
@@ -32,6 +36,7 @@ EntityBase *CreateEntity(Args &&...args) {
 template EntityBase *CreateEntity<Bullet>();
 template EntityBase *CreateEntity<Player>();
 template EntityBase *CreateEntity<Zombie>();
+template EntityBase *CreateEntity<Effect>();
 
 void RemoveEntity(EntityBase *entity) {
 	auto &gameState = GetGameState();

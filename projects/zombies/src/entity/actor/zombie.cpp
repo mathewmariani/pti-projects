@@ -7,6 +7,11 @@
 void Zombie::Hurt(const CoordXY<int> &direction) {
 	sx = direction.x * kZombieKnockback;
 	sy = direction.y * kZombieKnockback;
+	health -= 1;
+
+	if (health <= 0) {
+		RemoveEntity(this);
+	}
 }
 
 void Zombie::Update() {

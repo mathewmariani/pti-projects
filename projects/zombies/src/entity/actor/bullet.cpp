@@ -20,6 +20,7 @@ void Bullet::Update() {
 	}
 
 	if (collision) {
+		Effect::Create({x, y}, Effect::Type::Collect);
 		RemoveEntity(this);
 	}
 }

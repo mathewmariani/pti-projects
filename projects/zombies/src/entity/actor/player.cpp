@@ -9,13 +9,13 @@ void Player::Update() {
 	shoot_timer -= PTI_DELTA;
 
 	auto dir = CoordXY<int>::Zero;
-	if (pti_down(PTI_Y)) {
+	if (pti_down(PTI_LEFT)) {
 		dir = CoordXY<int>::Left;
-	} else if (pti_down(PTI_A)) {
+	} else if (pti_down(PTI_RIGHT)) {
 		dir = CoordXY<int>::Right;
-	} else if (pti_down(PTI_X)) {
+	} else if (pti_down(PTI_UP)) {
 		dir = CoordXY<int>::Down;
-	} else if (pti_down(PTI_B)) {
+	} else if (pti_down(PTI_DOWN)) {
 		dir = CoordXY<int>::Up;
 	}
 
@@ -48,9 +48,9 @@ void Player::Render() {
 }
 
 void Player::HandleHorizontalMovement() {
-	if (pti_down(PTI_LEFT)) {
+	if (pti_down(PTI_Y)) {
 		_pti_appr(sx, -kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
-	} else if (pti_down(PTI_RIGHT)) {
+	} else if (pti_down(PTI_A)) {
 		_pti_appr(sx, kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
 	} else {
 		_pti_appr(sx, 0, kPlayerFriction * PTI_DELTA);
@@ -58,9 +58,9 @@ void Player::HandleHorizontalMovement() {
 }
 
 void Player::HandleVerticalMovement() {
-	if (pti_down(PTI_UP)) {
+	if (pti_down(PTI_X)) {
 		_pti_appr(sy, -kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
-	} else if (pti_down(PTI_DOWN)) {
+	} else if (pti_down(PTI_B)) {
 		_pti_appr(sy, kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
 	} else {
 		_pti_appr(sy, 0, kPlayerFriction * PTI_DELTA);
