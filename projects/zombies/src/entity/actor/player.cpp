@@ -5,7 +5,7 @@
 #include "pti/pti.h"
 #include "bullet.h"
 
-void Player::Hurt(const CoordXY<int> &direction) {
+void Player::Hurt(const CoordXY<float> &direction) {
 	sx = direction.x * kPlayerHurtKnockback;
 	sy = direction.y * kPlayerHurtKnockback;
 	health -= 1;

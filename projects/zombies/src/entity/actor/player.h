@@ -31,7 +31,7 @@ struct Player : Actor {
 		state = PlayerState::Normal;
 	}
 
-	void Hurt(const CoordXY<int> &direction);
+	void Hurt(const CoordXY<float> &direction);
 
 	void Update() override;
 	void Render() override;

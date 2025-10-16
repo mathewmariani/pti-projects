@@ -6,14 +6,12 @@
 #include "batteries/assets.h"
 
 /* actors */
+#include "entity/registry.h"
 #include "entity/actor/bullet.h"
 #include "entity/actor/player.h"
 #include "entity/actor/zombie.h"
 
-#include "entity/registry.h"
-
 #include <math.h>
-
 #include <string>
 
 namespace {
@@ -40,6 +38,7 @@ static void load(void) {
 					if (auto *e = CreateEntity<Player>(); e) {
 						e->SetLocation({XPOS(i), YPOS(j)});
 						pti_mset(tilemap, i, j, 0);
+						GetGameState().player = static_cast<Player *>(e);
 					}
 				} break;
 				case 50: {
@@ -99,7 +98,6 @@ static void frame(void) {
 	/* adjust camera */
 	int cam_x, cam_y;
 	pti_get_camera(&cam_x, &cam_y);
-
 	int cx = _pti_max(0, _pti_min(EN_ROOM_WIDTH - width, cam_x));
 	int cy = _pti_max(0, _pti_min(EN_ROOM_HEIGHT - height, cam_y));
 	pti_camera(cx, cy);

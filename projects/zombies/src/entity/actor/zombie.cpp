@@ -15,12 +15,21 @@ void Zombie::Hurt(const CoordXY<int> &direction) {
 }
 
 void Zombie::Update() {
-	_pti_appr(sx, 0.0f, kZombieFriction * PTI_DELTA);
-	_pti_appr(sy, 0.0f, kZombieFriction * PTI_DELTA);
+	// move towards player'
+	auto player = GetGameState().player;
+	CoordXY<int> a{x, y};
+	CoordXY<int> b{player->x, player->y};
+	CoordXY<float> dir = a.DirectionTo(b);
+	_pti_appr(sx, dir.x, kZombieFriction * PTI_DELTA);
+	_pti_appr(sy, dir.y, kZombieFriction * PTI_DELTA);
+
 
 	auto collision = false;
 	for (auto *player : GetCollisions<Player>(*this, direction)) {
-		player->Hurt(CoordXY<int>::Left);
+		CoordXY<int> a{x, y};
+		CoordXY<int> b{player->x, player->y};
+		CoordXY<float> dir = a.DirectionTo(b);
+		player->Hurt(dir);
 		collision = true;
 	}
 }

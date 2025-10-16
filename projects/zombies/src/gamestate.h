@@ -25,6 +25,8 @@ struct GameState_t {
 	uint8_t Coins = 0;
 	uint8_t Deaths = 0;
 
+	Player *player;
+
 	bool PlayerIsDead = false;
 	float ResetTimer = 0.0f;
 };
