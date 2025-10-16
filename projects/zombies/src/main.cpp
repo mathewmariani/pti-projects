@@ -57,6 +57,7 @@ static void init(void) {
 	tileset = batteries::tileset("assets/tilemap.ase");
 	tilemap = batteries::tilemap("assets/tilemap.ase");
 	bitmap_bullet = batteries::sprite("assets/bullet.ase");
+	bitmap_coin = batteries::sprite("assets/coin.ase");
 	bitmap_player = batteries::sprite("assets/dog.ase");
 	bitmap_zombie = batteries::sprite("assets/zombie.ase");
 	bitmap_platform = batteries::sprite("assets/platform.ase");
@@ -105,12 +106,13 @@ static void frame(void) {
 	pti_map(tilemap, tileset, 0, 0);
 	RenderAllEntities();
 
-	// const auto status_str = std::format("coins: &d\n", coins);
+	/* render ui */
+	// const auto coin_str = std::format("coins: &d\n", coins);
 	char buffer[100];
-	std::snprintf(buffer, sizeof(buffer), "Is Dead: %s\n", gameState.PlayerIsDead ? "True" : "False");
-	std::string status_str(buffer);
+	std::snprintf(buffer, sizeof(buffer), "coins: %d\n", gameState.Coins);
+	std::string coin_str(buffer);
 
-	pti_print(bitmap_font, status_str.c_str(), 4, 0);
+	pti_print(bitmap_font, coin_str.c_str(), 4, 0);
 }
 
 pti_desc pti_main(int argc, char *argv[]) {

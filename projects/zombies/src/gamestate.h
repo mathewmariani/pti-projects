@@ -3,6 +3,7 @@
 #include "entity/registry.h"
 
 #include "entity/actor/bullet.h"
+#include "entity/actor/coin.h"
 #include "entity/actor/effect.h"
 #include "entity/actor/player.h"
 #include "entity/actor/zombie.h"
@@ -18,7 +19,7 @@ constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / EN_TILE_SIZE;
 
 constexpr float kDeathResetTimer = 2.0f;
 
-using EntityVariant = std::variant<std::monostate, Bullet, Effect, Player, Zombie>;
+using EntityVariant = std::variant<std::monostate, Bullet, Coin, Effect, Player, Zombie>;
 
 struct GameState_t {
 	EntityVariant Entities[kMaxEntities]{};

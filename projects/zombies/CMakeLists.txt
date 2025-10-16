@@ -12,6 +12,7 @@ set(ZOMBIES_HEADERS
 
     # actors
     src/entity/actor/bullet.h
+    src/entity/actor/coin.h
     src/entity/actor/effect.h
     src/entity/actor/player.h
     src/entity/actor/zombie.h
@@ -29,6 +30,7 @@ set(ZOMBIES_SRC
 
     # actors
     src/entity/actor/bullet.cpp
+    src/entity/actor/coin.cpp
     src/entity/actor/effect.cpp
     src/entity/actor/player.cpp
     src/entity/actor/zombie.cpp

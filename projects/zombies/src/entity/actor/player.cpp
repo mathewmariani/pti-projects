@@ -42,6 +42,12 @@ void Player::Update() {
 	HandleHorizontalMovement();
 	HandleVerticalMovement();
 
+	// collect coins
+	for (auto *coin : GetCollisions<Coin>(*this, direction)) {
+		RemoveEntity(coin);
+		GetGameState().Coins++;
+	}
+
 	// camera movement
 	int cam_x, cam_y;
 	pti_get_camera(&cam_x, &cam_y);

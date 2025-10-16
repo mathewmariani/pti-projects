@@ -34,6 +34,7 @@ EntityBase *CreateEntity(Args &&...args) {
 
 // Explicit instantiations (optional)
 template EntityBase *CreateEntity<Bullet>();
+template EntityBase *CreateEntity<Coin>();
 template EntityBase *CreateEntity<Player>();
 template EntityBase *CreateEntity<Zombie>();
 template EntityBase *CreateEntity<Effect>();
