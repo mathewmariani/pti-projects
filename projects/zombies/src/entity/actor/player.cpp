@@ -51,8 +51,8 @@ void Player::Update() {
 	// camera movement
 	int cam_x, cam_y;
 	pti_get_camera(&cam_x, &cam_y);
-	cam_x += ((x + bx + bw / 2.0f - EN_ROOM_WIDTH / 2.0f) - cam_x) / 10;
-	cam_y += ((y + by + bh / 2.0f - EN_ROOM_HEIGHT / 2.0f) - cam_y) / 10;
+	cam_x += ((x + bx + bw / 2.0f - kScreenWidth / 2.0f) - cam_x) / 10;
+	cam_y += ((y + by + bh / 2.0f - kScreenHeight / 2.0f) - cam_y) / 10;
 	pti_camera(cam_x, cam_y);
 }
 

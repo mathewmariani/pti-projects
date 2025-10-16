@@ -68,7 +68,7 @@ static void init(void) {
 
 	/* graphics state: */
 	pti_dither(0x5a5a);
-	pti_clip(0, 0, EN_ROOM_WIDTH, EN_ROOM_HEIGHT);
+	pti_clip(0, 0, kScreenWidth, kScreenHeight);
 }
 
 static void cleanup(void) {
@@ -83,12 +83,22 @@ static void frame(void) {
 		return;
 	}
 
-	if (gameState.PlayerIsDead) {
-		gameState.ResetTimer += PTI_DELTA;
-		if (gameState.ResetTimer >= kDeathResetTimer) {
-			GameStateReset();
-			load();
-			return;
+
+	// if (gameState.PlayerIsDead) {
+	// 	gameState.ResetTimer += PTI_DELTA;
+	// 	if (gameState.ResetTimer >= kDeathResetTimer) {
+	// 		GameStateReset();
+	// 		load();
+	// 		return;
+	// 	}
+	// }
+
+	gameState.ResetTimer += PTI_DELTA;
+	if (gameState.ResetTimer >= kDeathResetTimer) {
+		gameState.ResetTimer = 0.0f;
+		auto location = RandomOutsideCamera();
+		if (auto *e = CreateEntity<Zombie>(); e) {
+			e->SetLocation(location);
 		}
 	}
 
@@ -96,7 +106,7 @@ static void frame(void) {
 
 	pti_cls(0xffef7d57);
 
-	/* adjust camera */
+	// keep camera inbounds
 	int cam_x, cam_y;
 	pti_get_camera(&cam_x, &cam_y);
 	int cx = _pti_max(0, _pti_min(EN_ROOM_WIDTH - width, cam_x));
@@ -121,8 +131,8 @@ pti_desc pti_main(int argc, char *argv[]) {
 			.init_cb = init,
 			.frame_cb = frame,
 			.cleanup_cb = cleanup,
-			.memory_size = _pti_kilobytes(256), /* 256KB */
-			.width = 176,
-			.height = 128,
+			.memory_size = _pti_kilobytes(512), /* 256KB */
+			.width = kScreenWidth,
+			.height = kScreenHeight,
 	};
 }
