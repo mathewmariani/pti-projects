@@ -46,48 +46,87 @@ void GameStateTick() {
 #include <random>
 #include <vector>
 #include <algorithm>
+#include "bank.h"
 
+// Simple Rect type
 struct Rect {
-	int x0, y0, x1, y1;
+    int x; // top-left corner
+    int y;
+    int w;
+    int h;
 };
 
-std::random_device rd;
-std::mt19937 rng(rd());
+// Helper for random integer in [a, b]
+int RandInt(int a, int b) {
+    if (a > b) std::swap(a, b);
+    static thread_local std::mt19937 gen(std::random_device{}());
+    std::uniform_int_distribution<int> dist(a, b);
+    return dist(gen);
+}
+
+#include <algorithm>
+
+constexpr int kMinSpawnDist = 4; // in tiles
 
 CoordXY<int> RandomOutsideCamera() {
-	std::vector<Rect> candidates;
+    int camera_x, camera_y;
+    pti_get_camera(&camera_x, &camera_y);
 
-	int camera_x, camera_y;
-	pti_get_camera(&camera_x, &camera_y);
+    const Rect world{
+        .x = 0,
+        .y = 0,
+        .w = EN_ROOM_WIDTH / EN_TILE_SIZE - 1,
+        .h = EN_ROOM_HEIGHT / EN_TILE_SIZE - 1,
+    };
 
-	// Left of camera
-	if (camera_x > 0)
-		candidates.push_back({0, 0, camera_x - 1, 0 + EN_ROOM_HEIGHT - 1});
+    const Rect camera{
+        .x = std::max(0, camera_x / EN_TILE_SIZE),
+        .y = std::max(0, camera_y / EN_TILE_SIZE),
+        .w = std::min(world.w, (camera_x + kScreenWidth) / EN_TILE_SIZE),
+        .h = std::min(world.h, (camera_y + kScreenHeight) / EN_TILE_SIZE),
+    };
 
-	// Right of camera
-	if (camera_x + kScreenWidth < 0 + EN_ROOM_WIDTH)
-		candidates.push_back({camera_x + kScreenWidth, 0, 0 + EN_ROOM_HEIGHT - 1, 0 + EN_ROOM_HEIGHT - 1});
+    CoordXY<int> pt{};
 
-	// Top of camera
-	int overlap_x0 = std::max(0, camera_x);
-	int overlap_x1 = std::min(0 + EN_ROOM_HEIGHT - 1, camera_x + kScreenWidth - 1);
-	if (camera_y > 0 && overlap_x1 >= overlap_x0)
-		candidates.push_back({overlap_x0, 0, overlap_x1, camera_y - 1});
+    for (int tries = 0; tries < 100; ++tries) {
+        enum Side { TOP, BOTTOM, LEFT, RIGHT };
+        Side side = static_cast<Side>(RandInt(0, 3));
 
-	// Bottom of camera
-	if (camera_y + kScreenHeight < 0 + EN_ROOM_HEIGHT && overlap_x1 >= overlap_x0)
-		candidates.push_back({overlap_x0, camera_y + kScreenHeight, overlap_x1, 0 + EN_ROOM_HEIGHT - 1});
+        switch (side) {
+            case TOP:
+                if (camera.y - kMinSpawnDist > world.y) {
+                    pt.x = RandInt(world.x, world.x + world.w);
+                    pt.y = RandInt(world.y, camera.y - kMinSpawnDist);
+                }
+                break;
 
-	if (candidates.empty())
-		return {0, 0};// fallback
+            case BOTTOM:
+                if (camera.y + camera.h + kMinSpawnDist < world.y + world.h) {
+                    pt.x = RandInt(world.x, world.x + world.w);
+                    pt.y = RandInt(camera.y + camera.h + kMinSpawnDist, world.y + world.h);
+                }
+                break;
 
-	// Pick random candidate rectangle
-	std::uniform_int_distribution<size_t> rect_dist(0, candidates.size() - 1);
-	Rect r = candidates[rect_dist(rng)];
+            case LEFT:
+                if (camera.x - kMinSpawnDist > world.x) {
+                    pt.x = RandInt(world.x, camera.x - kMinSpawnDist);
+                    pt.y = RandInt(world.y, world.y + world.h);
+                }
+                break;
 
-	// Pick random x and y in that rectangle
-	std::uniform_int_distribution<int> x_dist(r.x0, r.x1);
-	std::uniform_int_distribution<int> y_dist(r.y0, r.y1);
+            case RIGHT:
+                if (camera.x + camera.w + kMinSpawnDist < world.x + world.w) {
+                    pt.x = RandInt(camera.x + camera.w + kMinSpawnDist, world.x + world.w);
+                    pt.y = RandInt(world.y, world.y + world.h);
+                }
+                break;
+        }
 
-	return {x_dist(rng), y_dist(rng)};
+        // Validate and return
+        if (pti_fget(tilemap, pt.x, pt.y) == 0)
+            return pt;
+    }
+
+    // Fallback if nothing valid found
+    return {world.x, world.y};
 }
