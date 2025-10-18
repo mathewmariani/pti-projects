@@ -5,8 +5,7 @@
 #include "pti/pti.h"
 
 void Bullet::Update() {
-	_pti_appr(speed.x, direction.x * kBulletMaxSpeed, kBulletAcceleration * PTI_DELTA);
-	_pti_appr(speed.y, direction.y * kBulletMaxSpeed, kBulletAcceleration * PTI_DELTA);
+	speed = direction * kBulletMaxSpeed;
 
 	auto collision = false;
 	for (auto *zombie : GetCollisions<Zombie>(*this, direction)) {

@@ -22,8 +22,8 @@ namespace {
 	float resetTimer = 0.0f;
 }// namespace
 
-#define XPOS(x) (x * EN_TILE_SIZE)
-#define YPOS(y) (y * EN_TILE_SIZE)
+#define XPOS(x) (x * kTileSize)
+#define YPOS(y) (y * kTileSize)
 
 static void load(void) {
 	GameStateInit();
@@ -50,6 +50,13 @@ static void load(void) {
 			}
 		}
 	}
+
+	for (auto i = 0; i < 100; i++) {
+		auto location = RandomOutsideCamera();
+		if (auto *e = CreateEntity<Zombie>(); e) {
+			e->SetLocation(location);
+		}
+	}
 }
 
 static void init(void) {
@@ -67,7 +74,7 @@ static void init(void) {
 	load();
 
 	/* graphics state: */
-	pti_dither(0x5a5a);
+	// pti_dither(0x5a5a);
 	pti_clip(0, 0, kScreenWidth, kScreenHeight);
 }
 
@@ -84,6 +91,7 @@ static void frame(void) {
 	}
 
 
+	// reset on death:
 	// if (gameState.PlayerIsDead) {
 	// 	gameState.ResetTimer += PTI_DELTA;
 	// 	if (gameState.ResetTimer >= kDeathResetTimer) {
@@ -93,14 +101,15 @@ static void frame(void) {
 	// 	}
 	// }
 
-	gameState.ResetTimer += PTI_DELTA;
-	if (gameState.ResetTimer >= kDeathResetTimer) {
-		gameState.ResetTimer = 0.0f;
-		auto location = RandomOutsideCamera();
-		if (auto *e = CreateEntity<Zombie>(); e) {
-			e->SetLocation(location);
-		}
-	}
+	// spawn zombies:
+	// gameState.ResetTimer += PTI_DELTA;
+	// if (gameState.ResetTimer >= kDeathResetTimer) {
+	// 	gameState.ResetTimer = 0.0f;
+	// 	auto location = RandomOutsideCamera();
+	// 	if (auto *e = CreateEntity<Zombie>(); e) {
+	// 		e->SetLocation(location);
+	// 	}
+	// }
 
 	GameStateTick();
 

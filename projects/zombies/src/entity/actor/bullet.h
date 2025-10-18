@@ -2,8 +2,7 @@
 
 #include "../actor.h"
 
-constexpr float kBulletMaxSpeed = 1.0f;
-constexpr float kBulletAcceleration = 20.0f;
+constexpr float kBulletMaxSpeed = 6.25f;
 constexpr int kBulletBoundaryOffset = 2;
 
 constexpr int kBulletOffsetX = 2;

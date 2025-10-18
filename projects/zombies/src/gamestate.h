@@ -13,11 +13,11 @@
 
 constexpr int kScreenWidth = 176;
 constexpr int kScreenHeight = 128;
-constexpr int EN_TILE_SIZE = 8;
+constexpr int kTileSize = 8;
 constexpr int EN_ROOM_WIDTH = (176 * 3);
 constexpr int EN_ROOM_HEIGHT = (128 * 3);
-constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / EN_TILE_SIZE;
-constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / EN_TILE_SIZE;
+constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / kTileSize;
+constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 
 constexpr float kDeathResetTimer = 2.0f;
 
