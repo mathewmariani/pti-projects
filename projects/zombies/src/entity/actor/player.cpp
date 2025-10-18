@@ -6,8 +6,7 @@
 #include "bullet.h"
 
 void Player::Hurt(const CoordXY<float> &direction) {
-	sx = direction.x * kPlayerHurtKnockback;
-	sy = direction.y * kPlayerHurtKnockback;
+	speed = direction * kPlayerHurtKnockback;
 	health -= 1;
 
 	if (health <= 0) {
@@ -32,10 +31,9 @@ void Player::Update() {
 	if (dir != CoordXY<int>::Zero && shoot_timer < 0.0f) {
 		shoot_timer = kPlayerFireRate;
 		if (auto *e = CreateEntity<Bullet>(); e) {
-			e->SetLocation({x, y});
+			e->SetLocation(position);
 			e->direction = dir;
-			sx = dir.x * -kPlayerShootingKnockback;
-			sy = dir.y * -kPlayerShootingKnockback;
+			speed = dir * -kPlayerShootingKnockback;
 		}
 	}
 
@@ -51,36 +49,36 @@ void Player::Update() {
 	// camera movement
 	int cam_x, cam_y;
 	pti_get_camera(&cam_x, &cam_y);
-	cam_x += ((x + bx + bw / 2.0f - kScreenWidth / 2.0f) - cam_x) / 10;
-	cam_y += ((y + by + bh / 2.0f - kScreenHeight / 2.0f) - cam_y) / 10;
+	cam_x += ((position.x + bx + bw / 2.0f - kScreenWidth / 2.0f) - cam_x) / 10;
+	cam_y += ((position.y + by + bh / 2.0f - kScreenHeight / 2.0f) - cam_y) / 10;
 	pti_camera(cam_x, cam_y);
 }
 
 void Player::Render() {
 	auto frame = static_cast<int>(timer * kPlayerFrameCount) % kPlayerFrameMod;
-	if (sx == 0 && sy == 0) {
+	if (speed == CoordXY<float>::Zero) {
 		frame = 0;
 	}
 
-	pti_spr(bitmap_player, frame, x - kPlayerOffsetX, y - kPlayerOffsetY, false, false);
+	pti_spr(bitmap_player, frame, position.x - kPlayerOffsetX, position.y - kPlayerOffsetY, false, false);
 }
 
 void Player::HandleHorizontalMovement() {
 	if (pti_down(PTI_Y)) {
-		_pti_appr(sx, -kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
+		_pti_appr(speed.x, -kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
 	} else if (pti_down(PTI_A)) {
-		_pti_appr(sx, kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
+		_pti_appr(speed.x, kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
 	} else {
-		_pti_appr(sx, 0, kPlayerFriction * PTI_DELTA);
+		_pti_appr(speed.x, 0, kPlayerFriction * PTI_DELTA);
 	}
 }
 
 void Player::HandleVerticalMovement() {
 	if (pti_down(PTI_X)) {
-		_pti_appr(sy, -kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
+		_pti_appr(speed.y, -kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
 	} else if (pti_down(PTI_B)) {
-		_pti_appr(sy, kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
+		_pti_appr(speed.y, kPlayerMaxSpeed, kPlayerAcceleration * PTI_DELTA);
 	} else {
-		_pti_appr(sy, 0, kPlayerFriction * PTI_DELTA);
+		_pti_appr(speed.y, 0, kPlayerFriction * PTI_DELTA);
 	}
 }

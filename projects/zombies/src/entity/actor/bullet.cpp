@@ -5,8 +5,8 @@
 #include "pti/pti.h"
 
 void Bullet::Update() {
-	_pti_appr(sx, direction.x * kBulletMaxSpeed, kBulletAcceleration * PTI_DELTA);
-	_pti_appr(sy, direction.y * kBulletMaxSpeed, kBulletAcceleration * PTI_DELTA);
+	_pti_appr(speed.x, direction.x * kBulletMaxSpeed, kBulletAcceleration * PTI_DELTA);
+	_pti_appr(speed.y, direction.y * kBulletMaxSpeed, kBulletAcceleration * PTI_DELTA);
 
 	auto collision = false;
 	for (auto *zombie : GetCollisions<Zombie>(*this, direction)) {
@@ -15,12 +15,12 @@ void Bullet::Update() {
 	}
 
 	if (collision || PlaceMeeting(direction)) {
-		Effect::Create({x, y}, Effect::Type::Collect);
+		Effect::Create(position, Effect::Type::Collect);
 		RemoveEntity(this);
 	}
 }
 
 void Bullet::Render() {
 	auto frame = static_cast<int>(timer * kBulletFrameCount) % kBulletFrameMod;
-	pti_spr(bitmap_bullet, frame, x - kBulletOffsetX, y - kBulletOffsetY, false, false);
+	pti_spr(bitmap_bullet, frame, position.x - kBulletOffsetX, position.y - kBulletOffsetY, false, false);
 }

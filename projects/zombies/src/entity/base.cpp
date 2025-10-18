@@ -17,24 +17,23 @@ void EntityBase::Render() {}
 void EntityBase::Physics() {}
 
 void EntityBase::SetLocation(const CoordXY<int> &newLocation) {
-	x = newLocation.x;
-	y = newLocation.y;
-	start_x = x;
-	start_y = y;
+	position = newLocation;
+	start_x = newLocation.x;
+	start_y = newLocation.y;
 }
 
 bool EntityBase::Overlaps(const EntityBase *other, const CoordXY<int> &dir) const {
-	return (x + bx + dir.x < other->x + other->bx + other->bw) &&
-		   (y + by + dir.y < other->y + other->by + other->bh) &&
-		   (x + bx + bw + dir.x > other->x + other->bx) &&
-		   (y + by + bh + dir.y > other->y + other->by);
+	return (position.x + bx + dir.x < other->position.x + other->bx + other->bw) &&
+		   (position.y + by + dir.y < other->position.y + other->by + other->bh) &&
+		   (position.x + bx + bw + dir.x > other->position.x + other->bx) &&
+		   (position.y + by + bh + dir.y > other->position.y + other->by);
 }
 
 bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
-	const auto top = std::max(0, (y + by + dir.y) / EN_TILE_SIZE);
-	const auto left = std::max(0, (x + bx + dir.x) / EN_TILE_SIZE);
-	const auto bottom = std::min(EN_ROOM_ROWS - 1, (y + by + bh + dir.y - 1) / EN_TILE_SIZE);
-	const auto right = std::min(EN_ROOM_COLS - 1, (x + bx + bw + dir.x - 1) / EN_TILE_SIZE);
+	const auto top = std::max(0, (position.y + by + dir.y) / EN_TILE_SIZE);
+	const auto left = std::max(0, (position.x + bx + dir.x) / EN_TILE_SIZE);
+	const auto bottom = std::min(EN_ROOM_ROWS - 1, (position.y + by + bh + dir.y - 1) / EN_TILE_SIZE);
+	const auto right = std::min(EN_ROOM_COLS - 1, (position.x + bx + bw + dir.x - 1) / EN_TILE_SIZE);
 
 	for (auto j = top; j <= bottom; ++j) {
 		for (auto i = left; i <= right; ++i) {
@@ -49,27 +48,27 @@ bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
 
 				// Slope handling
 				case 31: {// Shallow slope bottom (right)
-					auto cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
+					auto cx = (position.x + bx + bw + dir.x) - i * EN_TILE_SIZE;
 					auto slope_y = (j + 1) * EN_TILE_SIZE - 0.5f * cx;
-					if (y + by + bh + dir.y > slope_y) return true;
+					if (position.y + by + bh + dir.y > slope_y) return true;
 					continue;
 				}
 				case 32: {// Shallow slope top (right)
-					auto cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
+					auto cx = (position.x + bx + bw + dir.x) - i * EN_TILE_SIZE;
 					auto slope_y = (j + 1) * EN_TILE_SIZE - 4 - 0.5f * cx;
-					if (y + by + bh + dir.y > slope_y) return true;
+					if (position.y + by + bh + dir.y > slope_y) return true;
 					continue;
 				}
 				case 33: {// Shallow slope top (left)
-					auto cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
+					auto cx = (position.x + bx + dir.x) - i * EN_TILE_SIZE;
 					auto slope_y = j * EN_TILE_SIZE + 0.5f * cx;
-					if (y + by + bh + dir.y > slope_y) return true;
+					if (position.y + by + bh + dir.y > slope_y) return true;
 					continue;
 				}
 				case 34: {// Shallow slope bottom (left)
-					auto cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
+					auto cx = (position.x + bx + dir.x) - i * EN_TILE_SIZE;
 					auto slope_y = (j + 1) * EN_TILE_SIZE - 4 + 0.5f * cx;
-					if (y + by + bh + dir.y > slope_y) return true;
+					if (position.y + by + bh + dir.y > slope_y) return true;
 					continue;
 				}
 
@@ -83,7 +82,7 @@ bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
 				case 40:
 				case 41: {
 					// Allow collision only if the entity was entirely above the platform before the movement
-					if ((y + by + bh - sy) <= (j * EN_TILE_SIZE)) return true;
+					if ((position.y + by + bh - speed.y) <= (j * EN_TILE_SIZE)) return true;
 					continue;
 				}
 

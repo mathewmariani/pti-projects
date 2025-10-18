@@ -28,10 +28,10 @@ struct BoundingBox {
 
 struct EntityBase {
 	EntityId id;
-	int32_t x, y;      // position
+	CoordXY<int> position;
+	CoordXY<float> speed;
+	CoordXY<float> remainder;
 	uint8_t flags;     // general entity flags
-	float sx, sy;      // speed
-	float rx, ry;      // movement remainder
 	int bx, by, bw, bh;// bounding box
 	float timer;       // general timer, starts at 0 on create
 

@@ -7,31 +7,31 @@
 #include <cmath>
 
 void Actor::Physics() {
-	MoveX(sx, &Actor::HaltX);
-	MoveY(sy, &Actor::HaltY);
+	MoveX(speed.x, &Actor::HaltX);
+	MoveY(speed.y, &Actor::HaltY);
 
 	const auto dir = CoordXY<int>::Up;
 	grounded = PlaceMeeting(dir) || CollidesWithSolids(dir);
 }
 
 void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
-	rx += amount;
-	int move = std::round(rx);
+	remainder.x += amount;
+	int move = std::round(remainder.x);
 	if (move != 0) {
 		const int dx = _pti_sign(move);
 		const CoordXY<int> dir{dx, 0};
 		while (move != 0) {
 			// moving up slope:
 			if (PlaceMeeting({dx, 0}) && !(PlaceMeeting({dx, -1}))) {
-				y -= 1;
+				position.y -= 1;
 			}
 			// moving down slope:
 			if (!(PlaceMeeting({dx, 0})) && !(PlaceMeeting({dx, 1})) && PlaceMeeting({dx, 2})) {
-				y += 1;
+				position.y += 1;
 			}
 			// always last:
 			if (!PlaceMeeting(dir) && !CollidesWithSolids(dir)) {
-				x += dx;
+				position.x += dx;
 				move -= dx;
 			} else {
 				if (func) {
@@ -40,19 +40,19 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 				break;
 			}
 		}
-		rx = 0;
+		remainder.x = 0;
 	}
 }
 
 void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
-	ry += amount;
-	int move = std::round(ry);
+	remainder.y += amount;
+	int move = std::round(remainder.y);
 	if (move != 0) {
 		const int dy = _pti_sign(move);
 		const CoordXY<int> dir{0, dy};
 		while (move != 0) {
 			if (!PlaceMeeting(dir) && !CollidesWithSolids(dir)) {
-				y += dy;
+				position.y += dy;
 				move -= dy;
 			} else {
 				auto squished = false;
@@ -69,7 +69,7 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 				break;
 			}
 		}
-		ry = 0;
+		remainder.y = 0;
 	}
 }
 
@@ -78,7 +78,7 @@ bool Actor::CanWiggle() {
 		for (auto j : {-1, 1}) {
 			const CoordXY<int> dir{i * j, -1};
 			if (!PlaceMeeting(dir) && !CollidesWithSolids(dir)) {
-				x += (i * j);
+				position.x += (i * j);
 				return true;
 			}
 		}
@@ -93,11 +93,11 @@ void Actor::Squish(void) {
 }
 
 void Actor::HaltX(void) {
-	sx = 0;
+	speed.x = 0;
 }
 
 void Actor::HaltY(void) {
-	sy = 0;
+	speed.y = 0;
 }
 
 bool Actor::IsRidding(const EntityBase *base) const {

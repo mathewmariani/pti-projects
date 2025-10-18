@@ -24,5 +24,5 @@ void Coin::Update() {
 
 void Coin::Render() {
 	auto frame = static_cast<int>(timer * kCoinFrameCount) % kCoinFrameMod;
-	pti_spr(bitmap_coin, frame, x, y, false, false);
+	pti_spr(bitmap_coin, frame, position.x, position.y, false, false);
 }

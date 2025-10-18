@@ -22,10 +22,8 @@ EntityBase *CreateEntity(Args &&...args) {
 
 	auto *entity = &gameState.Entities[idx].emplace<T>(std::forward<Args>(args)...);
 	entity->id = idx;
-	entity->x = 0;
-	entity->y = 0;
-	entity->sx = 0;
-	entity->sy = 0;
+	entity->position = {0, 0};
+	entity->speed = {0, 0};
 	entity->timer = 0.0f;
 
 	_activeList.push_back(entity);

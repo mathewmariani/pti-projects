@@ -21,6 +21,7 @@ struct CoordXY {
 	CoordXY(T x_, T y_) : x(x_), y(y_) {}
 	CoordXY(const CoordXY &) = default;
 	CoordXY(CoordXY &&) = default;
+
 	CoordXY<T> operator*(const T rhs) const {
 		return {x * rhs, y * rhs};
 	}
@@ -43,13 +44,42 @@ struct CoordXY {
 	}
 
 	CoordXY<float> DirectionTo(const CoordXY<T> &target) const {
-		float dx = static_cast<float>(target.x - x);
-		float dy = static_cast<float>(target.y - y);
-		float len = std::sqrt(dx * dx + dy * dy);
-		if (len == 0.0f) return {0.0f, 0.0f};
-		return {dx / len, dy / len};
+		auto d = target - *this;
+		float len = std::sqrt(d.x * d.x + d.y * d.y);
+		if (len == 0.0f) return CoordXY<float>::Zero;
+		return (d / len);
+	}
+
+	T SqrMagnitude() const noexcept {
+		return ((x * x) + (y * y));
+	}
+
+	float SqrDistance(const CoordXY<T> &target) const noexcept {
+		return SqrMagnitude(target - *this);
+	}
+
+	static float SqrMagnitude(const CoordXY<T> &v) noexcept {
+		return static_cast<T>((v.x * v.x) + (v.y * v.y));
 	}
 };
+
+template<typename T, typename U>
+auto operator*(const CoordXY<T> &lhs, U rhs)
+		-> CoordXY<decltype(lhs.x * rhs)> {
+	return {lhs.x * rhs, lhs.y * rhs};
+}
+
+template<typename T, typename U>
+auto operator/(const CoordXY<T> &lhs, U rhs)
+		-> CoordXY<decltype(lhs.x * rhs)> {
+	return {lhs.x / rhs, lhs.y / rhs};
+}
+
+template<typename T, typename U>
+auto operator*(U lhs, const CoordXY<T> &rhs)
+		-> CoordXY<decltype(lhs * rhs.x)> {
+	return {lhs * rhs.x, lhs * rhs.y};
+}
 
 template<>
 struct std::hash<CoordXY<int>> {

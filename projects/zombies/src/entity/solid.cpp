@@ -7,13 +7,13 @@
 #include <cmath>
 
 void Solid::Physics(void) {
-	MoveX(sx);
-	MoveY(sy);
+	MoveX(speed.x);
+	MoveY(speed.y);
 }
 
 void Solid::MoveX(float amount) {
-	rx += amount;
-	int move = std::round(rx);
+	remainder.x += amount;
+	int move = std::round(remainder.x);
 	if (move != 0) {
 		auto actors = GetEntitiesOfType<Actor>();
 		int dx = _pti_sign(move);
@@ -25,16 +25,16 @@ void Solid::MoveX(float amount) {
 					actor->MoveX(dx, nullptr);
 				}
 			}
-			x += dx;
+			position.x += dx;
 			move -= dx;
 		}
-		rx = 0;
+		remainder.x = 0;
 	}
 }
 
 void Solid::MoveY(float amount) {
-	ry += amount;
-	int move = std::round(ry);
+	remainder.y += amount;
+	int move = std::round(remainder.y);
 	if (move != 0) {
 		auto actors = GetEntitiesOfType<Actor>();
 		int dy = _pti_sign(move);
@@ -46,9 +46,9 @@ void Solid::MoveY(float amount) {
 					actor->MoveY(dy, nullptr);
 				}
 			}
-			y += dy;
+			position.y += dy;
 			move -= dy;
 		}
-		ry = 0;
+		remainder.y = 0;
 	}
 }

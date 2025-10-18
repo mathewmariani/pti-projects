@@ -29,6 +29,7 @@ struct Zombie : Actor {
 		health = kZombieHealth;
 	}
 
+	std::vector<Zombie *> GetNeighborhood();
 	void Hurt(const CoordXY<int> &direction);
 
 	void Update() override;

@@ -31,7 +31,7 @@ void Effect::Render() {
 
 	switch (type) {
 		case Type::Collect:
-			pti_spr(bitmap_fx_collect, frame, x, y, false, false);
+			pti_spr(bitmap_fx_collect, frame, position.x, position.y, false, false);
 			break;
 	}
 }
