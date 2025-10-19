@@ -14,14 +14,6 @@
 #include <math.h>
 #include <string>
 
-namespace {
-	constexpr int width = 176;
-	constexpr int height = 128;
-	auto t = 0.0f;
-
-	float resetTimer = 0.0f;
-}// namespace
-
 #define XPOS(x) (x * kTileSize)
 #define YPOS(y) (y * kTileSize)
 
@@ -51,12 +43,12 @@ static void load(void) {
 		}
 	}
 
-	// for (auto i = 0; i < 100; i++) {
-	// 	auto location = RandomOutsideCamera();
-	// 	if (auto *e = CreateEntity<Zombie>(); e) {
-	// 		e->SetLocation(location);
-	// 	}
-	// }
+	for (auto i = 0; i < 200; i++) {
+		auto location = RandomOutsideCamera();
+		if (auto *e = CreateEntity<Zombie>(); e) {
+			e->SetLocation(location);
+		}
+	}
 }
 
 static void init(void) {
@@ -113,17 +105,20 @@ static void frame(void) {
 
 	GameStateTick();
 
-	pti_cls(0xffef7d57);
+
+		pti_cls(0xffef7d57);
 
 	// keep camera inbounds
 	int cam_x, cam_y;
 	pti_get_camera(&cam_x, &cam_y);
-	int cx = _pti_max(0, _pti_min(EN_ROOM_WIDTH - width, cam_x));
-	int cy = _pti_max(0, _pti_min(EN_ROOM_HEIGHT - height, cam_y));
+	int cx = _pti_max(0, _pti_min(EN_ROOM_WIDTH - kScreenWidth, cam_x));
+	int cy = _pti_max(0, _pti_min(EN_ROOM_HEIGHT - kScreenHeight, cam_y));
 	pti_camera(cx, cy);
 
 	pti_map(tilemap, tileset, 0, 0);
 	RenderAllEntities();
+
+	pti_rectf(cx, cy, kScreenWidth, 16, 0xff000000);
 
 	/* render ui */
 	// const auto coin_str = std::format("coins: &d\n", coins);

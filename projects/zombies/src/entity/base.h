@@ -17,7 +17,7 @@ enum class EntityType : uint8_t {
 	Null = 255,
 };
 
-using EntityId = uint8_t;
+using EntityId = uint32_t;
 
 struct BoundingBox {
 	uint8_t top;

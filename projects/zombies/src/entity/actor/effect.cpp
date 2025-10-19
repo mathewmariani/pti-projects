@@ -26,6 +26,7 @@ Effect::Effect() {
 	by = 0;
 	bw = 0;
 	bh = 0;
+	type = Type::Collect;
 }
 
 void Effect::Update() {

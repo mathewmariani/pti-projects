@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../actor.h"
+#include <vector>
 
 enum class ZombieState : uint8_t {
 	Normal,

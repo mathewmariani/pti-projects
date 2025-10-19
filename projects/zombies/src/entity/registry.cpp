@@ -5,7 +5,7 @@
 #include <variant>
 #include <vector>
 
-static std::vector<uint8_t> _freeIdList;
+static std::vector<uint32_t> _freeIdList;
 static std::vector<EntityBase *> _activeList;
 
 #include "actor/bullet.h"
@@ -16,14 +16,16 @@ static std::vector<EntityBase *> _activeList;
 template<typename T, typename... Args>
 EntityBase *CreateEntity(Args &&...args) {
 	auto &gameState = GetGameState();
-	if (_freeIdList.empty()) return nullptr;
+	if (_freeIdList.empty()) {
+		return nullptr;
+	}
 	auto idx = _freeIdList.back();
 	_freeIdList.pop_back();
 
 	auto *entity = &gameState.Entities[idx].emplace<T>(std::forward<Args>(args)...);
 	entity->id = idx;
-	entity->position = {0, 0};
-	entity->speed = {0, 0};
+	entity->position = CoordXY<int>::Zero;
+	entity->speed = CoordXY<float>::Zero;
 	entity->timer = 0.0f;
 
 	_activeList.push_back(entity);

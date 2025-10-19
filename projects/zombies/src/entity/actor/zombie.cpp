@@ -37,7 +37,7 @@ void Zombie::Create() {
 	std::mt19937 gen(rd());// Mersenne Twister engine
 	std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-	CoordXY<int> position{dist(gen) * (float) EN_ROOM_WIDTH, dist(gen) * (float) EN_ROOM_HEIGHT};
+	CoordXY<int> position{(int) (dist(gen) * 528.0f), (int) (dist(gen) * 384.0f)};
 
 	zombie->SetLocation(position);
 }
@@ -68,6 +68,9 @@ std::vector<Zombie *> Zombie::GetNeighborhood() {
 void Zombie::Hurt(const CoordXY<int> &direction) {
 	speed = direction * kZombieKnockback;
 	health -= 1;
+
+	state = ZombieState::Alerted;
+	alertTimer = kZombieAlertMaxTime;
 
 	if (health <= 0) {
 		Coin::Create(position);
@@ -109,7 +112,7 @@ void Zombie::Update() {
 	}
 
 	if (state == ZombieState::Alerted) {
-		moveTimer -= PTI_DELTA;
+		alertTimer -= PTI_DELTA;
 		moveDir = position.DirectionTo(player->position);
 	} else if (state == ZombieState::Normal) {
 		moveTimer -= PTI_DELTA;
@@ -175,6 +178,6 @@ void Zombie::Render() {
 	}
 
 	pti_spr(bitmap_zombie, frame, position.x - kZombieOffsetX, position.y - kZombieOffsetY, false, false);
-	pti_circ(position.x, position.y, 32, 0xffff0000);
-	pti_circ(position.x, position.y, 16, 0xffff0000);
+	// pti_circ(position.x, position.y, 32, 0xffff0000);
+	// pti_circ(position.x, position.y, 16, 0xffff0000);
 }

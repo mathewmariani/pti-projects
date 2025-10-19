@@ -5,7 +5,8 @@
 
 #include <utility>
 
-constexpr uint8_t kMaxEntities = 255;
+// constexpr uint8_t kMaxEntities = 255;
+constexpr int kMaxEntities = 255;
 
 template<typename T, typename... Args>
 EntityBase *CreateEntity(Args &&...args);
