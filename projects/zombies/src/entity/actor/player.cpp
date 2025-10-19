@@ -5,6 +5,32 @@
 #include "pti/pti.h"
 #include "bullet.h"
 
+constexpr float kPlayerMaxSpeed = 0.8f;
+constexpr float kPlayerAcceleration = 5.0f;
+constexpr float kPlayerFriction = 15.0f;
+constexpr float kPlayerFireRate = 0.25f;
+
+constexpr int kPlayerHitboxOffsetX = -1;
+constexpr int kPlayerHitboxOffsetY = 0;
+constexpr int kPlayerHitboxWidth = 4;
+constexpr int kPlayerHitboxHeight = 4;
+
+constexpr int kPlayerOffsetX = 6;
+constexpr int kPlayerOffsetY = 12;
+constexpr int kPlayerFrameCount = 8;
+constexpr int kPlayerFrameMod = 2;
+
+constexpr float kPlayerShootingKnockback = 1.2f;
+constexpr float kPlayerHurtKnockback = 4.0f;
+
+Player::Player() {
+	bx = kPlayerHitboxOffsetX;
+	by = kPlayerHitboxOffsetY;
+	bw = kPlayerHitboxWidth;
+	bh = kPlayerHitboxHeight;
+	state = PlayerState::Normal;
+}
+
 void Player::Hurt(const CoordXY<float> &direction) {
 	speed = direction * kPlayerHurtKnockback;
 	health -= 1;

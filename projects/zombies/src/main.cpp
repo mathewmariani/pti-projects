@@ -51,12 +51,12 @@ static void load(void) {
 		}
 	}
 
-	for (auto i = 0; i < 100; i++) {
-		auto location = RandomOutsideCamera();
-		if (auto *e = CreateEntity<Zombie>(); e) {
-			e->SetLocation(location);
-		}
-	}
+	// for (auto i = 0; i < 100; i++) {
+	// 	auto location = RandomOutsideCamera();
+	// 	if (auto *e = CreateEntity<Zombie>(); e) {
+	// 		e->SetLocation(location);
+	// 	}
+	// }
 }
 
 static void init(void) {
@@ -130,8 +130,13 @@ static void frame(void) {
 	char buffer[100];
 	std::snprintf(buffer, sizeof(buffer), "coins: %d\n", gameState.Coins);
 	std::string coin_str(buffer);
-
 	pti_print(bitmap_font, coin_str.c_str(), 4, 0);
+
+	// debugging:
+	// for (auto *e : GetEntitiesOfType<Actor>()) {
+	// 	pti_circ(e->position.x, e->position.y, 16, 0xffff0000);
+	// 	pti_rectf(e->position.x + e->bx, e->position.y + e->by, e->bw - 1, e->bh - 1, 0xff00ff00);
+	// }
 }
 
 pti_desc pti_main(int argc, char *argv[]) {

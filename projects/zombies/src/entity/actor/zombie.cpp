@@ -6,6 +6,27 @@
 
 #include <random>
 
+constexpr float kZombieMaxSpeed = 0.4f;
+constexpr float kZombieAcceleration = 1.80f;
+constexpr float kZombieFriction = 15.0f;
+constexpr float kZombieKnockback = 2.0f;
+constexpr float kZombieRoamingChance = 0.2f;
+constexpr float kZombieRoamingMinTime = 1.0f;
+constexpr float kZombieRoamingMaxTime = 3.0f;
+
+constexpr float kZombieAlertMinTime = 1.0f;
+constexpr float kZombieAlertMaxTime = 3.0f;
+
+constexpr int kZombieOffsetX = 6;
+constexpr int kZombieOffsetY = 12;
+constexpr int kZombieHitboxOffsetX = -2;
+constexpr int kZombieHitboxOffsetY = -2;
+constexpr int kZombieHitboxWidth = 6;
+constexpr int kZombieHitboxHeight = 6;
+constexpr int kZombieFrameCount = 8;
+constexpr int kZombieFrameMod = 2;
+constexpr int kZombieHealth = 3;
+
 void Zombie::Create() {
 	auto *zombie = (Zombie *) CreateEntity<Zombie>();
 	if (zombie == nullptr) {
@@ -19,6 +40,15 @@ void Zombie::Create() {
 	CoordXY<int> position{dist(gen) * (float) EN_ROOM_WIDTH, dist(gen) * (float) EN_ROOM_HEIGHT};
 
 	zombie->SetLocation(position);
+}
+
+Zombie::Zombie() {
+	bx = kZombieHitboxOffsetX;
+	by = kZombieHitboxOffsetY;
+	bw = kZombieHitboxWidth;
+	bh = kZombieHitboxHeight;
+	state = ZombieState::Normal;
+	health = kZombieHealth;
 }
 
 std::vector<Zombie *> Zombie::GetNeighborhood() {
@@ -147,5 +177,4 @@ void Zombie::Render() {
 	pti_spr(bitmap_zombie, frame, position.x - kZombieOffsetX, position.y - kZombieOffsetY, false, false);
 	pti_circ(position.x, position.y, 32, 0xffff0000);
 	pti_circ(position.x, position.y, 16, 0xffff0000);
-	// pti_rect(position.x, position.y, bw, bh, 0xffff0000);
 }
