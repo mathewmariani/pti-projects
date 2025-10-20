@@ -31,6 +31,10 @@ static void load(void) {
 						e->SetLocation({XPOS(i), YPOS(j)});
 						pti_mset(tilemap, i, j, 0);
 						GetGameState().player = static_cast<Player *>(e);
+
+						auto cam_x = e->position.x - kScreenWidth / 2.0f;
+						auto cam_y = e->position.y - kScreenHeight / 2.0f;
+						pti_camera(cam_x, cam_y);
 					}
 				} break;
 				case 50: {
@@ -105,8 +109,7 @@ static void frame(void) {
 
 	GameStateTick();
 
-
-		pti_cls(0xffef7d57);
+	pti_cls(0xffef7d57);
 
 	// keep camera inbounds
 	int cam_x, cam_y;
@@ -120,12 +123,15 @@ static void frame(void) {
 
 	pti_rectf(cx, cy, kScreenWidth, 16, 0xff000000);
 
-	/* render ui */
-	// const auto coin_str = std::format("coins: &d\n", coins);
-	char buffer[100];
-	std::snprintf(buffer, sizeof(buffer), "coins: %d\n", gameState.Coins);
-	std::string coin_str(buffer);
-	pti_print(bitmap_font, coin_str.c_str(), 4, 0);
+	for (auto i = 0; i < 5; i++) {
+		int x = (cam_x + 8) + (i * 8);
+		int y = cam_y + 8;
+		if (i >= gameState.player->GetHealth()) {
+			pti_circf(x, y, 3, 0xff222222);
+		} else {
+			pti_circf(x, y, 3, 0xff0000ff);
+		}
+	}
 
 	// debugging:
 	// for (auto *e : GetEntitiesOfType<Actor>()) {

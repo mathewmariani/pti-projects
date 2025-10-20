@@ -87,7 +87,6 @@ void Zombie::Update() {
 	auto player = GetGameState().player;
 	auto dist_to_player = position.SqrDistance(player->position);
 
-	// --- Detect player ---
 	if (dist_to_player < (32.0f * 32.0f)) {
 		state = ZombieState::Alerted;
 		if (alertTimer <= 0.0f) {
@@ -101,7 +100,6 @@ void Zombie::Update() {
 		}
 	}
 
-	// --- Check neighborhood for alerted zombies ---
 	bool nearbyAlert = false;
 	for (auto *other : GetNeighborhood()) {
 		if (other->state == ZombieState::Alerted) {
@@ -131,7 +129,6 @@ void Zombie::Update() {
 		}
 	}
 
-	// --- Movement/friction ---
 	if (moveDir.x != 0.0f || moveDir.y != 0.0f) {
 		_pti_appr(speed.x, kZombieMaxSpeed * moveDir.x, kZombieAcceleration * PTI_DELTA);
 		_pti_appr(speed.y, kZombieMaxSpeed * moveDir.y, kZombieAcceleration * PTI_DELTA);
@@ -141,8 +138,8 @@ void Zombie::Update() {
 	}
 
 	// --- Avoid neighbors ---
-	CoordXY<float> avoid = CoordXY<float>::Zero;
-	CoordXY<float> heading = CoordXY<float>::Zero;
+	auto avoid = CoordXY<float>::Zero;
+	auto heading = CoordXY<float>::Zero;
 	for (auto *other : GetNeighborhood()) {
 		auto offset = other->position - position;
 		auto d2 = other->position.SqrDistance(position);
@@ -152,17 +149,16 @@ void Zombie::Update() {
 		}
 	}
 
-	CoordXY<float> force = moveDir + avoid * 0.5f;// scale avoidance influence
-
-	float len = std::sqrt(force.x * force.x + force.y * force.y);
-	if (len > 0.0f) {
-		force.x /= len;
-		force.y /= len;
-	}
+	auto force = moveDir + avoid;
+	// float len = std::sqrt(force.x * force.x + force.y * force.y);
+	// if (len > 0.0f) {
+	// 	force.x /= len;
+	// 	force.y /= len;
+	// }
 
 	_pti_appr(speed.x, kZombieMaxSpeed * force.x, kZombieAcceleration * PTI_DELTA);
 	_pti_appr(speed.y, kZombieMaxSpeed * force.y, kZombieAcceleration * PTI_DELTA);
-	// --- Player collision ---
+
 	auto collision = false;
 	for (auto *player : GetCollisions<Player>(*this, direction)) {
 		auto dir = position.DirectionTo(player->position);
