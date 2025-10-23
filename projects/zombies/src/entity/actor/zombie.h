@@ -20,6 +20,9 @@ struct Zombie : Actor {
 	void Render() override;
 
 private:
+	bool CanSee(const Actor *actor) const;
+
+private:
 	ZombieState state;
 	int health;
 	float moveTimer;

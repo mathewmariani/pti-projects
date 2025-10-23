@@ -63,6 +63,7 @@ static void init(void) {
 	bitmap_coin = batteries::sprite("assets/coin.ase");
 	bitmap_player = batteries::sprite("assets/dog.ase");
 	bitmap_zombie = batteries::sprite("assets/zombie.ase");
+	bitmap_heart = batteries::sprite("assets/heart.ase");
 	bitmap_platform = batteries::sprite("assets/platform.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
 	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
@@ -86,28 +87,24 @@ static void frame(void) {
 		return;
 	}
 
-
-	// reset on death:
-	// if (gameState.PlayerIsDead) {
-	// 	gameState.ResetTimer += PTI_DELTA;
-	// 	if (gameState.ResetTimer >= kDeathResetTimer) {
-	// 		GameStateReset();
-	// 		load();
-	// 		return;
-	// 	}
-	// }
-
-	// spawn zombies:
-	// gameState.ResetTimer += PTI_DELTA;
-	// if (gameState.ResetTimer >= kDeathResetTimer) {
-	// 	gameState.ResetTimer = 0.0f;
-	// 	auto location = RandomOutsideCamera();
-	// 	if (auto *e = CreateEntity<Zombie>(); e) {
-	// 		e->SetLocation(location);
-	// 	}
-	// }
+	if (gameState.PlayerIsDead) {
+		gameState.ResetTimer += PTI_DELTA;
+		if (gameState.ResetTimer >= kDeathResetTimer) {
+			GameStateReset();
+			load();
+			return;
+		}
+	}
 
 	GameStateTick();
+
+	for (auto *zombie : GetEntitiesOfType<Zombie>()) {
+		if (IsWithinSpawnZone(zombie->position)) {
+			continue;
+		}
+
+		zombie->position = RandomOutsideCamera();
+	}
 
 	pti_cls(0xffef7d57);
 
@@ -123,14 +120,10 @@ static void frame(void) {
 
 	pti_rectf(cx, cy, kScreenWidth, 16, 0xff000000);
 
-	for (auto i = 0; i < 5; i++) {
+	for (auto i = 0; i < gameState.player->GetHealth(); i++) {
 		int x = (cam_x + 8) + (i * 8);
 		int y = cam_y + 8;
-		if (i >= gameState.player->GetHealth()) {
-			pti_circf(x, y, 3, 0xff222222);
-		} else {
-			pti_circf(x, y, 3, 0xff0000ff);
-		}
+		pti_spr(bitmap_heart, 0, x - 4, y - 3, false, false);
 	}
 
 	// debugging:

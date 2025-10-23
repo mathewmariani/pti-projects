@@ -9,7 +9,7 @@
 constexpr float kZombieMaxSpeed = 0.4f;
 constexpr float kZombieAcceleration = 1.80f;
 constexpr float kZombieFriction = 15.0f;
-constexpr float kZombieKnockback = 2.0f;
+constexpr float kZombieKnockback = 0.85f;
 constexpr float kZombieRoamingChance = 0.2f;
 constexpr float kZombieRoamingMinTime = 1.0f;
 constexpr float kZombieRoamingMaxTime = 3.0f;
@@ -58,7 +58,7 @@ std::vector<Zombie *> Zombie::GetNeighborhood() {
 			continue;
 		}
 		auto dist2 = position.SqrDistance(other->position);
-		if (dist2 <= (32.0f * 32.0f)) {
+		if (dist2 <= (32.0f * 32.0f) && CanSee(other)) {
 			neighborhood.push_back(other);
 		}
 	}
@@ -73,10 +73,43 @@ void Zombie::Hurt(const CoordXY<int> &direction) {
 	alertTimer = kZombieAlertMaxTime;
 
 	if (health <= 0) {
-		Coin::Create(position);
+		// Coin::Create(position);
 		Effect::Create(position, Effect::Type::Collect);
 		RemoveEntity(this);
 	}
+}
+
+bool Zombie::CanSee(const Actor *e) const {
+	int x0 = static_cast<int>(position.x / kTileSize);
+	int y0 = static_cast<int>(position.y / kTileSize);
+	int x1 = static_cast<int>(e->position.x / kTileSize);
+	int y1 = static_cast<int>(e->position.y / kTileSize);
+
+	int dx = std::abs(x1 - x0);
+	int dy = std::abs(y1 - y0);
+	int sx = (x0 < x1) ? 1 : -1;
+	int sy = (y0 < y1) ? 1 : -1;
+	int err = dx - dy;
+
+	while (true) {
+		if (pti_fget(tilemap, x0, y0) != 0) {
+			return false;
+		}
+		if (x0 == x1 && y0 == y1) {
+			break;
+		}
+		int e2 = 2 * err;
+		if (e2 > -dy) {
+			err -= dy;
+			x0 += sx;
+		}
+		if (e2 < dx) {
+			err += dx;
+			y0 += sy;
+		}
+	}
+
+	return true;
 }
 
 void Zombie::Update() {
@@ -87,7 +120,7 @@ void Zombie::Update() {
 	auto player = GetGameState().player;
 	auto dist_to_player = position.SqrDistance(player->position);
 
-	if (dist_to_player < (32.0f * 32.0f)) {
+	if (dist_to_player < (32.0f * 32.0f) && CanSee(player)) {
 		state = ZombieState::Alerted;
 		if (alertTimer <= 0.0f) {
 			alertTimer = kZombieAlertMinTime + dist(gen) * kZombieAlertMaxTime;
@@ -137,7 +170,6 @@ void Zombie::Update() {
 		_pti_appr(speed.y, 0.0f, kZombieFriction * PTI_DELTA);
 	}
 
-	// --- Avoid neighbors ---
 	auto avoid = CoordXY<float>::Zero;
 	auto heading = CoordXY<float>::Zero;
 	for (auto *other : GetNeighborhood()) {
@@ -150,12 +182,6 @@ void Zombie::Update() {
 	}
 
 	auto force = moveDir + avoid;
-	// float len = std::sqrt(force.x * force.x + force.y * force.y);
-	// if (len > 0.0f) {
-	// 	force.x /= len;
-	// 	force.y /= len;
-	// }
-
 	_pti_appr(speed.x, kZombieMaxSpeed * force.x, kZombieAcceleration * PTI_DELTA);
 	_pti_appr(speed.y, kZombieMaxSpeed * force.y, kZombieAcceleration * PTI_DELTA);
 

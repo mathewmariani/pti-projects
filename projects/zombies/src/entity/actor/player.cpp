@@ -8,7 +8,7 @@
 constexpr float kPlayerMaxSpeed = 0.8f;
 constexpr float kPlayerAcceleration = 5.0f;
 constexpr float kPlayerFriction = 15.0f;
-constexpr float kPlayerFireRate = 0.25f;
+constexpr float kPlayerFireRate = 0.20f;
 
 constexpr int kPlayerHitboxOffsetX = -1;
 constexpr int kPlayerHitboxOffsetY = 0;
@@ -20,7 +20,7 @@ constexpr int kPlayerOffsetY = 12;
 constexpr int kPlayerFrameCount = 8;
 constexpr int kPlayerFrameMod = 2;
 
-constexpr float kPlayerShootingKnockback = 1.2f;
+constexpr float kPlayerShootingKnockback = 0.85f;
 constexpr float kPlayerHurtKnockback = 4.0f;
 
 Player::Player() {
@@ -36,12 +36,17 @@ void Player::Hurt(const CoordXY<float> &direction) {
 	health -= 1;
 
 	if (health <= 0) {
+		GetGameState().PlayerIsDead = true;
 		RemoveEntity(this);
 	}
 }
 
 void Player::Update() {
 	shoot_timer -= PTI_DELTA;
+
+
+	HandleHorizontalMovement();
+	HandleVerticalMovement();
 
 	auto dir = CoordXY<int>::Zero;
 	if (pti_down(PTI_LEFT)) {
@@ -59,12 +64,9 @@ void Player::Update() {
 		if (auto *e = CreateEntity<Bullet>(); e) {
 			e->SetLocation(position);
 			e->direction = dir;
-			speed = dir * -kPlayerShootingKnockback;
+			speed = speed + (dir * -kPlayerShootingKnockback);
 		}
 	}
-
-	HandleHorizontalMovement();
-	HandleVerticalMovement();
 
 	// collect coins
 	for (auto *coin : GetCollisions<Coin>(*this, direction)) {

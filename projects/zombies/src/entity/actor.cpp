@@ -21,15 +21,6 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 		const int dx = _pti_sign(move);
 		const CoordXY<int> dir{dx, 0};
 		while (move != 0) {
-			// moving up slope:
-			if (PlaceMeeting({dx, 0}) && !(PlaceMeeting({dx, -1}))) {
-				position.y -= 1;
-			}
-			// moving down slope:
-			if (!(PlaceMeeting({dx, 0})) && !(PlaceMeeting({dx, 1})) && PlaceMeeting({dx, 2})) {
-				position.y += 1;
-			}
-			// always last:
 			if (!PlaceMeeting(dir) && !CollidesWithSolids(dir)) {
 				position.x += dx;
 				move -= dx;
@@ -55,15 +46,7 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 				position.y += dy;
 				move -= dy;
 			} else {
-				auto squished = false;
-				if (dy < 0) {
-					// moving up:
-					squished = !CanWiggle();
-				} else if (dy > 0) {
-					// moving down:
-					squished = (PlaceMeeting({0, -1}) || CollidesWithSolids({0, -1}));
-				}
-				if (squished && func) {
+				if (func) {
 					(this->*func)();
 				}
 				break;

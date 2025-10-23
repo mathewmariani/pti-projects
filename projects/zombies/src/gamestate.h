@@ -40,6 +40,7 @@ void GameStateInit();
 void GameStateReset();
 void GameStateTick();
 CoordXY<int> RandomOutsideCamera();
+bool IsWithinSpawnZone(const CoordXY<int> &pt);
 
 template<typename T>
 std::vector<T *> GetEntitiesOfType() {
