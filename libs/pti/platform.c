@@ -5,7 +5,7 @@
 #include "sokol/sokol_log.h"
 
 #define PTI_IMPL
-#include "pti/pti.h"
+#include "pti.h"
 
 // forward declarations
 static void init(void);
@@ -15,7 +15,11 @@ static void input(const sapp_event *);
 
 int main(int argc, char *argv[]) {
 	pti_desc desc = pti_main(argc, argv);
+
 	pti_init(&desc);
+
+	int width = desc.width * 3;
+	int height = desc.height * 3;
 
 	const char *name = "pti";
 	sapp_run(&(sapp_desc) {
@@ -32,8 +36,8 @@ int main(int argc, char *argv[]) {
 			.frame_cb = frame,
 			.cleanup_cb = cleanup,
 			.event_cb = input,
-			.width = desc.width * 3,
-			.height = desc.height * 3,
+			.width = width,
+			.height = height,
 			.window_title = name,
 			.logger.func = slog_func,
 	});
@@ -74,10 +78,10 @@ static void sokol_init_gfx(void) {
 			"precision mediump float;\n"
 #endif
 			"layout(location=0) in vec2 pos;\n"
-			"out vec2 uv;\n"
+			"out vec2 vs_texcoord;\n"
 			"void main() {\n"
 			"  gl_Position = vec4((pos.xy - 0.5) * 2.0, 0.0, 1.0);\n"
-			"  uv = vec2(pos.x, 1.0 - pos.y);\n"
+			"  vs_texcoord = vec2(pos.x, 1.0 - pos.y);\n"
 			"}\n";
 
 	const char *display_fs_src =
@@ -86,13 +90,46 @@ static void sokol_init_gfx(void) {
 #elif defined(SOKOL_GLES3)
 			"#version 300 es\n"
 			"precision mediump float;\n"
+			"precision mediump sampler2D;\n"
 #endif
-			"uniform sampler2D tex;\n"
-			"in vec2 uv;\n"
+			"float PI = 3.14159;\n"
+			"uniform sampler2D screen;\n"
+			"in vec2 vs_texcoord;\n"
 			"out vec4 frag_color;\n"
+			"vec2 curvature = vec2(10.0);\n"
+			"vec2 scanLineOpacity = vec2(0.5);\n"
+			"float brightness = 2.0;\n"
+			"float vignetteOpacity = 0.5;\n"
+			"float vignetteRoundness = 1.0;\n"
+			"vec2 curveRemapUV(vec2 uv) {\n"
+			"  uv = uv * 2.0 - 1.0;\n"
+			"  vec2 offset = abs(uv.yx) / vec2(curvature.x, curvature.y);\n"
+			"  uv = uv + uv * offset * offset;\n"
+			"  uv = uv * 0.5 + 0.5;\n"
+			"  return uv;\n"
+			"}\n"
+			"vec3 scanLineIntensity(float uv, float resolution, float opacity) {\n"
+			"  float intensity = sin(uv * resolution * PI * 2.0);\n"
+			"  intensity = ((0.5 * intensity) + 0.5) * 0.9 + 0.1;\n"
+			"  return vec3(pow(intensity, opacity));\n"
+			"}\n"
+			"vec3 vignetteIntensity(vec2 uv, vec2 resolution, float opacity, float roundness) {\n"
+			"  float intensity = uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y);\n"
+			"  return vec3(clamp(pow((resolution.x / roundness) * intensity, opacity), 0.0, 1.0));\n"
+			"}\n"
 			"void main() {\n"
-			"  vec4 texel = texture(tex, uv);\n"
-			"  frag_color = texel;\n"
+			"  vec2 uv = curveRemapUV(vs_texcoord);\n"
+			"  if (uv.x < 0.0 || uv.y < 0.0 || uv.x > 1.0 || uv.y > 1.0) {\n"
+			"    frag_color = vec4(0.0, 0.0, 0.0, 1.0);\n"
+			"    return;\n"
+			"  }\n"
+			"  vec3 base_color = texture(screen, uv).rgb;\n"
+			"  vec2 resolution = vec2(textureSize(screen, 0));\n"
+			"  base_color *= vignetteIntensity(uv, resolution, vignetteOpacity, vignetteRoundness);\n"
+			"  base_color *= scanLineIntensity(uv.x, resolution.x, scanLineOpacity.x);\n"
+			"  base_color *= scanLineIntensity(uv.y, resolution.y, scanLineOpacity.y);\n"
+			"  base_color *= brightness;\n"
+			"  frag_color = vec4(base_color, 1.0);\n"
 			"}\n";
 
 	state.gfx.pass = (sg_pass) {
@@ -115,7 +152,7 @@ static void sokol_init_gfx(void) {
 					.samplers[0] = {.stage = SG_SHADERSTAGE_FRAGMENT, .sampler_type = SG_SAMPLERTYPE_FILTERING},
 					.texture_sampler_pairs[0] = {
 							.stage = SG_SHADERSTAGE_FRAGMENT,
-							.glsl_name = "tex",
+							.glsl_name = "screen",
 							.view_slot = 0,
 							.sampler_slot = 0,
 					},
@@ -129,12 +166,14 @@ static void sokol_init_gfx(void) {
 			.label = "quad-pipeline",
 	});
 
+	// clang-format off
 	const float vertices[] = {
 			-1.0f, 1.0f,  /* top-left */
 			1.0f, 1.0f,   /* top-right */
 			1.0f, -1.0f,  /* bottom-right */
 			-1.0f, -1.0f, /* bottom-left */
 	};
+	// clang-format on
 	const uint16_t indices[] = {0, 1, 2, 0, 2, 3};
 
 	/* bindings */
@@ -213,7 +252,6 @@ static void cleanup(void) {
 	sg_shutdown();
 }
 
-
 #define PTI_FRAMERATE (30.0)
 #define PTI_DELTA (1.0 / PTI_FRAMERATE)
 #define TICK_DURATION_NS (PTI_DELTA * 1e9)
@@ -243,7 +281,6 @@ static void frame(void) {
 	sokol_gfx_draw();
 }
 
-// Inline function for button down event
 static inline void btn_down(int pti_key, int sapp_key, int sapp_alt, const sapp_event *ev) {
 	if (ev->key_code == sapp_key || ev->key_code == sapp_alt) {
 		_pti.vm.hardware.btn_state[pti_key] |= (_PTI_KEY_STATE | _PTI_KEY_PRESSED);
@@ -251,7 +288,6 @@ static inline void btn_down(int pti_key, int sapp_key, int sapp_alt, const sapp_
 	}
 }
 
-// Inline function for button up event
 static inline void btn_up(int pti_key, int sapp_key, int sapp_alt, const sapp_event *ev) {
 	if (ev->key_code == sapp_key || ev->key_code == sapp_alt) {
 		_pti.vm.hardware.btn_state[pti_key] &= ~(_PTI_KEY_STATE | _PTI_KEY_PRESSED);
@@ -261,7 +297,7 @@ static inline void btn_up(int pti_key, int sapp_key, int sapp_alt, const sapp_ev
 
 static void input(const sapp_event *ev) {
 	switch (ev->type) {
-		// keyboard:
+		/* keyboard: */
 		case SAPP_EVENTTYPE_KEY_DOWN:
 			if (ev->key_repeat) {
 				break;
@@ -289,7 +325,7 @@ static void input(const sapp_event *ev) {
 			btn_up(PTI_DBG, SAPP_KEYCODE_C, SAPP_KEYCODE_C, ev);
 			break;
 
-		// mouse:
+		/* mouse: */
 		case SAPP_EVENTTYPE_MOUSE_MOVE:
 			break;
 
