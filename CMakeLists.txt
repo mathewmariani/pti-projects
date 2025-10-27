@@ -18,7 +18,6 @@ add_compile_options(-Wno-reorder-init-list)
 include("extra/cmake/macros.cmake")
 
 # thirdparty
-
 include("extra/cmake/batteries.cmake")
 include("extra/cmake/cute.cmake")
 # include("extra/cmake/dbgui.cmake")
@@ -27,6 +26,7 @@ include("extra/cmake/sokol.cmake")
 include("extra/cmake/tracy.cmake")
 include("extra/cmake/pti.cmake")
 
+# preload_assets("${CMAKE_SOURCE_DIR}/assets")
 
 include_directories(${THIRDPARTY_DIR})
 

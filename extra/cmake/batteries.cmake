@@ -5,7 +5,12 @@ message("BUILD_WITH_BATTERIES: ${BUILD_WITH_BATTERIES}")
 
 if(BUILD_WITH_BATTERIES)
   set(BATTERIES_DIR ${THIRDPARTY_DIR}/batteries)
-  set(BATTERIES_SRC ${BATTERIES_DIR}/assets.cpp)
+  set(BATTERIES_SRC
+    ${BATTERIES_DIR}/assets.cpp
+    ${BATTERIES_DIR}/coordinate.h
+    ${BATTERIES_DIR}/entity.cpp
+    ${BATTERIES_DIR}/math.h
+    ${BATTERIES_DIR}/registry.h)
 
   add_library(batteries STATIC ${BATTERIES_SRC})
 

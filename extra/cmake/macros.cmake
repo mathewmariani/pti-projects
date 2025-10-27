@@ -15,12 +15,40 @@ macro(emscripten target)
   endif()
 endmacro()
 
+macro(preload_assets src_dir)
+  if(NOT IS_EMSCRIPTEN)
+    return()
+  endif()
+
+  file(GLOB_RECURSE ASSET_FILES "${src_dir}/*")
+
+  set(OUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>")
+  set(OUT_JS "${OUT_DIR}/assets.js")
+  set(OUT_DATA "${OUT_DIR}/assets.data")
+
+  # Trigger rebuild if any asset changes
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${src_dir}/*")
+
+  add_custom_command(
+    OUTPUT ${OUT_JS} ${OUT_DATA}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${OUT_DIR}
+    COMMAND ${Python3_EXECUTABLE} ${EMSCRIPTEN_ROOT_PATH}/tools/file_packager.py
+            ${OUT_DATA}
+            --preload ${src_dir}@/assets
+            --js-output=${OUT_JS}
+    DEPENDS ${ASSET_FILES}
+    COMMENT "Building Emscripten data pack"
+  )
+
+  add_custom_target(assets_data ALL
+    DEPENDS ${OUT_JS} ${OUT_DATA}
+  )
+endmacro()
+
+
 macro(copy_assets target)
   if (IS_EMSCRIPTEN)
-    set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
-    if(EXISTS "${ASSETS_DIR}")
-      target_link_options(${target} PRIVATE "--embed-file;${ASSETS_DIR}@/assets")
-    endif()
+    return()
   else()
     add_custom_command(TARGET ${target} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E create_symlink
