@@ -35,24 +35,24 @@ static void load(void) {
 	int i, j, t;
 	for (i = 0; i < EN_ROOM_COLS; i++) {
 		for (j = 0; j < EN_ROOM_ROWS; j++) {
-			t = pti_mget(tilemap, i, j);
+			t = pti_mget(i, j);
 			switch (t) {
 				case 48: {
 					if (auto *e = CreateEntity<Player>(); e) {
 						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(tilemap, i, j, 0);
+						pti_mset(i, j, 0);
 					}
 				} break;
 				case 51:
 					if (auto *e = CreateEntity<Platform>(Platform::Type::Vertical); e) {
 						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(tilemap, i, j, 0);
+						pti_mset(i, j, 0);
 					}
 					break;
 				case 52:
 					if (auto *e = CreateEntity<Platform>(Platform::Type::Horizontal); e) {
 						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(tilemap, i, j, 0);
+						pti_mset(i, j, 0);
 					}
 					break;
 			}
@@ -67,6 +67,10 @@ static void init(void) {
 	bitmap_player = batteries::sprite("assets/dog.ase");
 	bitmap_platform = batteries::sprite("assets/platform.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
+
+	pti_set_tilemap(tilemap);
+	pti_set_tileset(tileset);
+	pti_set_font(bitmap_font);
 
 	load();
 
@@ -108,7 +112,7 @@ static void frame(void) {
 	int cy = _pti_max(0, _pti_min(EN_ROOM_HEIGHT - height, cam_y));
 	pti_camera(cx, cy);
 
-	pti_map(tilemap, tileset, 0, 0);
+	pti_map(0, 0);
 	RenderAllEntities();
 
 	// const auto status_str = std::format("coins: &d\n", coins);
@@ -116,7 +120,7 @@ static void frame(void) {
 	std::snprintf(buffer, sizeof(buffer), "Is Dead: %s\n", gameState.PlayerIsDead ? "True" : "False");
 	std::string status_str(buffer);
 
-	pti_print(bitmap_font, status_str.c_str(), 4, 0);
+	pti_print(status_str.c_str(), 4, 0);
 }
 
 pti_desc pti_main(int argc, char *argv[]) {

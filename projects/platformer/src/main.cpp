@@ -60,26 +60,26 @@ static void load(void) {
 	int i, j, t;
 	for (i = 0; i < EN_ROOM_COLS; i++) {
 		for (j = 0; j < EN_ROOM_ROWS; j++) {
-			t = pti_mget(tilemap, i, j);
+			t = pti_mget(i, j);
 			switch (t) {
 				case 48: {
 					if (auto *e = CreateEntity<Player>(); e) {
 						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(tilemap, i, j, 0);
+						pti_mset(i, j, 0);
 					}
 				} break;
 				case 49:
 					Coin::Create({XPOS(i), YPOS(j)});
-					pti_mset(tilemap, i, j, 0);
+					pti_mset(i, j, 0);
 					break;
 				case 50: {
 					Goomba::Create({XPOS(i), YPOS(j)});
-					pti_mset(tilemap, i, j, 0);
+					pti_mset(i, j, 0);
 				} break;
 				case 51: {
 					if (auto *e = CreateEntity<Shooter>(); e) {
 						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(tilemap, i, j, 0);
+						pti_mset(i, j, 0);
 					}
 				} break;
 			}
@@ -102,6 +102,10 @@ static void init(void) {
 	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
 	bitmap_fx_dust1 = batteries::sprite("assets/dust1.ase");
 	bitmap_fx_dust2 = batteries::sprite("assets/dust2.ase");
+
+	pti_set_tilemap(tilemap);
+	pti_set_tileset(tileset);
+	pti_set_font(bitmap_font);
 
 	load();
 
@@ -141,7 +145,7 @@ static void frame(void) {
 	pti_camera(_pti_max(0, _pti_min(EN_ROOM_WIDTH - width, cam_x)),
 			   _pti_max(0, _pti_min(EN_ROOM_HEIGHT - height, cam_y)));
 
-	pti_map(tilemap, tileset, 0, 0);
+	pti_map(0, 0);
 	RenderAllEntities();
 
 	/* render ui */
@@ -150,7 +154,7 @@ static void frame(void) {
 	std::snprintf(buffer, sizeof(buffer), "coins: %d\n", gameState.Coins);
 	std::string coin_str(buffer);
 
-	pti_print(bitmap_font, coin_str.c_str(), 4, 0);
+	pti_print(coin_str.c_str(), 4, 0);
 }
 
 pti_desc pti_main(int argc, char *argv[]) {

@@ -96,6 +96,9 @@ void *pti_alloc(pti_bank_t *bank, const uint32_t size);
 void pti_reload(void);
 void pti_memcpy(void *dst, const void *src, size_t len);
 void pti_memset(void *dst, const int value, size_t len);
+void pti_set_tilemap(pti_tilemap_t *ptr);
+void pti_set_tileset(pti_tileset_t *ptr);
+void pti_set_font(pti_bitmap_t *ptr);
 
 //>> memory api
 const uint8_t pti_peek(const uint32_t offset, const uint32_t index);
@@ -111,9 +114,9 @@ bool pti_pressed(pti_button btn);
 bool pti_released(pti_button btn);
 
 //>> map api
-uint32_t pti_mget(const pti_tilemap_t *tilemap, int x, int y);
-void pti_mset(pti_tilemap_t *tilemap, int x, int y, int value);
-uint16_t pti_fget(const pti_tilemap_t *tilemap, int x, int y);
+uint32_t pti_mget(int x, int y);
+void pti_mset(int x, int y, int value);
+uint16_t pti_fget(int x, int y);
 
 //>> random api
 uint16_t pti_prand(void);
@@ -131,20 +134,19 @@ void pti_circf(int x, int y, int r, uint64_t color);
 void pti_line(int x0, int y0, int x1, int y1, uint64_t color);
 void pti_rect(int x, int y, int w, int h, uint64_t color);
 void pti_rectf(int x, int y, int w, int h, uint64_t color);
-void pti_map(const pti_tilemap_t *tilemap, const pti_tileset_t *tileset, int x, int y);
+void pti_map(int x, int y);
 void pti_spr(const pti_bitmap_t *bitmap, int n, int x, int y, bool flip_x, bool flip_y);
-void pti_print(const pti_bitmap_t *font, const char *text, int x, int y);
+void pti_print(const char *text, int x, int y);
 
 #ifdef __cplusplus
 }// extern "C"
 
 // reference-based equivalents for C++
-inline uint32_t pti_mget(const pti_tilemap_t &tilemap, int x, int y) { return pti_mget(&tilemap, x, y); }
-inline void pti_mset(pti_tilemap_t &tilemap, int x, int y, int value) { pti_mset(&tilemap, x, y, value); }
-inline uint16_t pti_fget(const pti_tilemap_t &tilemap, int x, int y) { return pti_fget(&tilemap, x, y); }
-inline void pti_map(const pti_tilemap_t &tilemap, const pti_tileset_t &tileset, int x, int y) { pti_map(&tilemap, &tileset, x, y); }
+inline void pti_set_tilemap(pti_tilemap_t &tilemap) { pti_set_tilemap(&tilemap); }
+inline void pti_set_tileset(pti_tileset_t &tileset) { pti_set_tileset(&tileset); }
+inline void pti_set_font(pti_bitmap_t &bitmap) { pti_set_font(&bitmap); }
+
 inline void pti_spr(const pti_bitmap_t &bitmap, int n, int x, int y, bool flip_x, bool flip_y) { pti_spr(&bitmap, n, x, y, flip_x, flip_y); }
-inline void pti_print(const pti_bitmap_t &font, const char *text, int x, int y) { pti_print(&font, text, x, y); }
 
 #endif
 
@@ -204,7 +206,11 @@ typedef struct {
 		uint16_t height;
 	} screen;
 
+	pti_tilemap_t *tilemap;
+
 	struct {
+		pti_tileset_t *tileset;
+		pti_bitmap_t *font;
 		int16_t clip_x0, clip_y0;
 		int16_t clip_x1, clip_y1;
 		int16_t cam_x, cam_y;
@@ -390,6 +396,18 @@ void pti_memset(void *dst, const int value, size_t len) {
 	memset(dst, value, len);
 }
 
+void pti_set_tilemap(pti_tilemap_t *ptr) {
+	_pti.vm.tilemap = ptr;
+}
+
+void pti_set_tileset(pti_tileset_t *ptr) {
+	_pti.vm.draw.tileset = ptr;
+}
+
+void pti_set_font(pti_bitmap_t *ptr) {
+	_pti.vm.draw.font = ptr;
+}
+
 //>> memory api
 
 const uint8_t pti_peek(const uint32_t offset, const uint32_t index) {
@@ -458,18 +476,18 @@ bool pti_released(pti_button btn) {
 
 //>> map
 
-uint32_t pti_mget(const pti_tilemap_t *tilemap, int x, int y) {
-	int *tiles = (int *) _pti__ptr_to_bank((void *) tilemap->tiles);
-	return *(tiles + x + y * tilemap->width);
+uint32_t pti_mget(int x, int y) {
+	int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
+	return *(tiles + x + y * _pti.vm.tilemap->width);
 }
 
-void pti_mset(pti_tilemap_t *tilemap, int x, int y, int value) {
-	int *tiles = (int *) _pti__ptr_to_bank((void *) tilemap->tiles);
-	*(tiles + x + y * tilemap->width) = value;
+void pti_mset(int x, int y, int value) {
+	int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
+	*(tiles + x + y * _pti.vm.tilemap->width) = value;
 }
 
-uint16_t pti_fget(const pti_tilemap_t *tilemap, int x, int y) {
-	return (uint16_t) pti_mget(tilemap, x, y);
+uint16_t pti_fget(int x, int y) {
+	return (uint16_t) pti_mget(x, y);
 }
 
 //>> random
@@ -582,69 +600,19 @@ _PTI_PRIVATE void _pti__plot(void *pixels, int n, int x, int y, int w, int h, in
 
 
 #if defined(PTI_SIMD)
-	const int rows = dst_y2 - dst_y1 + 1;
-	const int cols = clipped_width;
-
-	__m128i key = _mm_set1_epi32((int) color_key);
-	const __m128i all_ones = _mm_set1_epi32(-1);
-
-	for (int row = 0; row < rows; ++row) {
-		// compute source Y for this row (safer than pointer arithmetic inferring sign)
-		int src_row = src_y1 + row * (flip_y ? -1 : 1);
-		uint32_t *src_row_start = src + src_row * src_width + src_x1;
-		uint32_t *dst_ptr = dst + (dst_y1 + row) * dst_width + dst_x1;
-
-		int col = 0;
-		int quads = cols / 4;
-		for (int q = 0; q < quads; ++q) {
-			uint32_t *src_load_ptr;
-			__m128i src_vals;
-
-			if (!flip_x) {
-				// load 4 pixels starting at src_row_start + col
-				src_load_ptr = src_row_start + col;
-				src_vals = _mm_loadu_si128((__m128i const *) src_load_ptr);
-				// advance source by 4 to match dst increment
-				// we'll advance col by 4 below
-			} else {
-				// For flipped X we want src pixels in this order:
-				//   dst[0] = src_row_start[col + 0 * (-1)]  <-- that's src_index
-				// If src_row_start points at the rightmost pixel for the row (src_x1 already accounts for flip),
-				// the 4 source pixels (in memory ascending order) are at addresses:
-				//   src_load_ptr = src_row_start + (col - 3)
-				// then load those 4 and reverse 32-bit lanes so lane order becomes [A3,A2,A1,A0]
-				src_load_ptr = src_row_start + (col - 3);
-				src_vals = _mm_loadu_si128((__m128i const *) src_load_ptr);
-				// reverse 32-bit lanes to get correct left-to-right order for dst
-				src_vals = _mm_shuffle_epi32(src_vals, _MM_SHUFFLE(0, 1, 2, 3));// reverses lane order
-			}
-
-			__m128i dst_vals = _mm_loadu_si128((__m128i const *) dst_ptr);
-
-			// mask = (src_vals == key)
+	__m128i key = _mm_set1_epi32(color_key);
+	for (int dst_y = dst_y1; dst_y <= dst_y2; dst_y++) {
+		for (int i = 0; i < clipped_width; i += 4) {
+			__m128i src_vals = _mm_loadu_si128((__m128i *) src_pixel);
+			__m128i dst_vals = _mm_loadu_si128((__m128i *) dst_pixel);
 			__m128i mask = _mm_cmpeq_epi32(src_vals, key);
-
-			// final = (mask ? dst_vals : src_vals)
-			// final = (src_vals & ~mask) | (dst_vals & mask)
-			__m128i src_and_not_mask = _mm_andnot_si128(mask, src_vals);
-			__m128i dst_and_mask = _mm_and_si128(dst_vals, mask);
-			__m128i final = _mm_or_si128(src_and_not_mask, dst_and_mask);
-
-			_mm_storeu_si128((__m128i *) dst_ptr, final);
-
-			// Advance by 4 dst pixels and by 4 source "columns" in memory sense
-			dst_ptr += 4;
-			// For column index: in the non-flip case we consumed cols at +4,
-			// in flip case we consumed addresses starting at (col - 3) .. (col)
-			col += 4;
+			__m128i final = _mm_blendv_epi8(dst_vals, src_vals, _mm_andnot_si128(mask, _mm_set1_epi32(-1)));
+			_mm_storeu_si128((__m128i *) dst_pixel, final);
+			src_pixel += 4 * ix;
+			dst_pixel += 4;
 		}
-
-		// scalar tail for leftover pixels
-		for (; col < cols; ++col) {
-			uint32_t src_color = *(src_row_start + (flip_x ? (col * -1 + 0) : col));
-			uint32_t *dst_p = dst + (dst_y1 + row) * dst_width + dst_x1 + col;
-			if (src_color != color_key) *dst_p = src_color;
-		}
+		src_pixel += src_next_row * iy;
+		dst_pixel += dst_next_row;
 	}
 #else
 	for (int dst_y = dst_y1; dst_y <= dst_y2; dst_y++) {
@@ -818,14 +786,15 @@ void pti_rectf(int x, int y, int w, int h, uint64_t color) {
 	}
 }
 
-void pti_map(const pti_tilemap_t *tilemap, const pti_tileset_t *tileset, int x, int y) {
-	const int map_w = tilemap->width;
-	const int map_h = tilemap->height;
-	const int tile_w = tileset->width;
-	const int tile_h = tileset->height;
+void pti_map(int x, int y) {
+	const int map_w = _pti.vm.tilemap->width;
+	const int map_h = _pti.vm.tilemap->height;
+	const int tile_w = _pti.vm.draw.tileset->width;
+	const int tile_h = _pti.vm.draw.tileset->height;
 
-	int *tiles = (int *) _pti__ptr_to_bank((void *) tilemap->tiles);
-	void *pixels = (void *) _pti__ptr_to_bank((void *) tileset->pixels);
+	const int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
+	const void *pixels = (void *) _pti__ptr_to_bank((void *) _pti.vm.draw.tileset->pixels);
+
 
 	_pti__transform(&x, &y);
 
@@ -878,8 +847,8 @@ uint32_t _pti__next_utf8_code_point(const char *data, uint32_t *index, uint32_t 
 #define FONT_GLYPHS_PER_ROW (96 / FONT_GLYPH_WIDTH)
 #define FONT_TAB_SIZE (3)
 
-void pti_print(const pti_bitmap_t *font, const char *text, int x, int y) {
-	void *pixels = (void *) _pti__ptr_to_bank((void *) font->pixels);
+void pti_print(const char *text, int x, int y) {
+	void *pixels = (void *) _pti__ptr_to_bank((void *) _pti.vm.draw.font->pixels);
 	int cursor_x = x;
 	int cursor_y = y;
 	uint32_t text_length = strlen(text);
@@ -906,7 +875,9 @@ void pti_print(const pti_bitmap_t *font, const char *text, int x, int y) {
 		glyph_x *= FONT_GLYPH_WIDTH;
 		glyph_y *= FONT_GLYPH_HEIGHT;
 
-		_pti__plot(pixels, 0, cursor_x, cursor_y, FONT_GLYPH_WIDTH, FONT_GLYPH_HEIGHT, glyph_x, glyph_y, font->width, font->height, false, false);
+		int width = _pti.vm.draw.font->width;
+		int height = _pti.vm.draw.font->height;
+		_pti__plot(pixels, 0, cursor_x, cursor_y, FONT_GLYPH_WIDTH, FONT_GLYPH_HEIGHT, glyph_x, glyph_y, width, height, false, false);
 
 		cursor_x += FONT_GLYPH_WIDTH;
 	}

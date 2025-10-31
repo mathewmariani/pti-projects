@@ -38,7 +38,7 @@ bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
 
 	for (auto j = top; j <= bottom; ++j) {
 		for (auto i = left; i <= right; ++i) {
-			auto flags = pti_fget(tilemap, i, j);
+			auto flags = pti_fget(i, j);
 
 			switch (flags) {
 				// Non-colliding tiles
