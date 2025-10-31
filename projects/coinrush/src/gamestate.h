@@ -1,14 +1,19 @@
 #pragma once
 
+#include <variant>
+#include <vector>
+
 #include "batteries/registry.h"
 
+// actors
 #include "entity/actor/bullet.h"
 #include "entity/actor/coin.h"
 #include "entity/actor/effect.h"
+#include "entity/actor/goomba.h"
 #include "entity/actor/player.h"
 
-#include <variant>
-#include <vector>
+// solids
+#include "entity/solid/platform.h"
 
 constexpr int kMaxEntities = 256;
 
@@ -23,7 +28,7 @@ constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 constexpr float kDeathResetTimer = 2.0f;
 
 struct GameState_t {
-	EntityManager<kMaxEntities, Bullet, Coin, Effect, Player> Entities;
+	EntityManager<kMaxEntities, Bullet, Coin, Effect, Goomba, Player, Platform> Entities;
 	uint8_t Coins = 0;
 	uint8_t Deaths = 0;
 

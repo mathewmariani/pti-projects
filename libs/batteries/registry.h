@@ -35,6 +35,7 @@ public:
 		entities_[index].template emplace<T>(std::forward<Args>(args)...);
 		auto &entity = std::get<T>(entities_[index]);
 		entity.id = index;
+		entity.timer = 0.0f;
 		return &entity;
 	}
 

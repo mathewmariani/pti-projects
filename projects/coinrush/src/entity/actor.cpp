@@ -107,19 +107,12 @@ bool Actor::IsGrounded(void) const {
 }
 
 bool Actor::CollidesWithSolids(const CoordXY<int> &dir) const {
-	// for (auto &e : GetGameState().Entities) {
-	// 	// clang-format off
-	// 	auto collided = std::visit([&](auto &obj) {
-	// 		using U = std::decay_t<decltype(obj)>;
-	// 		if constexpr (std::is_base_of_v<Solid, U>) {
-	// 			return this->Overlaps(&obj, dir);
-	// 		}
-	//     return false;
-	// 	}, e);
-	// 	// clang-format on
-	// 	if (collided) {
-	// 		return true;
-	// 	}
-	// }
-	return false;
+	auto collided = false;
+	GetGameState().Entities.ForEach<Solid>([&](Solid *solid) {
+		if (this->Overlaps(solid, dir)) {
+			collided = true;
+			return;
+		}
+	});
+	return collided;
 }

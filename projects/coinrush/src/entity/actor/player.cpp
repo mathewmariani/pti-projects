@@ -50,6 +50,7 @@ void Player::Update() {
 
 	// collect coins
 	for (auto *coin : GetCollisions<Coin>(this, direction)) {
+		Effect::Create(coin->position);
 		RemoveEntity(coin);
 		GetGameState().Coins++;
 	}

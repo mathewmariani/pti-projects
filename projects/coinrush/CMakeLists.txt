@@ -13,7 +13,11 @@ set(COINRUSH_HEADERS
     src/entity/actor/bullet.h
     src/entity/actor/coin.h
     src/entity/actor/effect.h
-    src/entity/actor/player.h)
+    src/entity/actor/goomba.h
+    src/entity/actor/player.h
+
+    #solids
+    src/entity/solid/platform.h)
 
 set(COINRUSH_SRC
     src/bank.cpp
@@ -27,7 +31,11 @@ set(COINRUSH_SRC
     src/entity/actor/bullet.cpp
     src/entity/actor/coin.cpp
     src/entity/actor/effect.cpp
-    src/entity/actor/player.cpp)
+    src/entity/actor/goomba.cpp
+    src/entity/actor/player.cpp
+
+    #solids
+    src/entity/solid/platform.cpp)
 
 if(CMAKE_SYSTEM_NAME STREQUAL Windows)
     add_executable(coinrush WIN32 ${COINRUSH_SRC} ${COINRUSH_HEADERS})

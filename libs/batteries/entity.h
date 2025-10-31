@@ -8,10 +8,11 @@
 using EntityId = uint32_t;
 
 struct BoundingBox {
-	uint8_t top;
-	uint8_t left;
-	uint8_t width;
-	uint8_t height;
+	int top, left, width, height;
+	BoundingBox() : top(0), left(0), width(0), height(0) {}
+	BoundingBox(int x, int y, int w, int h) : top(x), left(y), width(w), height(h) {}
+	BoundingBox(const BoundingBox &) = default;
+	BoundingBox(BoundingBox &&) = default;
 };
 
 struct EntityBase {

@@ -27,6 +27,22 @@ static void load(void) {
 						GetGameState().player = static_cast<Player *>(e);
 					}
 				} break;
+				case 49:
+					Coin::Create({XPOS(i), YPOS(j)});
+					pti_mset(i, j, 0);
+					break;
+				case 51:
+					if (auto *e = CreateEntity<Platform>(Platform::Type::Vertical); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+					break;
+				case 52:
+					if (auto *e = CreateEntity<Platform>(Platform::Type::Horizontal); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+					break;
 			}
 		}
 	}
