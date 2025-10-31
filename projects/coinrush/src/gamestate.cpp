@@ -133,7 +133,7 @@ CoordXY<int> RandomOutsideCamera() {
 		}
 
 		if (pt_tile.x >= 0 && pt_tile.y >= 0) {
-			if (pti_fget(tilemap, pt_tile.x, pt_tile.y) == 0) {
+			if (pti_fget(pt_tile.x, pt_tile.y) == 0) {
 				return pt_tile * kTileSize;
 			}
 		}

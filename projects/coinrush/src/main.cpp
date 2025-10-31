@@ -18,12 +18,12 @@ static void load(void) {
 	int i, j, t;
 	for (i = 0; i < EN_ROOM_COLS; i++) {
 		for (j = 0; j < EN_ROOM_ROWS; j++) {
-			t = pti_mget(tilemap, i, j);
+			t = pti_mget(i, j);
 			switch (t) {
 				case 48: {
 					if (auto *e = CreateEntity<Player>(); e) {
 						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(tilemap, i, j, 0);
+						pti_mset(i, j, 0);
 						GetGameState().player = static_cast<Player *>(e);
 					}
 				} break;
@@ -44,6 +44,10 @@ static void init(void) {
 	bitmap_platform = batteries::sprite("assets/platform.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
 	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
+
+	pti_set_tilemap(tilemap);
+	pti_set_tileset(tileset);
+	pti_set_font(bitmap_font);
 
 	load();
 
@@ -76,22 +80,14 @@ static void frame(void) {
 	GameStateTick();
 
 	pti_cls(0xffef7d57);
+	pti_map(0, 0);
 
-	// keep camera inbounds
-	int cam_x, cam_y;
-	pti_get_camera(&cam_x, &cam_y);
-	int cx = _pti_max(0, _pti_min(EN_ROOM_WIDTH - kScreenWidth, cam_x));
-	int cy = _pti_max(0, _pti_min(EN_ROOM_HEIGHT - kScreenHeight, cam_y));
-	pti_camera(cx, cy);
-
-	pti_map(tilemap, tileset, 0, 0);
 	RenderAllEntities();
 
 	// debugging:
-	// for (auto *e : GetEntitiesOfType<Actor>()) {
-	// 	pti_circ(e->position.x, e->position.y, 16, 0xffff0000);
-	// 	pti_rectf(e->position.x + e->bx, e->position.y + e->by, e->bw - 1, e->bh - 1, 0xff00ff00);
-	// }
+	for (auto *e : GetEntitiesOfType<Actor>()) {
+		pti_rect(e->position.x + e->bx, e->position.y + e->by, e->bw - 1, e->bh - 1, 0xff00ff00);
+	}
 }
 
 pti_desc pti_main(int argc, char *argv[]) {
