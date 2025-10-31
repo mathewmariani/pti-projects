@@ -8,18 +8,18 @@ constexpr float kPlayerAcceleration = 20.0f;
 constexpr float kPlayerFriction = 15.0f;
 constexpr float kPlayerPhysicsVerticalMax = 6.0f;
 constexpr float kPlayerPhysicsVerticalGrav = 0.24f;
-constexpr float kPlayerPhysicsVerticalGravFall = 0.4254f;
+constexpr float kPlayerPhysicsVerticalGravFall = 0.5f;
 constexpr float kPlayerPhysicsVerticalGravAlt = 0.1940f;
-constexpr float kPlayerPhysicsJumpStrength = 6.1135f;
+constexpr float kPlayerPhysicsJumpStrength = 4.7397f;
 constexpr float kPlayerPhysicsBounceStrength = 4.5535f;
 
 constexpr float kPlayerJumpBuffer = 0.1334f;
 constexpr float kPlayerCoyoteTime = 0.1;
 
-constexpr int kPlayerHitboxOffsetX = -1;
-constexpr int kPlayerHitboxOffsetY = 0;
-constexpr int kPlayerHitboxWidth = 4;
-constexpr int kPlayerHitboxHeight = 4;
+constexpr int kPlayerHitboxOffsetX = -4;
+constexpr int kPlayerHitboxOffsetY = -4;
+constexpr int kPlayerHitboxWidth = 8;
+constexpr int kPlayerHitboxHeight = 8;
 
 constexpr int kPlayerOffsetX = 6;
 constexpr int kPlayerOffsetY = 12;
@@ -75,30 +75,17 @@ void Player::HandleHorizontalMovement() {
 }
 
 void Player::HandleVerticalMovement() {
-	static int hang_time = 0;
-
-	float grav = kPlayerPhysicsVerticalGravFall;
-	if (!grounded && coyoteTime > 0.0f) {
-		grav *= 0.5f;// slow fall when walking off ledge
-	}
-
-	if (!grounded && state == Player::State::Jump) {
-		if (speed.y <= -0.5f) {
-			hang_time = 3;
-			speed.y += grav;
+	float grav = 0.0f;
+	if (!grounded) {
+		// faster falling
+		if (speed.y > 0) {
+			grav = kPlayerPhysicsVerticalGravFall * 1.5f;
 		} else {
-			if (hang_time > 0) {
-				--hang_time;
-				speed.y = 0;
-			} else {
-				speed.y += grav;
-			}
-		}
-	} else {
-		if (!grounded) {
-			speed.y += grav;
+			grav = kPlayerPhysicsVerticalGravFall;
 		}
 	}
+
+	speed.y += grav;
 
 	// Limit vertical speed
 	if (speed.y > kPlayerPhysicsVerticalMax) {
@@ -110,6 +97,7 @@ void Player::HandleJump() {
 	bool kJumpPressed = pti_pressed(PTI_UP);
 	bool kJumpReleased = pti_released(PTI_UP);
 
+	// jump buffer
 	if (kJumpPressed) {
 		jumpBuffer = kPlayerJumpBuffer;
 	} else if (jumpBuffer > 0.0f) {
@@ -117,11 +105,14 @@ void Player::HandleJump() {
 		if (jumpBuffer < 0.0f) jumpBuffer = 0.0f;
 	}
 
+	// coyote time
 	if (grounded) {
 		coyoteTime = kPlayerCoyoteTime;
 	} else if (coyoteTime > 0.0f) {
 		coyoteTime -= PTI_DELTA;
-		if (coyoteTime < 0.0f) coyoteTime = 0.0f;
+		if (coyoteTime < 0.0f) {
+			coyoteTime = 0.0f;
+		}
 	}
 
 	if (state == Player::State::Jump && grounded) {
@@ -135,6 +126,7 @@ void Player::HandleJump() {
 		coyoteTime = 0.0f;
 	}
 
+	// short jump
 	if (state == Player::State::Jump && speed.y < -(kPlayerPhysicsJumpStrength * 0.5f)) {
 		if (kJumpReleased) {
 			speed.y = -(kPlayerPhysicsJumpStrength * 0.5f);
