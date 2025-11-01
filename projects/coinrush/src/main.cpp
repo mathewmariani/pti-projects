@@ -31,6 +31,10 @@ static void load(void) {
 					Coin::Create({XPOS(i), YPOS(j)});
 					pti_mset(i, j, 0);
 					break;
+				case 50: {
+					Goomba::Create({XPOS(i), YPOS(j)});
+					pti_mset(i, j, 0);
+				} break;
 				case 51:
 					if (auto *e = CreateEntity<Platform>(Platform::Type::Vertical); e) {
 						e->SetLocation({XPOS(i), YPOS(j)});
@@ -55,7 +59,7 @@ static void init(void) {
 	bitmap_bullet = batteries::sprite("assets/bullet.ase");
 	bitmap_coin = batteries::sprite("assets/coin.ase");
 	bitmap_player = batteries::sprite("assets/dog.ase");
-	bitmap_zombie = batteries::sprite("assets/zombie.ase");
+	bitmap_goomba = batteries::sprite("assets/zombie.ase");
 	bitmap_heart = batteries::sprite("assets/heart.ase");
 	bitmap_platform = batteries::sprite("assets/platform.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");

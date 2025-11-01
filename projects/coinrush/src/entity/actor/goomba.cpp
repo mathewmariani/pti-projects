@@ -15,10 +15,13 @@ constexpr float kGoombaPhysicsVerticalGravAlt = 0.1940f;
 constexpr float kGoombaPhysicsJumpStrength = 6.1135f;
 constexpr float kGoombaPhysicsBounceStrength = 4.5535f;
 
-constexpr int kGoombaOffsetX = 4;
-constexpr int kGoombaOffsetY = 8;
-constexpr int kGoombaWidth = 8;
-constexpr int kGoombaHeight = 8;
+constexpr int kGoombaHitboxOffsetX = -4;
+constexpr int kGoombaHitboxOffsetY = -4;
+constexpr int kGoombaHitboxWidth = 8;
+constexpr int kGoombaHitboxHeight = 8;
+
+constexpr int kGoombaOffsetX = 6;
+constexpr int kGoombaOffsetY = 12;
 constexpr int kGoombaFrameCount = 8;
 constexpr int kGoombaFrameMod = 2;
 
@@ -31,13 +34,19 @@ void Goomba::Create(const CoordXY<int> &location) {
 	goomba->SetLocation(location);
 }
 
+Goomba::Goomba() {
+	bx = kGoombaHitboxOffsetX;
+	by = kGoombaHitboxOffsetY;
+	bw = kGoombaHitboxWidth;
+	bh = kGoombaHitboxHeight;
+	direction.x = -1;
+}
 
 void Goomba::Update() {
-	// if (IsTouchingWall()) {
-	// 	direction *= -1;
-	// 	position.x += direction;
-	// 	speed.x = -speed.x;
-	// }
+	if (PlaceMeeting(direction) || CollidesWithSolids(direction)) {
+		direction.x *= -1;
+		speed.x = -speed.x;
+	}
 
 	HandleHorizontalMovement();
 	HandleVerticalMovement();
