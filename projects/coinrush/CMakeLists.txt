@@ -15,6 +15,7 @@ set(COINRUSH_HEADERS
     src/entity/actor/effect.h
     src/entity/actor/goomba.h
     src/entity/actor/player.h
+    src/entity/actor/shooter.h
 
     #solids
     src/entity/solid/platform.h)
@@ -33,6 +34,7 @@ set(COINRUSH_SRC
     src/entity/actor/effect.cpp
     src/entity/actor/goomba.cpp
     src/entity/actor/player.cpp
+    src/entity/actor/shooter.cpp
 
     #solids
     src/entity/solid/platform.cpp)

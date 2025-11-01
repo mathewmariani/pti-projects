@@ -18,6 +18,15 @@ constexpr int kBulletHitboxHeight = 8;
 constexpr int kBulletFrameCount = 1;
 constexpr int kBulletFrameMod = 1;
 
+void Bullet::Create(const CoordXY<int> &location) {
+	auto *bullet = (Bullet *) CreateEntity<Bullet>();
+	if (bullet == nullptr) {
+		return;
+	}
+
+	bullet->SetLocation(location);
+}
+
 Bullet::Bullet() {
 	bx = kBulletHitboxOffsetX;
 	by = kBulletHitboxOffsetY;
