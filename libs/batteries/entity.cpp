@@ -34,6 +34,23 @@ bool EntityBase::Overlaps(const EntityBase *other, const CoordXY<int> &dir) cons
 		   (position.y + by + bh + dir.y > other->position.y + other->by);
 }
 
+bool EntityBase::PlaceMeeting(const CoordXY<int> &dir, const int index) const {
+	const auto top = std::max(0, (position.y + by + dir.y) / kTileSize);
+	const auto left = std::max(0, (position.x + bx + dir.x) / kTileSize);
+	const auto bottom = std::min(EN_ROOM_ROWS - 1, (position.y + by + bh + dir.y - 1) / kTileSize);
+	const auto right = std::min(EN_ROOM_COLS - 1, (position.x + bx + bw + dir.x - 1) / kTileSize);
+
+	for (auto j = top; j <= bottom; ++j) {
+		for (auto i = left; i <= right; ++i) {
+			if (pti_fget(i, j) == index) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
 	const auto top = std::max(0, (position.y + by + dir.y) / kTileSize);
 	const auto left = std::max(0, (position.x + bx + dir.x) / kTileSize);
@@ -88,6 +105,28 @@ bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
 				case 41: {
 					// Allow collision only if the entity was entirely above the platform before the movement
 					if ((position.y + by + bh - speed.y) <= (j * kTileSize)) return true;
+					continue;
+				}
+
+				// half-tiles
+				case 42: {// top-half
+					float solid_y = j * kTileSize + 4;
+					if (position.y + by + dir.y < solid_y) return true;
+					continue;
+				}
+				case 43: {// right-half
+					float solid_x = (i + 1) * kTileSize - 4;
+					if (position.x + bx + bw + dir.x > solid_x) return true;
+					continue;
+				}
+				case 53: {// bottom-half
+					float solid_y = (j + 1) * kTileSize - 4;
+					if (position.y + by + bh + dir.y > solid_y) return true;
+					continue;
+				}
+				case 54: {// left-half
+					float solid_x = i * kTileSize + 4;
+					if (position.x + bx + dir.x < solid_x) return true;
 					continue;
 				}
 

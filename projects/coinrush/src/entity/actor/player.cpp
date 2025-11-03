@@ -48,6 +48,13 @@ void Player::Update() {
 	HandleVerticalMovement();
 	HandleJump();
 
+	// check for spikes
+	if (PlaceMeeting(direction, 42) || PlaceMeeting(direction, 43) || PlaceMeeting(direction, 53) || PlaceMeeting(direction, 54)) {
+		Effect::Create(this->position);
+		RemoveEntity(this);
+		return;
+	}
+
 	// collect coins
 	for (auto *coin : GetCollisions<Coin>(this, direction)) {
 		Effect::Create(coin->position);

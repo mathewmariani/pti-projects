@@ -14,8 +14,9 @@ void Actor::Physics() {
 void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 	remainder.x += amount;
 	int move = _pti_round(remainder.x);
+	direction.x = _pti_sign(move);
 	if (move != 0) {
-		const int dx = _pti_sign(move);
+		const int dx = direction.x;
 		const CoordXY<int> dir{dx, 0};
 		while (move != 0) {
 			// moving up slope:
@@ -44,8 +45,9 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 	remainder.y += amount;
 	int move = _pti_round(remainder.y);
+	direction.y = _pti_sign(move);
 	if (move != 0) {
-		const int dy = _pti_sign(move);
+		const int dy = direction.y;
 		const CoordXY<int> dir{0, dy};
 		while (move != 0) {
 			if (!PlaceMeeting(dir) && !CollidesWithSolids(dir)) {
@@ -84,16 +86,16 @@ bool Actor::CanWiggle() {
 }
 
 void Actor::Squish(void) {
-	RemoveEntity(this);
-	GetGameState().Deaths++;
-	GetGameState().PlayerIsDead = true;
+	/* do nothing */
 }
 
 void Actor::HaltX(void) {
+	direction.x = 0;
 	speed.x = 0;
 }
 
 void Actor::HaltY(void) {
+	direction.y = 0;
 	speed.y = 0;
 }
 

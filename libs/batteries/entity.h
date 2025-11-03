@@ -41,4 +41,5 @@ struct EntityBase {
 
 	bool Overlaps(const EntityBase *other, const CoordXY<int> &dir) const;
 	bool PlaceMeeting(const CoordXY<int> &dir) const;
+	bool PlaceMeeting(const CoordXY<int> &dir, const int index) const;
 };
