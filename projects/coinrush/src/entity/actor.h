@@ -15,10 +15,12 @@ struct Actor : EntityBase {
 	void HaltX(void);
 	void HaltY(void);
 
-	bool IsRidding(const EntityBase *base) const;
+	bool IsRiding(const EntityBase *base) const;
 	bool IsGrounded(void) const;
 
 	bool CollidesWithSolids(const CoordXY<int> &dir) const;
+
+	virtual bool CanBeMoved(void) const { return true; }
 
 protected:
 	bool grounded;

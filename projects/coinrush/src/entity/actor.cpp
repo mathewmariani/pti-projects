@@ -16,6 +16,7 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 	int move = _pti_round(remainder.x);
 	direction.x = _pti_sign(move);
 	if (move != 0) {
+		remainder.x -= move;
 		const int dx = direction.x;
 		const CoordXY<int> dir{dx, 0};
 		while (move != 0) {
@@ -38,7 +39,6 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 				break;
 			}
 		}
-		remainder.x = 0;
 	}
 }
 
@@ -47,6 +47,7 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 	int move = _pti_round(remainder.y);
 	direction.y = _pti_sign(move);
 	if (move != 0) {
+		remainder.y -= move;
 		const int dy = direction.y;
 		const CoordXY<int> dir{0, dy};
 		while (move != 0) {
@@ -62,13 +63,12 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 					// moving down:
 					squished = (PlaceMeeting({0, -1}) || CollidesWithSolids({0, -1}));
 				}
-				if (func) {
+				if (squished && func) {
 					(this->*func)();
 				}
 				break;
 			}
 		}
-		remainder.y = 0;
 	}
 }
 
@@ -99,12 +99,13 @@ void Actor::HaltY(void) {
 	speed.y = 0;
 }
 
-bool Actor::IsRidding(const EntityBase *base) const {
-	return Overlaps(base, {0, 0}) || Overlaps(base, {0, 1});
+bool Actor::IsRiding(const EntityBase *base) const {
+	if (!CanBeMoved()) { return false; }
+	return Overlaps(base, CoordXY<int>::Zero) || Overlaps(base, CoordXY<int>::Up);
 }
 
 bool Actor::IsGrounded(void) const {
-	const CoordXY<int> dir{0, 1};
+	const auto dir = CoordXY<int>::Up;
 	return PlaceMeeting(dir) || CollidesWithSolids(dir);
 }
 

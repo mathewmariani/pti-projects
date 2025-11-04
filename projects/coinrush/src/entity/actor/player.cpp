@@ -83,17 +83,15 @@ void Player::HandleHorizontalMovement() {
 }
 
 void Player::HandleVerticalMovement() {
-	float grav = 0.0f;
 	if (!grounded) {
-		// faster falling
 		if (speed.y > 0) {
-			grav = kPlayerPhysicsVerticalGravFall * 1.5f;
+			speed.y += kPlayerPhysicsVerticalGravFall * 1.5f;
 		} else {
-			grav = kPlayerPhysicsVerticalGravFall;
+			speed.y += kPlayerPhysicsVerticalGravFall;
 		}
+	} else {
+		speed.y = 0.0f;
 	}
-
-	speed.y += grav;
 
 	// Limit vertical speed
 	if (speed.y > kPlayerPhysicsVerticalMax) {
