@@ -8,6 +8,7 @@ template<typename T>
 struct CoordXY {
 	T x, y;
 	static inline const CoordXY<T> Zero{0, 0};
+	static inline const CoordXY<T> One{+1, +1};
 	static inline const CoordXY<T> Up{+0, +1};
 	static inline const CoordXY<T> Right{+1, +0};
 	static inline const CoordXY<T> Down{+0, -1};

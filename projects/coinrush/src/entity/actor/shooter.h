@@ -3,7 +3,7 @@
 #include "../actor.h"
 
 struct Shooter : Actor {
-	Shooter();
+	Shooter(const CoordXY<int> &dir);
 
 	void Update() override;
 	void Render() override;
@@ -14,4 +14,5 @@ private:
 
 private:
 	float shoot_timer;
+	CoordXY<int> shoot_direction;
 };

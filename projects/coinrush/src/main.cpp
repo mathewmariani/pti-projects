@@ -47,6 +47,31 @@ static void load(void) {
 						pti_mset(i, j, 0);
 					}
 					break;
+					// shooter
+				case 57:
+					if (auto *e = CreateEntity<Shooter>(CoordXY<int>::Down); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+					break;
+				case 58:
+					if (auto *e = CreateEntity<Shooter>(CoordXY<int>::Up); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+					break;
+				case 59:
+					if (auto *e = CreateEntity<Shooter>(CoordXY<int>::Right); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+					break;
+				case 60:
+					if (auto *e = CreateEntity<Shooter>(CoordXY<int>::Left); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+					break;
 			}
 		}
 	}
@@ -104,10 +129,18 @@ static void frame(void) {
 
 	RenderAllEntities();
 
+	/* render ui */
+	// const auto coin_str = std::format("coins: &d\n", coins);
+	char buffer[100];
+	std::snprintf(buffer, sizeof(buffer), "coins: %d\n", gameState.Coins);
+	std::string coin_str(buffer);
+
+	pti_print(coin_str.c_str(), 8, 4);
+
 	// debugging:
-	for (auto *e : GetEntitiesOfType<Actor>()) {
-		pti_rect(e->position.x + e->bx, e->position.y + e->by, e->bw - 1, e->bh - 1, 0xff00ff00);
-	}
+	// for (auto *e : GetEntitiesOfType<Actor>()) {
+	// 	pti_rect(e->position.x + e->bx, e->position.y + e->by, e->bw - 1, e->bh - 1, 0xff00ff00);
+	// }
 }
 
 pti_desc pti_main(int argc, char *argv[]) {

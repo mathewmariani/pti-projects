@@ -90,12 +90,10 @@ void Actor::Squish(void) {
 }
 
 void Actor::HaltX(void) {
-	direction.x = 0;
 	speed.x = 0;
 }
 
 void Actor::HaltY(void) {
-	direction.y = 0;
 	speed.y = 0;
 }
 

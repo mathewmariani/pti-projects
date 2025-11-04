@@ -39,7 +39,6 @@ void UpdateEntitiesOfType() {
 
 // Tick the game
 void GameStateTick() {
-	// Exact types
 	UpdateEntitiesOfType<Solid>();
 	UpdateEntitiesOfType<Actor>();
 }

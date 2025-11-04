@@ -12,24 +12,29 @@ constexpr int kShooterOffsetY = 8;
 constexpr int kShooterWidth = 8;
 constexpr int kShooterHeight = 8;
 
-Shooter::Shooter() {
+Shooter::Shooter(const CoordXY<int> &dir) {
 	bx = 0;
 	by = 0;
 	bw = kShooterWidth;
 	bh = kShooterHeight;
-	direction = {-1, 0};
+
+	shoot_direction = dir;
 }
 
 void Shooter::Update() {
 	shoot_timer -= PTI_DELTA;
 	if (shoot_timer < 0.0f) {
 		shoot_timer = kShooterFireRate;
-		Bullet::Create({position.x - 8, position.y});
+		if (auto *e = CreateEntity<Bullet>(); e) {
+			auto loc = position + (CoordXY<int>::One * 4);
+			e->SetLocation(loc);
+			e->direction = shoot_direction;
+		}
 	}
 }
 
 void Shooter::Render() {
-	pti_spr(bitmap_shooter, 0, position.x - kShooterOffsetX, position.y - kShooterOffsetY, false, false);
+	pti_rectf(position.x, position.y, 8, 8, 0xff0000ff);
 }
 
 void Shooter::HandleHorizontalMovement() {
