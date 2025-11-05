@@ -130,6 +130,7 @@ void Player::HandleJump() {
 
 	if (state == Player::State::Jump && grounded) {
 		state = Player::State::Normal;
+		Effect::Create(this->position + (CoordXY<int>::Down * kPlayerHitboxOffsetY));
 	}
 
 	if ((kJumpPressed || jumpBuffer > 0.0f) && (grounded || coyoteTime > 0.0f)) {
@@ -137,6 +138,7 @@ void Player::HandleJump() {
 		speed.y = -kPlayerPhysicsJumpStrength;
 		jumpBuffer = 0.0f;
 		coyoteTime = 0.0f;
+		Effect::Create(this->position + (CoordXY<int>::Down * kPlayerHitboxOffsetY));
 	}
 
 	// short jump
