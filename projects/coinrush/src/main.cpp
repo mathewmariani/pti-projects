@@ -16,7 +16,7 @@ static void load(void) {
 	GameStateInit();
 	batteries::reload();
 
-	pti_set_tilemap(levels[RandomRange(0, 1)]);
+	pti_set_tilemap(levels[RandomRange(0, levels.size() - 1)]);
 
 	int i, j, t;
 	for (i = 0; i < EN_ROOM_COLS; i++) {
@@ -104,6 +104,8 @@ static void init(void) {
 	levels = {
 			batteries::tilemap("assets/levels/01.ase"),
 			batteries::tilemap("assets/levels/02.ase"),
+			batteries::tilemap("assets/levels/03.ase"),
+			batteries::tilemap("assets/levels/04.ase"),
 	};
 
 	pti_set_tileset(tileset);
