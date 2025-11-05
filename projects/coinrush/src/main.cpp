@@ -72,6 +72,13 @@ static void load(void) {
 						pti_mset(i, j, 0);
 					}
 					break;
+
+				case 61:
+					if (auto *e = CreateEntity<Flag>(); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+					break;
 			}
 		}
 	}

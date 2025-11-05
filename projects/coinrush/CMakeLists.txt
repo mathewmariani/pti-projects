@@ -13,6 +13,7 @@ set(COINRUSH_HEADERS
     src/entity/actor/bullet.h
     src/entity/actor/coin.h
     src/entity/actor/effect.h
+    src/entity/actor/flag.h
     src/entity/actor/goomba.h
     src/entity/actor/player.h
     src/entity/actor/shooter.h
@@ -32,6 +33,7 @@ set(COINRUSH_SRC
     src/entity/actor/bullet.cpp
     src/entity/actor/coin.cpp
     src/entity/actor/effect.cpp
+    src/entity/actor/flag.cpp
     src/entity/actor/goomba.cpp
     src/entity/actor/player.cpp
     src/entity/actor/shooter.cpp
@@ -49,7 +51,7 @@ target_link_libraries(coinrush PRIVATE batteries)
 target_link_libraries(coinrush PRIVATE cute)
 target_link_libraries(coinrush PRIVATE pti)
 target_link_libraries(coinrush PRIVATE imgui)
-# target_link_libraries(coinrush PRIVATE dbgui)
+target_link_libraries(coinrush PRIVATE dbgui)
 target_link_libraries(coinrush PRIVATE tracy)
 
 emscripten(coinrush)

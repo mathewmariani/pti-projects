@@ -9,6 +9,7 @@
 #include "entity/actor/bullet.h"
 #include "entity/actor/coin.h"
 #include "entity/actor/effect.h"
+#include "entity/actor/flag.h"
 #include "entity/actor/goomba.h"
 #include "entity/actor/player.h"
 #include "entity/actor/shooter.h"
@@ -29,7 +30,7 @@ constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 constexpr float kDeathResetTimer = 2.0f;
 
 struct GameState_t {
-	EntityManager<kMaxEntities, Bullet, Coin, Effect, Goomba, Player, Shooter, Platform> Entities;
+	EntityManager<kMaxEntities, Bullet, Coin, Effect, Flag, Goomba, Player, Shooter, Platform> Entities;
 	uint8_t Coins = 0;
 	uint8_t Deaths = 0;
 
