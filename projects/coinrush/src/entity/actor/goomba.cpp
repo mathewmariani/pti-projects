@@ -43,13 +43,18 @@ Goomba::Goomba() {
 }
 
 void Goomba::Update() {
-	if (PlaceMeeting(direction) || CollidesWithSolids(direction)) {
+	HandleHorizontalMovement();
+	HandleVerticalMovement();
+
+	const CoordXY<int> horizontal{direction.x, 0};
+	if (PlaceMeeting(horizontal) || CollidesWithSolids(horizontal)) {
 		direction.x *= -1;
 		speed.x = -speed.x;
 	}
 
-	HandleHorizontalMovement();
-	HandleVerticalMovement();
+	for (auto *player : GetCollisions<Player>(this, direction)) {
+		player->Hurt(CoordXY<float>::Zero);
+	}
 }
 
 void Goomba::Render() {

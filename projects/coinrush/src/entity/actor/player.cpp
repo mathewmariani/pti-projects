@@ -38,6 +38,8 @@ Player::Player() {
 }
 
 void Player::Hurt(const CoordXY<float> &direction) {
+	Effect::Create(this->position);
+
 	speed = direction * kPlayerHurtKnockback;
 	GetGameState().PlayerIsDead = true;
 	RemoveEntity(this);
@@ -50,8 +52,7 @@ void Player::Update() {
 
 	// check for spikes
 	if (PlaceMeeting(direction, 42) || PlaceMeeting(direction, 43) || PlaceMeeting(direction, 53) || PlaceMeeting(direction, 54)) {
-		Effect::Create(this->position);
-		RemoveEntity(this);
+		Hurt(CoordXY<float>::Zero);
 		return;
 	}
 

@@ -40,6 +40,10 @@ void Bullet::Update() {
 		Effect::Create(position, Effect::Type::Collect);
 		RemoveEntity(this);
 	}
+
+	for (auto *player : GetCollisions<Player>(this, direction)) {
+		player->Hurt(CoordXY<float>::Zero);
+	}
 }
 
 void Bullet::Render() {
