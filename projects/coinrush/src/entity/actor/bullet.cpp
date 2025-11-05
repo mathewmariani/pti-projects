@@ -34,13 +34,23 @@ Bullet::Bullet() {
 	bh = kBulletHitboxHeight;
 }
 
+void Bullet::HaltX(void) {
+	Effect::Create(position, Effect::Type::Collect);
+	RemoveEntity(this);
+}
+
+void Bullet::HaltY(void) {
+	Effect::Create(position, Effect::Type::Collect);
+	RemoveEntity(this);
+}
+
 void Bullet::Update() {
-	speed = direction * kBulletMaxSpeed;
-	if (PlaceMeeting(direction)) {
+	if (PlaceMeeting(direction) || CollidesWithSolids(direction)) {
 		Effect::Create(position, Effect::Type::Collect);
 		RemoveEntity(this);
 	}
 
+	speed = direction * kBulletMaxSpeed;
 	for (auto *player : GetCollisions<Player>(this, direction)) {
 		player->Hurt(CoordXY<float>::Zero);
 	}

@@ -7,6 +7,11 @@ struct Bullet : Actor {
 
 	Bullet();
 
+	void HaltX(void) override;
+	void HaltY(void) override;
+
 	void Update() override;
 	void Render() override;
+
+	bool CanBeMoved(void) const override { return false; }
 };

@@ -99,6 +99,7 @@ static void init(void) {
 	bitmap_platform = batteries::sprite("assets/platform.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
 	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
+	bitmap_shooter = batteries::sprite("assets/cannon.ase");
 
 	levels = {
 			batteries::tilemap("assets/levels/01.ase"),

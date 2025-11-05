@@ -29,12 +29,14 @@ void Shooter::Update() {
 			auto loc = position + (CoordXY<int>::One * 4);
 			e->SetLocation(loc);
 			e->direction = shoot_direction;
+
+			Effect::Create(loc, Effect::Type::Collect);
 		}
 	}
 }
 
 void Shooter::Render() {
-	pti_rectf(position.x, position.y, 8, 8, 0xff0000ff);
+	pti_spr(bitmap_shooter, 0, position.x - kShooterOffsetX, position.y - kShooterOffsetY, false, false);
 }
 
 void Shooter::HandleHorizontalMovement() {
