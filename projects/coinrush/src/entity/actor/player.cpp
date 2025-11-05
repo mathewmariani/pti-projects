@@ -74,7 +74,8 @@ void Player::Render() {
 		frame = 0;
 	}
 
-	pti_spr(bitmap_player, frame, position.x - kPlayerOffsetX, position.y - kPlayerOffsetY, false, false);
+	auto flip_x = direction.x < 0;
+	pti_spr(bitmap_player, frame, position.x - kPlayerOffsetX, position.y - kPlayerOffsetY, flip_x, false);
 }
 
 void Player::HandleHorizontalMovement() {

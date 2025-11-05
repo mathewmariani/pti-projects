@@ -14,8 +14,8 @@ void Actor::Physics() {
 void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 	remainder.x += amount;
 	int move = _pti_round(remainder.x);
-	direction.x = _pti_sign(move);
 	if (move != 0) {
+		direction.x = _pti_sign(move);
 		remainder.x -= move;
 		const int dx = direction.x;
 		const CoordXY<int> dir{dx, 0};
@@ -45,8 +45,8 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 	remainder.y += amount;
 	int move = _pti_round(remainder.y);
-	direction.y = _pti_sign(move);
 	if (move != 0) {
+		direction.y = _pti_sign(move);
 		remainder.y -= move;
 		const int dy = direction.y;
 		const CoordXY<int> dir{0, dy};

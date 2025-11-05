@@ -36,7 +36,17 @@ void Shooter::Update() {
 }
 
 void Shooter::Render() {
-	pti_spr(bitmap_shooter, 0, position.x - kShooterOffsetX, position.y - kShooterOffsetY, false, false);
+	auto flip_x = false;
+	auto flip_y = false;
+	auto frame = 0;
+	if (shoot_direction.x != 0) {
+		frame = 1;
+		flip_x = (shoot_direction.x > 0);
+	} else if (shoot_direction.y != 0) {
+		flip_y = (shoot_direction.y < 0);
+	}
+
+	pti_spr(bitmap_shooter, frame, position.x - kShooterOffsetX, position.y - kShooterOffsetY, flip_x, flip_y);
 }
 
 void Shooter::HandleHorizontalMovement() {

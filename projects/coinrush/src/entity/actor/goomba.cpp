@@ -63,7 +63,8 @@ void Goomba::Render() {
 		frame = 0;
 	}
 
-	pti_spr(bitmap_goomba, frame, position.x - kGoombaOffsetX, position.y - kGoombaOffsetY, false, false);
+	auto flip_x = direction.x < 0;
+	pti_spr(bitmap_goomba, frame, position.x - kGoombaOffsetX, position.y - kGoombaOffsetY, flip_x, false);
 }
 
 void Goomba::HandleHorizontalMovement() {

@@ -107,6 +107,7 @@ static void init(void) {
 			batteries::tilemap("assets/levels/02.ase"),
 			batteries::tilemap("assets/levels/03.ase"),
 			batteries::tilemap("assets/levels/04.ase"),
+			batteries::tilemap("assets/levels/05.ase"),
 	};
 
 	pti_set_tileset(tileset);
