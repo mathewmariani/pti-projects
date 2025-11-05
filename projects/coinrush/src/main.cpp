@@ -134,6 +134,7 @@ static void frame(void) {
 	if (gameState.PlayerIsDead) {
 		gameState.ResetTimer += PTI_DELTA;
 		if (gameState.ResetTimer >= kDeathResetTimer) {
+			gameState.Deaths++;
 			GameStateReset();
 			load();
 			return;
@@ -150,12 +151,17 @@ static void frame(void) {
 	DoShake();
 
 	/* render ui */
-	// const auto coin_str = std::format("coins: &d\n", coins);
 	char buffer[100];
-	std::snprintf(buffer, sizeof(buffer), "coins: %d\n", gameState.Coins);
-	std::string coin_str(buffer);
 
+	// coin counter
+	std::snprintf(buffer, sizeof(buffer), "Coins: %d\n", gameState.Coins);
+	std::string coin_str(buffer);
 	pti_print(coin_str.c_str(), 8, 4);
+
+	// death counter
+	std::snprintf(buffer, sizeof(buffer), "Deaths: %d\n", gameState.Deaths);
+	std::string death_str(buffer);
+	pti_print(death_str.c_str(), 8, 16);
 
 	// debugging:
 	// for (auto *e : GetEntitiesOfType<Actor>()) {

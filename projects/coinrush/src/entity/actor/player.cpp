@@ -75,12 +75,6 @@ void Player::Render() {
 	}
 
 	pti_spr(bitmap_player, frame, position.x - kPlayerOffsetX, position.y - kPlayerOffsetY, false, false);
-
-	char buffer[100];
-	std::snprintf(buffer, sizeof(buffer), "Is Dead: %f\n", speed.y);
-	std::string status_str(buffer);
-
-	pti_print(status_str.c_str(), 4, 10);
 }
 
 void Player::HandleHorizontalMovement() {
