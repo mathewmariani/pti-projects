@@ -3,6 +3,8 @@
 #include "../../bank.h"
 #include "pti/pti.h"
 
+#include "batteries/juice.h"
+
 constexpr float kPlayerMaxSpeed = 3.0f;
 constexpr float kPlayerAcceleration = 20.0f;
 constexpr float kPlayerFriction = 15.0f;
@@ -43,6 +45,8 @@ void Player::Hurt(const CoordXY<float> &direction) {
 	speed = direction * kPlayerHurtKnockback;
 	GetGameState().PlayerIsDead = true;
 	RemoveEntity(this);
+
+	Shake();
 }
 
 void Player::Update() {

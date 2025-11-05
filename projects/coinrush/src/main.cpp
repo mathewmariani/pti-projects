@@ -6,6 +6,7 @@
 #include "batteries/assets.h"
 #include "batteries/registry.h"
 #include "batteries/math.h"
+#include "batteries/juice.h"
 
 #include <string>
 
@@ -145,6 +146,8 @@ static void frame(void) {
 	pti_map(0, 0);
 
 	RenderAllEntities();
+
+	DoShake();
 
 	/* render ui */
 	// const auto coin_str = std::format("coins: &d\n", coins);
