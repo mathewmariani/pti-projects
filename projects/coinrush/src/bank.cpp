@@ -1,4 +1,5 @@
 #include "bank.h"
+#include "batteries/assets.h"
 
 // tilemap + tileset
 pti_tilemap_t *tilemap = nullptr;
@@ -22,3 +23,5 @@ pti_bitmap_t *bitmap_font = nullptr;
 pti_bitmap_t *bitmap_fx_collect = nullptr;
 pti_bitmap_t *bitmap_fx_dust1 = nullptr;
 pti_bitmap_t *bitmap_fx_dust2 = nullptr;
+
+std::vector<pti_tilemap_t *> levels{};

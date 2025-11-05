@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <random>
 
-int RandomRange(int a, int b) {
+static int RandomRange(int a, int b) {
 	static thread_local std::mt19937 gen(std::random_device{}());
 	if (a > b) {
 		std::swap(a, b);

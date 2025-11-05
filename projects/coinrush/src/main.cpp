@@ -5,6 +5,7 @@
 #include "gamestate.h"
 #include "batteries/assets.h"
 #include "batteries/registry.h"
+#include "batteries/math.h"
 
 #include <string>
 
@@ -14,6 +15,8 @@
 static void load(void) {
 	GameStateInit();
 	batteries::reload();
+
+	pti_set_tilemap(levels[RandomRange(0, 1)]);
 
 	int i, j, t;
 	for (i = 0; i < EN_ROOM_COLS; i++) {
@@ -97,7 +100,11 @@ static void init(void) {
 	bitmap_font = batteries::sprite("assets/font.ase");
 	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
 
-	pti_set_tilemap(tilemap);
+	levels = {
+			batteries::tilemap("assets/levels/01.ase"),
+			batteries::tilemap("assets/levels/02.ase"),
+	};
+
 	pti_set_tileset(tileset);
 	pti_set_font(bitmap_font);
 

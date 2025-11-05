@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 typedef struct pti_tilemap_t pti_tilemap_t;
 typedef struct pti_tileset_t pti_tileset_t;
 typedef struct pti_bitmap_t pti_bitmap_t;
@@ -26,3 +28,5 @@ extern pti_bitmap_t *bitmap_font;
 extern pti_bitmap_t *bitmap_fx_collect;
 extern pti_bitmap_t *bitmap_fx_dust1;
 extern pti_bitmap_t *bitmap_fx_dust2;
+
+extern std::vector<pti_tilemap_t *> levels;
