@@ -10,82 +10,11 @@
 
 #include <string>
 
-#define XPOS(x) (x * kTileSize)
-#define YPOS(y) (y * kTileSize)
-
 static void load(void) {
 	GameStateInit();
 	batteries::reload();
 
-	pti_set_tilemap(levels[RandomRange(0, levels.size() - 1)]);
-
-	int i, j, t;
-	for (i = 0; i < EN_ROOM_COLS; i++) {
-		for (j = 0; j < EN_ROOM_ROWS; j++) {
-			t = pti_mget(i, j);
-			switch (t) {
-				case 48: {
-					if (auto *e = CreateEntity<Player>(); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-						GetGameState().player = static_cast<Player *>(e);
-					}
-				} break;
-				case 49:
-					Coin::Create({XPOS(i), YPOS(j)});
-					pti_mset(i, j, 0);
-					break;
-				case 50: {
-					Goomba::Create({XPOS(i), YPOS(j)});
-					pti_mset(i, j, 0);
-				} break;
-				case 51:
-					if (auto *e = CreateEntity<Platform>(Platform::Type::Vertical); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-					}
-					break;
-				case 52:
-					if (auto *e = CreateEntity<Platform>(Platform::Type::Horizontal); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-					}
-					break;
-					// shooter
-				case 57:
-					if (auto *e = CreateEntity<Shooter>(CoordXY<int>::Down); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-					}
-					break;
-				case 58:
-					if (auto *e = CreateEntity<Shooter>(CoordXY<int>::Up); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-					}
-					break;
-				case 59:
-					if (auto *e = CreateEntity<Shooter>(CoordXY<int>::Right); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-					}
-					break;
-				case 60:
-					if (auto *e = CreateEntity<Shooter>(CoordXY<int>::Left); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-					}
-					break;
-
-				case 61:
-					if (auto *e = CreateEntity<Flag>(); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-					}
-					break;
-			}
-		}
-	}
+	ChangeLevels();
 }
 
 static void init(void) {
@@ -102,7 +31,7 @@ static void init(void) {
 	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
 	bitmap_shooter = batteries::sprite("assets/cannon.ase");
 
-	levels = {
+	GetGameState().levels = {
 			batteries::tilemap("assets/levels/01.ase"),
 			batteries::tilemap("assets/levels/02.ase"),
 			batteries::tilemap("assets/levels/03.ase"),
@@ -166,6 +95,9 @@ static void frame(void) {
 
 	// debugging:
 	// for (auto *e : GetEntitiesOfType<Actor>()) {
+	// 	pti_rect(e->position.x + e->bx, e->position.y + e->by, e->bw - 1, e->bh - 1, 0xff00ff00);
+	// }
+	// for (auto *e : GetEntitiesOfType<Solid>()) {
 	// 	pti_rect(e->position.x + e->bx, e->position.y + e->by, e->bw - 1, e->bh - 1, 0xff00ff00);
 	// }
 }

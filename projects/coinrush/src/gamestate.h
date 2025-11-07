@@ -17,6 +17,8 @@
 #include "entity/solid/platform.h"
 #include "entity/solid/shooter.h"
 
+typedef struct pti_tilemap_t pti_tilemap_t;
+
 constexpr int kMaxEntities = 256;
 
 constexpr int kScreenWidth = 320;
@@ -36,6 +38,8 @@ struct GameState_t {
 
 	Player *player;
 
+	std::vector<pti_tilemap_t *> levels;
+
 	bool PlayerIsDead = false;
 	float ResetTimer = 0.0f;
 };
@@ -45,6 +49,8 @@ GameState_t &GetGameState();
 void GameStateInit();
 void GameStateReset();
 void GameStateTick();
+
+void ChangeLevels();
 
 void RenderAllEntities();
 
