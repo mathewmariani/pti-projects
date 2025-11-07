@@ -12,10 +12,10 @@
 #include "entity/actor/flag.h"
 #include "entity/actor/goomba.h"
 #include "entity/actor/player.h"
-#include "entity/actor/shooter.h"
 
 // solids
 #include "entity/solid/platform.h"
+#include "entity/solid/shooter.h"
 
 constexpr int kMaxEntities = 256;
 
@@ -52,10 +52,8 @@ template<typename T, typename... Args>
 EntityBase *CreateEntity(Args &&...args) {
 	return GetGameState().Entities.Create<T>(std::forward<Args>(args)...);
 }
-void RemoveEntity(EntityBase *entity);
 
-CoordXY<int> RandomOutsideCamera();
-bool IsWithinSpawnZone(const CoordXY<int> &pt);
+void RemoveEntity(EntityBase *entity);
 
 template<typename T>
 std::vector<T *> GetEntitiesOfType() {

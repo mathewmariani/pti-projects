@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../actor.h"
+#include "../solid.h"
 
-struct Shooter : Actor {
+struct Shooter : Solid {
 	Shooter(const CoordXY<int> &dir);
 
 	void Update() override;

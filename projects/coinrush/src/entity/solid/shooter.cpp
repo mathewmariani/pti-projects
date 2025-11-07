@@ -1,22 +1,29 @@
 #include "pti/pti.h"
 
 #include "shooter.h"
-#include "effect.h"
-#include "bullet.h"
+#include "../actor/effect.h"
+#include "../actor/bullet.h"
 #include "../../gamestate.h"
 #include "../../bank.h"
 
 constexpr float kShooterFireRate = 1.0f;
+
+constexpr int kShooterHitboxOffsetX = -4;
+constexpr int kShooterHitboxOffsetY = -4;
+constexpr int kShooterHitboxWidth = 12;
+constexpr int kShooterHitboxHeight = 12;
+
 constexpr int kShooterOffsetX = 4;
-constexpr int kShooterOffsetY = 8;
+constexpr int kShooterOffsetY = 4;
 constexpr int kShooterWidth = 8;
 constexpr int kShooterHeight = 8;
 
+
 Shooter::Shooter(const CoordXY<int> &dir) {
-	bx = 0;
-	by = 0;
-	bw = kShooterWidth;
-	bh = kShooterHeight;
+	bx = kShooterHitboxOffsetX;
+	by = kShooterHitboxOffsetY;
+	bw = kShooterHitboxWidth;
+	bh = kShooterHitboxHeight;
 
 	shoot_direction = dir;
 }
@@ -26,7 +33,22 @@ void Shooter::Update() {
 	if (shoot_timer < 0.0f) {
 		shoot_timer = kShooterFireRate;
 		if (auto *e = CreateEntity<Bullet>(); e) {
-			auto loc = position + (CoordXY<int>::One * 4);
+			auto loc = position;
+
+			if (shoot_direction.x != 0) {
+				loc = loc + (CoordXY<int>::Y * kShooterOffsetX);
+			} else if (shoot_direction.y != 0) {
+				loc = loc + (CoordXY<int>::X * kShooterOffsetY);
+			}
+
+			if (shoot_direction.x > 0) {
+				loc = loc + (shoot_direction * 8);
+			} else if (shoot_direction.y > 0) {
+				loc = loc + (shoot_direction * 8);
+			}
+
+			loc = loc + shoot_direction;
+
 			e->SetLocation(loc);
 			e->direction = shoot_direction;
 

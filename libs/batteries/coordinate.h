@@ -13,6 +13,8 @@ struct CoordXY {
 	static inline const CoordXY<T> Right{+1, +0};
 	static inline const CoordXY<T> Down{+0, -1};
 	static inline const CoordXY<T> Left{-1, +0};
+	static inline const CoordXY<T> X{1, 0};
+	static inline const CoordXY<T> Y{0, 1};
 
 	static constexpr std::array<CoordXY<T>, 4> VonNewmanNeighborhood() {
 		return {Up, Left, Down, Right};
