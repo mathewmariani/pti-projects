@@ -26,8 +26,6 @@ void GameStateReset() {
 	_gameState->ResetTimer = 0.0f;
 }
 
-// ---------------------------------------------------
-// Update entities of exact type
 template<typename T>
 void UpdateEntitiesOfType() {
 	_gameState->Entities.ForEach<T>([](T *e) {
@@ -37,20 +35,17 @@ void UpdateEntitiesOfType() {
 	});
 }
 
-// Tick the game
 void GameStateTick() {
 	UpdateEntitiesOfType<Solid>();
 	UpdateEntitiesOfType<Actor>();
 }
 
-// Render all entities (polymorphic)
 void RenderAllEntities() {
 	_gameState->Entities.ForEach<EntityBase>([](EntityBase *e) {
 		e->Render();
 	});
 }
 
-// Remove entity safely
 void RemoveEntity(EntityBase *entity) {
 	if (entity) {
 		_gameState->Entities.RemoveAt(entity->id);
