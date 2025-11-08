@@ -26,4 +26,4 @@ pti_bitmap_t *bitmap_fx_collect2 = nullptr;
 pti_bitmap_t *bitmap_fx_dust1 = nullptr;
 pti_bitmap_t *bitmap_fx_dust2 = nullptr;
 
-std::vector<pti_tilemap_t *> levels{};
+std::vector<pti_tilemap_t *> levels;

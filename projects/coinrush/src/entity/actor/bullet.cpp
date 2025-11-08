@@ -11,10 +11,11 @@ constexpr int kBulletOffsetY = 4;
 constexpr int kBulletWidth = 8;
 constexpr int kBulletHeight = 8;
 
-constexpr int kBulletHitboxOffsetX = -2;
-constexpr int kBulletHitboxOffsetY = -2;
-constexpr int kBulletHitboxWidth = 4;
-constexpr int kBulletHitboxHeight = 4;
+constexpr int kBulletHitboxOffsetX = -4;
+constexpr int kBulletHitboxOffsetY = -4;
+constexpr int kBulletHitboxWidth = 8;
+constexpr int kBulletHitboxHeight = 8;
+
 constexpr int kBulletFrameCount = 1;
 constexpr int kBulletFrameMod = 1;
 

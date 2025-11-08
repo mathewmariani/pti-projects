@@ -8,10 +8,10 @@
 
 constexpr float kShooterFireRate = 1.0f;
 
-constexpr int kShooterHitboxOffsetX = -4;
-constexpr int kShooterHitboxOffsetY = -4;
-constexpr int kShooterHitboxWidth = 12;
-constexpr int kShooterHitboxHeight = 12;
+constexpr int kShooterHitboxOffsetX = 0;
+constexpr int kShooterHitboxOffsetY = 0;
+constexpr int kShooterHitboxWidth = 8;
+constexpr int kShooterHitboxHeight = 8;
 
 constexpr int kShooterOffsetX = 4;
 constexpr int kShooterOffsetY = 4;
@@ -47,7 +47,7 @@ void Shooter::Update() {
 				loc = loc + (shoot_direction * 8);
 			}
 
-			loc = loc + shoot_direction;
+			loc = loc + shoot_direction + (shoot_direction * 2);
 
 			e->SetLocation(loc);
 			e->direction = shoot_direction;
