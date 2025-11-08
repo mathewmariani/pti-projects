@@ -68,8 +68,7 @@ static void frame(void) {
 		gameState.ResetTimer += PTI_DELTA;
 		if (gameState.ResetTimer >= kDeathResetTimer) {
 			gameState.Deaths++;
-			GameStateReset();
-			load();
+			ChangeLevels();
 			return;
 		}
 	}

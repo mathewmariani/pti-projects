@@ -35,8 +35,7 @@ struct GameState_t {
 	EntityManager<kMaxEntities, Bullet, Coin, Effect, Flag, Goomba, Player, Shooter, Platform> Entities;
 	uint8_t Coins = 0;
 	uint8_t Deaths = 0;
-
-	Player *player;
+	int CurrentLevelIndex = -1;
 
 	std::vector<pti_tilemap_t *> levels;
 

@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+#include "batteries/assets.h"
 #include "batteries/math.h"
 
 #define XPOS(x) (x * kTileSize)
@@ -56,10 +57,20 @@ void RemoveEntity(EntityBase *entity) {
 }
 
 void ChangeLevels(void) {
+	// we reload the assets because we alter the RAM when we load level.
+	batteries::reload();
+
 	_gameState->Entities.Clear();
+	_gameState->PlayerIsDead = false;
+	_gameState->ResetTimer = 0.0f;
 
 	auto &levels = _gameState->levels;
-	pti_set_tilemap(levels[RandomRange(0, levels.size() - 1)]);
+	auto next = -1;
+	do {
+		next = RandomRange(0, levels.size() - 1);
+	} while (next == _gameState->CurrentLevelIndex);
+
+	pti_set_tilemap(levels[next]);
 
 	int i, j, t;
 	for (i = 0; i < EN_ROOM_COLS; i++) {
@@ -70,7 +81,6 @@ void ChangeLevels(void) {
 					if (auto *e = CreateEntity<Player>(); e) {
 						e->SetLocation({XPOS(i), YPOS(j)});
 						pti_mset(i, j, 0);
-						GetGameState().player = static_cast<Player *>(e);
 					}
 				} break;
 				case 49:
