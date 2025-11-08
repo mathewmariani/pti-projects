@@ -19,13 +19,15 @@ extern pti_bitmap_t *bitmap_pop;
 extern pti_bitmap_t *bitmap_platform;
 extern pti_bitmap_t *bitmap_zombie;
 extern pti_bitmap_t *bitmap_heart;
+extern pti_bitmap_t *bitmap_door;
 
 // font
 extern pti_bitmap_t *bitmap_shooter;
 extern pti_bitmap_t *bitmap_font;
 
 // effects
-extern pti_bitmap_t *bitmap_fx_collect;
+extern pti_bitmap_t *bitmap_fx_collect1;
+extern pti_bitmap_t *bitmap_fx_collect2;
 extern pti_bitmap_t *bitmap_fx_dust1;
 extern pti_bitmap_t *bitmap_fx_dust2;
 

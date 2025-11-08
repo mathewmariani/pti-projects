@@ -3,18 +3,18 @@
 #include "../../gamestate.h"
 #include "../../bank.h"
 
-constexpr int kBulletHitboxOffsetX = 0;
-constexpr int kBulletHitboxOffsetY = 0;
-constexpr int kBulletHitboxWidth = 8;
-constexpr int kBulletHitboxHeight = 8;
+constexpr int kFlagHitboxOffsetX = 0;
+constexpr int kFlagHitboxOffsetY = 0;
+constexpr int kFlagHitboxWidth = 8;
+constexpr int kFlagHitboxHeight = 8;
 
-constexpr int kFlagOffsetX = 0;
-constexpr int kFlagOffsetY = 0;
-constexpr int kFlagWidth = 8;
-constexpr int kFlagHeight = 8;
+constexpr int kFlagOffsetX = -8;
+constexpr int kFlagOffsetY = -8;
+constexpr int kFlagWidth = 16;
+constexpr int kFlagHeight = 16;
 
-constexpr int kFlagFrameCount = 8;
-constexpr int kFlagFrameMod = 5;
+constexpr int kFlagFrameCount = 5;
+constexpr int kFlagFrameMod = 2;
 
 void Flag::Create(const CoordXY<int> &location) {
 	auto *flag = (Flag *) CreateEntity<Flag>();
@@ -26,10 +26,10 @@ void Flag::Create(const CoordXY<int> &location) {
 }
 
 Flag::Flag() {
-	bx = kBulletHitboxOffsetX;
-	by = kBulletHitboxOffsetY;
-	bw = kBulletHitboxWidth;
-	bh = kBulletHitboxHeight;
+	bx = kFlagHitboxOffsetX;
+	by = kFlagHitboxOffsetY;
+	bw = kFlagHitboxWidth;
+	bh = kFlagHitboxHeight;
 }
 
 void Flag::Update() {
@@ -39,11 +39,11 @@ void Flag::Update() {
 	}
 
 	if (collision) {
-		printf("Change level!\n");
+		ChangeLevels();
 	}
 }
 
 void Flag::Render() {
 	auto frame = static_cast<int>(timer * kFlagFrameCount) % kFlagFrameMod;
-	pti_rectf(position.x + kFlagOffsetX, position.y + kFlagOffsetX, kFlagWidth, kFlagHeight, 0xff00f0f0);
+	pti_spr(bitmap_door, 0, position.x + kFlagOffsetX, position.y + kFlagOffsetX, false, false);
 }

@@ -15,12 +15,14 @@ pti_bitmap_t *bitmap_shooter = nullptr;
 pti_bitmap_t *bitmap_platform = nullptr;
 pti_bitmap_t *bitmap_zombie = nullptr;
 pti_bitmap_t *bitmap_heart = nullptr;
+pti_bitmap_t *bitmap_door = nullptr;
 
 // font
 pti_bitmap_t *bitmap_font = nullptr;
 
 // effects
-pti_bitmap_t *bitmap_fx_collect = nullptr;
+pti_bitmap_t *bitmap_fx_collect1 = nullptr;
+pti_bitmap_t *bitmap_fx_collect2 = nullptr;
 pti_bitmap_t *bitmap_fx_dust1 = nullptr;
 pti_bitmap_t *bitmap_fx_dust2 = nullptr;
 

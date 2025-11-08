@@ -28,8 +28,10 @@ static void init(void) {
 	bitmap_heart = batteries::sprite("assets/heart.ase");
 	bitmap_platform = batteries::sprite("assets/platform.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
-	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
+	bitmap_fx_collect1 = batteries::sprite("assets/collect.ase");
+	bitmap_fx_collect2 = batteries::sprite("assets/collect2.ase");
 	bitmap_shooter = batteries::sprite("assets/cannon.ase");
+	bitmap_door = batteries::sprite("assets/door.ase");
 
 	GetGameState().levels = {
 			batteries::tilemap("assets/levels/01.ase"),
@@ -37,6 +39,7 @@ static void init(void) {
 			batteries::tilemap("assets/levels/03.ase"),
 			batteries::tilemap("assets/levels/04.ase"),
 			batteries::tilemap("assets/levels/05.ase"),
+			batteries::tilemap("assets/levels/06.ase"),
 	};
 
 	pti_set_tileset(tileset);
