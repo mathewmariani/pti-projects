@@ -10,7 +10,7 @@ if(BUILD_WITH_BATTERIES)
     ${BATTERIES_DIR}/coordinate.h
     ${BATTERIES_DIR}/entity.cpp
     ${BATTERIES_DIR}/juice.cpp
-    ${BATTERIES_DIR}/math.h
+    ${BATTERIES_DIR}/helper.h
     ${BATTERIES_DIR}/registry.h)
 
   add_library(batteries STATIC ${BATTERIES_SRC})

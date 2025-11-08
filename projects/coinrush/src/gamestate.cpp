@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "batteries/assets.h"
-#include "batteries/math.h"
+#include "batteries/helper.h"
 
 #define XPOS(x) (x * kTileSize)
 #define YPOS(y) (y * kTileSize)

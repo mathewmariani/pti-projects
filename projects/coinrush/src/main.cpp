@@ -5,7 +5,7 @@
 #include "gamestate.h"
 #include "batteries/assets.h"
 #include "batteries/registry.h"
-#include "batteries/math.h"
+#include "batteries/helper.h"
 #include "batteries/juice.h"
 
 #include <string>
