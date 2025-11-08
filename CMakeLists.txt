@@ -8,26 +8,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(pti-projects)
 
-set(THIRDPARTY_DIR "libs")
-
-# suppress warnings
-add_compile_options(-Wno-c99-designator)
-add_compile_options(-Wno-reorder-init-list)
+set(THIRDPARTY_DIR libs)
+set(PROJECTS_DIR projects)
 
 # macros
 include("extra/cmake/macros.cmake")
 
 # thirdparty
-
 include("extra/cmake/batteries.cmake")
 include("extra/cmake/cute.cmake")
-# include("extra/cmake/dbgui.cmake")
+include("extra/cmake/dbgui.cmake")
 include("extra/cmake/imgui.cmake")
 include("extra/cmake/sokol.cmake")
 include("extra/cmake/tracy.cmake")
 include("extra/cmake/pti.cmake")
 
-
 include_directories(${THIRDPARTY_DIR})
-
-add_subdirectory(projects)
+add_subdirectory(${PROJECTS_DIR})

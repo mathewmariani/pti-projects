@@ -11,16 +11,39 @@ macro(emscripten target)
       -sALLOW_MEMORY_GROWTH=1
       -sUSE_WEBGL2=1
       -sSINGLE_FILE=1
+      -sFORCE_FILESYSTEM=1
       $<$<CONFIG:Debug>:-g>)
   endif()
 endmacro()
 
+macro(preload_assets target src_dir)
+  if(NOT IS_EMSCRIPTEN)
+    return()
+  endif()
+
+  file(GLOB_RECURSE ASSET_FILES "${src_dir}/*")
+  set(OUT_JS "$<TARGET_FILE_DIR:${target}>/assets.js")
+  set(OUT_DATA "$<TARGET_FILE_DIR:${target}>/assets.data")
+
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${src_dir}/*")
+
+  # Use POST_BUILD so it runs only after the target exists and is built
+  add_custom_command(
+    TARGET ${target} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${target}>"
+    COMMAND ${Python3_EXECUTABLE} ${EMSCRIPTEN_ROOT_PATH}/tools/file_packager.py
+            "$<TARGET_FILE_DIR:${target}>/assets.data"
+            --preload ${src_dir}@/assets
+            --js-output="$<TARGET_FILE_DIR:${target}>/assets.js"
+    COMMENT "Building Emscripten data pack for target ${target}"
+  )
+endmacro()
+
+
+
 macro(copy_assets target)
-  if (IS_EMSCRIPTEN)
-    set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/assets")
-    if(EXISTS "${ASSETS_DIR}")
-      target_link_options(${target} PRIVATE "--embed-file;${ASSETS_DIR}@/assets")
-    endif()
+  if(IS_EMSCRIPTEN)
+    preload_assets(${target} "${CMAKE_CURRENT_SOURCE_DIR}/assets")
   else()
     add_custom_command(TARGET ${target} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E create_symlink
@@ -28,6 +51,7 @@ macro(copy_assets target)
       "$<TARGET_FILE_DIR:${target}>/assets")
   endif()
 endmacro()
+
 
 macro(pti_executable target files)
   add_executable(${target} ${files})
