@@ -42,4 +42,10 @@ struct EntityBase {
 	bool Overlaps(const EntityBase *other, const CoordXY<int> &dir) const;
 	bool PlaceMeeting(const CoordXY<int> &dir) const;
 	bool PlaceMeeting(const CoordXY<int> &dir, const int index) const;
+
+private:
+	template<typename Predicate>
+	bool CheckTiles(const CoordXY<int> &dir, Predicate &&pred) const;
+
+	bool PlaceMeetingForTile(int i, int j, const CoordXY<int> &dir, int flags) const;
 };
