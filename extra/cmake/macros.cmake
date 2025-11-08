@@ -11,44 +11,39 @@ macro(emscripten target)
       -sALLOW_MEMORY_GROWTH=1
       -sUSE_WEBGL2=1
       -sSINGLE_FILE=1
+      -sFORCE_FILESYSTEM=1
       $<$<CONFIG:Debug>:-g>)
   endif()
 endmacro()
 
-macro(preload_assets src_dir)
+macro(preload_assets target src_dir)
   if(NOT IS_EMSCRIPTEN)
     return()
   endif()
 
   file(GLOB_RECURSE ASSET_FILES "${src_dir}/*")
+  set(OUT_JS "$<TARGET_FILE_DIR:${target}>/assets.js")
+  set(OUT_DATA "$<TARGET_FILE_DIR:${target}>/assets.data")
 
-  set(OUT_DIR "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>")
-  set(OUT_JS "${OUT_DIR}/assets.js")
-  set(OUT_DATA "${OUT_DIR}/assets.data")
-
-  # Trigger rebuild if any asset changes
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${src_dir}/*")
 
+  # Use POST_BUILD so it runs only after the target exists and is built
   add_custom_command(
-    OUTPUT ${OUT_JS} ${OUT_DATA}
-    COMMAND ${CMAKE_COMMAND} -E make_directory ${OUT_DIR}
+    TARGET ${target} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${target}>"
     COMMAND ${Python3_EXECUTABLE} ${EMSCRIPTEN_ROOT_PATH}/tools/file_packager.py
-            ${OUT_DATA}
+            "$<TARGET_FILE_DIR:${target}>/assets.data"
             --preload ${src_dir}@/assets
-            --js-output=${OUT_JS}
-    DEPENDS ${ASSET_FILES}
-    COMMENT "Building Emscripten data pack"
-  )
-
-  add_custom_target(assets_data ALL
-    DEPENDS ${OUT_JS} ${OUT_DATA}
+            --js-output="$<TARGET_FILE_DIR:${target}>/assets.js"
+    COMMENT "Building Emscripten data pack for target ${target}"
   )
 endmacro()
 
 
+
 macro(copy_assets target)
-  if (IS_EMSCRIPTEN)
-    return()
+  if(IS_EMSCRIPTEN)
+    preload_assets(${target} "${CMAKE_CURRENT_SOURCE_DIR}/assets")
   else()
     add_custom_command(TARGET ${target} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E create_symlink
@@ -56,6 +51,7 @@ macro(copy_assets target)
       "$<TARGET_FILE_DIR:${target}>/assets")
   endif()
 endmacro()
+
 
 macro(pti_executable target files)
   add_executable(${target} ${files})

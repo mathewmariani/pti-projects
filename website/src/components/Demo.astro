@@ -45,6 +45,20 @@ const height = dimensions.height * dimensions.scale;
     console.log("onerror: " + event.message);
   };
 </script>
+<script type="text/javascript" is:inline>
+  var Module = {
+    locateFile: function (path) {
+      const scripts = document.getElementsByTagName('script');
+      const thisScript = scripts[scripts.length - 1];
+      const basePath = thisScript.src.substring(0, thisScript.src.lastIndexOf('/') + 1);
+
+      if (path.endsWith('.data')) return basePath + path;
+      return path;
+    }
+  };
+</script>
+<script type="text/javascript" src={`${dir}/${name}/assets.js`} async is:inline
+></script>
 <script type="text/javascript" src={`${dir}/${name}/${name}.js`} async is:inline
 ></script>
 <style>
