@@ -33,18 +33,9 @@ set(PLATFORMER_SRC
 
     src/entity/registry.cpp)
 
-if(CMAKE_SYSTEM_NAME STREQUAL Windows)
-    add_executable(towerfall-physics WIN32 ${PLATFORMER_SRC} ${PLATFORMER_HEADERS})
-else()
-    add_executable(towerfall-physics src/main.cpp ${PLATFORMER_SRC} ${PLATFORMER_HEADERS})
-endif()
+set(PLATFORMER_FILES
+    src/main.cpp
+    ${PLATFORMER_SRC}
+    ${PLATFORMER_HEADERS})
 
-target_link_libraries(towerfall-physics PRIVATE batteries)
-target_link_libraries(towerfall-physics PRIVATE cute)
-target_link_libraries(towerfall-physics PRIVATE pti)
-target_link_libraries(towerfall-physics PRIVATE imgui)
-# target_link_libraries(towerfall-physics PRIVATE dbgui)
-target_link_libraries(towerfall-physics PRIVATE tracy)
-
-emscripten(towerfall-physics)
-copy_assets(towerfall-physics)
+pti_project(towerfall-physics "${PLATFORMER_FILES}")

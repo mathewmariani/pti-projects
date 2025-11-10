@@ -37,18 +37,9 @@ set(ZOMBIES_SRC
 
     src/entity/registry.cpp)
 
-if(CMAKE_SYSTEM_NAME STREQUAL Windows)
-    add_executable(zombies WIN32 ${ZOMBIES_SRC} ${ZOMBIES_HEADERS})
-else()
-    add_executable(zombies src/main.cpp ${ZOMBIES_SRC} ${ZOMBIES_HEADERS})
-endif()
+set(ZOMBIES_FILES
+    src/main.cpp
+    ${ZOMBIES_SRC}
+    ${ZOMBIES_HEADERS})
 
-target_link_libraries(zombies PRIVATE batteries)
-target_link_libraries(zombies PRIVATE cute)
-target_link_libraries(zombies PRIVATE pti)
-target_link_libraries(zombies PRIVATE imgui)
-# target_link_libraries(zombies PRIVATE dbgui)
-target_link_libraries(zombies PRIVATE tracy)
-
-emscripten(zombies)
-copy_assets(zombies)
+pti_project(zombies "${ZOMBIES_FILES}")

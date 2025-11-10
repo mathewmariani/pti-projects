@@ -27,18 +27,9 @@ set(PLATFORMER_SRC
     src/entity/registry.cpp
     src/entity/shooter.cpp)
 
-if(CMAKE_SYSTEM_NAME STREQUAL Windows)
-    add_executable(platformer WIN32 ${PLATFORMER_SRC} ${PLATFORMER_HEADERS})
-else()
-    add_executable(platformer src/main.cpp ${PLATFORMER_SRC} ${PLATFORMER_HEADERS})
-endif()
+set(PLATFORMER_FILES
+    src/main.cpp
+    ${PLATFORMER_SRC}
+    ${PLATFORMER_HEADERS})
 
-target_link_libraries(platformer PRIVATE batteries)
-target_link_libraries(platformer PRIVATE cute)
-target_link_libraries(platformer PRIVATE pti)
-target_link_libraries(platformer PRIVATE imgui)
-# target_link_libraries(platformer PRIVATE dbgui)
-target_link_libraries(platformer PRIVATE tracy)
-
-emscripten(platformer)
-copy_assets(platformer)
+pti_project(platformer "${PLATFORMER_FILES}")
