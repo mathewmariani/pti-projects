@@ -1,6 +1,7 @@
 #include "assets.h"
 
 #include <unordered_map>
+#include <math.h>
 
 #include "pti/pti.h"
 #include "cute/cute_aseprite.h"
@@ -50,23 +51,40 @@ namespace batteries {
 		ase_t *ase = cute_aseprite_load_from_file(path.c_str(), NULL);
 		ase_tileset_t ase_tileset = ase->tileset;
 
-		const size_t size = (ase_tileset.tile_w * (ase_tileset.tile_h * ase_tileset.tile_count)) * sizeof(ase_color_t);
-		void *pixels = pti_alloc(&bank, size);
+		int tile_w = ase_tileset.tile_w;
+		int tile_h = ase_tileset.tile_h;
+		int count = ase_tileset.tile_count;
+		const ase_color_t *src_pixels = (ase_color_t *) ase_tileset.pixels;
 
-		pti_tileset_t tileset;
+		int tiles_per_row = (int) ceilf(sqrtf((float) count));
+		int atlas_w = tiles_per_row * tile_w;
+		int atlas_h = ((count + tiles_per_row - 1) / tiles_per_row) * tile_h;
 
-		/* initialize */
-		tileset.count = (int32_t) ase_tileset.tile_count;
-		tileset.width = (int16_t) ase_tileset.tile_w;
-		tileset.height = (int16_t) ase_tileset.tile_h;
-		tileset.pixels = (void *) pti_alloc(&bank, size);
+		ase_color_t *atlas_pixels = (ase_color_t *) pti_alloc(&bank, atlas_w * atlas_h * sizeof(ase_color_t));
+		memset(atlas_pixels, 0, atlas_w * atlas_h * sizeof(ase_color_t));
 
-		memcpy(tileset.pixels, ase_tileset.pixels, size);
+		for (int i = 0; i < count; ++i) {
+			int tile_x = (i % tiles_per_row) * tile_w;
+			int tile_y = (i / tiles_per_row) * tile_h;
+
+			for (int y = 0; y < tile_h; ++y) {
+				const ase_color_t *src_row = &src_pixels[i * tile_w * tile_h + y * tile_w];
+				ase_color_t *dst_row = &atlas_pixels[(tile_y + y) * atlas_w + tile_x];
+				memcpy(dst_row, src_row, tile_w * sizeof(ase_color_t));
+			}
+		}
 
 		/* release cute resources. */
 		cute_aseprite_free(ase);
 
-		return tileset;
+		return (pti_tileset_t) {
+				.count = count,
+				.width = atlas_w,
+				.height = atlas_h,
+				.tile_w = tile_w,
+				.tile_h = tile_h,
+				.pixels = atlas_pixels,
+		};
 	}
 
 	pti_tilemap_t __create_tilemap(const std::string &path) {
