@@ -1,5 +1,4 @@
 #include "zombie.h"
-#include "../registry.h"
 #include "../../gamestate.h"
 #include "../../bank.h"
 #include "pti/pti.h"
@@ -186,7 +185,7 @@ void Zombie::Update() {
 	_pti_appr(speed.y, kZombieMaxSpeed * force.y, kZombieAcceleration * PTI_DELTA);
 
 	auto collision = false;
-	for (auto *player : GetCollisions<Player>(*this, direction)) {
+	for (auto *player : GetCollisions<Player>(this, direction)) {
 		auto dir = position.DirectionTo(player->position);
 		player->Hurt(dir);
 		collision = true;

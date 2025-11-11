@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base.h"
+#include "batteries/entity.h"
 
 struct Actor : EntityBase {
 	using MoveFunc = void (Actor::*)(void);
@@ -12,13 +12,15 @@ struct Actor : EntityBase {
 
 	bool CanWiggle(void);
 	void Squish(void);
-	void HaltX(void);
-	void HaltY(void);
+	virtual void HaltX(void);
+	virtual void HaltY(void);
 
-	bool IsRidding(const EntityBase *base) const;
+	bool IsRiding(const EntityBase *base) const;
 	bool IsGrounded(void) const;
 
 	bool CollidesWithSolids(const CoordXY<int> &dir) const;
+
+	virtual bool CanBeMoved(void) const { return true; }
 
 protected:
 	bool grounded;

@@ -6,7 +6,6 @@
 #include "batteries/assets.h"
 
 /* actors */
-#include "entity/registry.h"
 #include "entity/actor/bullet.h"
 #include "entity/actor/player.h"
 #include "entity/actor/zombie.h"

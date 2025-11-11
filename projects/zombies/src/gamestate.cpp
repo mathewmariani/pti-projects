@@ -1,9 +1,18 @@
+#include "pti/pti.h"
+#include "bank.h"
 #include "gamestate.h"
 
 #include "entity/actor.h"
 #include "entity/solid.h"
 
 #include <memory>
+#include <vector>
+
+#include "batteries/assets.h"
+#include "batteries/helper.h"
+
+#define XPOS(x) (x * kTileSize)
+#define YPOS(y) (y * kTileSize)
 
 static auto _gameState = std::make_unique<GameState_t>();
 
@@ -12,29 +21,22 @@ GameState_t &GetGameState() {
 }
 
 void GameStateInit() {
-	ResetAllEntities();
+	_gameState->Entities.Clear();
 }
 
 void GameStateReset() {
-	ResetAllEntities();
+	_gameState->Entities.Clear();
 	_gameState->PlayerIsDead = false;
 	_gameState->ResetTimer = 0.0f;
 }
 
 template<typename T>
 void UpdateEntitiesOfType() {
-	for (auto &e : GetGameState().Entities) {
-		// clang-format off
-		std::visit([&](auto &obj) {
-			using U = std::decay_t<decltype(obj)>;
-			if constexpr (std::is_base_of_v<T, U>) {
-				obj.timer += PTI_DELTA;
-				obj.Update();
-				obj.Physics();
-			}
-		}, e);
-		// clang-format on
-	}
+	_gameState->Entities.ForEach<T>([](T *e) {
+		e->timer += PTI_DELTA;
+		e->Update();
+		e->Physics();
+	});
 }
 
 void GameStateTick() {
@@ -42,32 +44,59 @@ void GameStateTick() {
 	UpdateEntitiesOfType<Actor>();
 }
 
-#include "pti/pti.h"
-#include <random>
-#include <vector>
-#include <algorithm>
-#include "bank.h"
+void RenderAllEntities() {
+	_gameState->Entities.ForEach<EntityBase>([](EntityBase *e) {
+		e->Render();
+	});
+}
 
-struct Rect {
-	int x;
-	int y;
-	int w;
-	int h;
-};
+void RemoveEntity(EntityBase *entity) {
+	if (entity) {
+		_gameState->Entities.RemoveAt(entity->id);
+	}
+}
 
-int RandInt(int a, int b) {
-	if (a > b) std::swap(a, b);
-	static thread_local std::mt19937 gen(std::random_device{}());
-	std::uniform_int_distribution<int> dist(a, b);
-	return dist(gen);
+void ChangeLevels(void) {
+	// we reload the assets because we alter the RAM when we load level.
+	batteries::reload();
+
+	_gameState->Entities.Clear();
+	_gameState->PlayerIsDead = false;
+	_gameState->ResetTimer = 0.0f;
+
+	auto &levels = _gameState->levels;
+	auto next = -1;
+	do {
+		next = RandomRange(0, levels.size() - 1);
+	} while (next == _gameState->CurrentLevelIndex);
+
+	pti_set_tilemap(levels[next]);
+
+	int i, j, t;
+	for (i = 0; i < EN_ROOM_COLS; i++) {
+		for (j = 0; j < EN_ROOM_ROWS; j++) {
+			t = pti_mget(i, j);
+			switch (t) {
+				case 48: {
+					if (auto *e = CreateEntity<Player>(); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+				} break;
+			}
+		}
+	}
 }
 
 #include <algorithm>
+#include "batteries/helper.h"
 
 constexpr int kMinSpawnDist = 2;// in tiles
 constexpr int kMaxSpawnDist = 4;// in tiles
 
-static inline int TileFromPixel(int px) { return px / kTileSize; }
+static inline int TileFromPixel(int px) {
+	return px / kTileSize;
+}
 
 CoordXY<int> RandomOutsideCamera() {
 	int camera_x_px, camera_y_px;
@@ -90,15 +119,15 @@ CoordXY<int> RandomOutsideCamera() {
 					BOTTOM,
 					LEFT,
 					RIGHT };
-		Side side = static_cast<Side>(RandInt(0, 3));
+		Side side = static_cast<Side>(RandomRange(0, 3));
 
 		switch (side) {
 			case TOP: {
 				int maxY = cam_top - kMinSpawnDist;
 				int minY = std::max(world_top, cam_top - kMaxSpawnDist);
 				if (minY <= maxY) {
-					int x = RandInt(world_left, world_right);
-					int y = RandInt(minY, maxY);
+					int x = RandomRange(world_left, world_right);
+					int y = RandomRange(minY, maxY);
 					pt_tile.x = x;
 					pt_tile.y = y;
 				}
@@ -109,8 +138,8 @@ CoordXY<int> RandomOutsideCamera() {
 				int minY = cam_bottom + kMinSpawnDist;
 				int maxY = std::min(world_bottom, cam_bottom + kMaxSpawnDist);
 				if (minY <= maxY) {
-					int x = RandInt(world_left, world_right);
-					int y = RandInt(minY, maxY);
+					int x = RandomRange(world_left, world_right);
+					int y = RandomRange(minY, maxY);
 					pt_tile.x = x;
 					pt_tile.y = y;
 				}
@@ -121,8 +150,8 @@ CoordXY<int> RandomOutsideCamera() {
 				int maxX = cam_left - kMinSpawnDist;
 				int minX = std::max(world_left, cam_left - kMaxSpawnDist);
 				if (minX <= maxX) {
-					int x = RandInt(minX, maxX);
-					int y = RandInt(world_top, world_bottom);
+					int x = RandomRange(minX, maxX);
+					int y = RandomRange(world_top, world_bottom);
 					pt_tile.x = x;
 					pt_tile.y = y;
 				}
@@ -133,8 +162,8 @@ CoordXY<int> RandomOutsideCamera() {
 				int minX = cam_right + kMinSpawnDist;
 				int maxX = std::min(world_right, cam_right + kMaxSpawnDist);
 				if (minX <= maxX) {
-					int x = RandInt(minX, maxX);
-					int y = RandInt(world_top, world_bottom);
+					int x = RandomRange(minX, maxX);
+					int y = RandomRange(world_top, world_bottom);
 					pt_tile.x = x;
 					pt_tile.y = y;
 				}

@@ -1,9 +1,8 @@
 #include "player.h"
-#include "../registry.h"
+#include "bullet.h"
 #include "../../gamestate.h"
 #include "../../bank.h"
 #include "pti/pti.h"
-#include "bullet.h"
 
 constexpr float kPlayerMaxSpeed = 0.8f;
 constexpr float kPlayerAcceleration = 5.0f;
@@ -69,7 +68,7 @@ void Player::Update() {
 	}
 
 	// collect coins
-	for (auto *coin : GetCollisions<Coin>(*this, direction)) {
+	for (auto *coin : GetCollisions<Coin>(this, direction)) {
 		RemoveEntity(coin);
 		GetGameState().Coins++;
 	}

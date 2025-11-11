@@ -7,7 +7,6 @@ set(ZOMBIES_HEADERS
 
     # lib
     src/entity/actor.h
-    src/entity/base.h
     src/entity/solid.h
 
     # actors
@@ -15,9 +14,7 @@ set(ZOMBIES_HEADERS
     src/entity/actor/coin.h
     src/entity/actor/effect.h
     src/entity/actor/player.h
-    src/entity/actor/zombie.h
-
-    src/entity/registry.h)
+    src/entity/actor/zombie.h)
 
 set(ZOMBIES_SRC
     src/bank.cpp
@@ -25,7 +22,6 @@ set(ZOMBIES_SRC
 
     # lib
     src/entity/actor.cpp
-    src/entity/base.cpp
     src/entity/solid.cpp
 
     # actors
@@ -33,9 +29,7 @@ set(ZOMBIES_SRC
     src/entity/actor/coin.cpp
     src/entity/actor/effect.cpp
     src/entity/actor/player.cpp
-    src/entity/actor/zombie.cpp
-
-    src/entity/registry.cpp)
+    src/entity/actor/zombie.cpp)
 
 set(ZOMBIES_FILES
     src/main.cpp

@@ -1,8 +1,7 @@
-#include "pti/pti.h"
 #include "coin.h"
-#include "../registry.h"
 #include "../../gamestate.h"
 #include "../../bank.h"
+#include "pti/pti.h"
 
 constexpr int kCoinOffsetX = 4;
 constexpr int kCoinOffsetY = 4;
