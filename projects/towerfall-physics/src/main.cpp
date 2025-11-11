@@ -11,7 +11,7 @@
 /* actors */
 #include "entity/actor/player.h"
 
-#include "entity/registry.h"
+#include "batteries/registry.h"
 
 #include <math.h>
 
@@ -25,8 +25,8 @@ namespace {
 	float resetTimer = 0.0f;
 }// namespace
 
-#define XPOS(x) (x * EN_TILE_SIZE)
-#define YPOS(y) (y * EN_TILE_SIZE)
+#define XPOS(x) (x * kTileSize)
+#define YPOS(y) (y * kTileSize)
 
 static void load(void) {
 	GameStateInit();
@@ -103,14 +103,6 @@ static void frame(void) {
 	GameStateTick();
 
 	pti_cls(0xffef7d57);
-
-	/* adjust camera */
-	int cam_x, cam_y;
-	pti_get_camera(&cam_x, &cam_y);
-
-	int cx = _pti_max(0, _pti_min(EN_ROOM_WIDTH - width, cam_x));
-	int cy = _pti_max(0, _pti_min(EN_ROOM_HEIGHT - height, cam_y));
-	pti_camera(cx, cy);
 
 	pti_map(0, 0);
 	RenderAllEntities();

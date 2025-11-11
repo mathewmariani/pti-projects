@@ -1,26 +1,37 @@
 #pragma once
 
-#include "entity/registry.h"
-#include "entity/actor/player.h"
-#include "entity/solid/platform.h"
-
 #include <variant>
 #include <vector>
 
-constexpr int EN_TILE_SIZE = 8;
-constexpr int EN_ROOM_WIDTH = 176;
-constexpr int EN_ROOM_HEIGHT = 128;
-constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / EN_TILE_SIZE;
-constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / EN_TILE_SIZE;
+#include "batteries/registry.h"
 
+// actors
+#include "entity/actor/player.h"
+
+// solids
+#include "entity/solid/platform.h"
+
+typedef struct pti_tilemap_t pti_tilemap_t;
+
+constexpr int kMaxEntities = 256;
+
+constexpr int kScreenWidth = 320;
+constexpr int kScreenHeight = 224;
+constexpr int kTileSize = 8;
+constexpr int EN_ROOM_WIDTH = (kScreenWidth);
+constexpr int EN_ROOM_HEIGHT = (kScreenHeight);
+constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / kTileSize;
+constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
+#define PTI_DELTA (1.0 / 30.0)
 constexpr float kDeathResetTimer = 2.0f;
 
-using EntityVariant = std::variant<std::monostate, Player, Platform>;
-
 struct GameState_t {
-	EntityVariant Entities[kMaxEntities]{};
+	EntityManager<kMaxEntities, Player, Platform> Entities;
 	uint8_t Coins = 0;
 	uint8_t Deaths = 0;
+	int CurrentLevelIndex = -1;
+
+	std::vector<pti_tilemap_t *> levels;
 
 	bool PlayerIsDead = false;
 	float ResetTimer = 0.0f;
@@ -32,25 +43,31 @@ void GameStateInit();
 void GameStateReset();
 void GameStateTick();
 
+void ChangeLevels();
+
+void RenderAllEntities();
+
+template<typename T, typename... Args>
+EntityBase *CreateEntity(Args &&...args) {
+	return GetGameState().Entities.Create<T>(std::forward<Args>(args)...);
+}
+
+void RemoveEntity(EntityBase *entity);
+
 template<typename T>
 std::vector<T *> GetEntitiesOfType() {
-	const auto &entities = GetGameState().Entities;
+	return GetGameState().Entities.GetList<T>();
+}
+
+template<typename T>
+std::vector<T *> GetCollisions(EntityBase *subject, const CoordXY<int> &dir) {
 	std::vector<T *> result;
 	result.reserve(kMaxEntities);
 
-	for (auto &e : GetGameState().Entities) {
-		if (std::holds_alternative<std::monostate>(e)) {
-			continue;
+	GetGameState().Entities.ForEach<T>([&](T *other) {
+		if (subject->Overlaps(other, dir)) {
+			result.push_back(other);
 		}
-		// clang-format off
-		std::visit([&](auto& obj) {
-			using U = std::decay_t<decltype(obj)>;
-			if constexpr (std::is_base_of_v<T, U>) {
-				result.push_back(&obj);
-			}
-		}, e);
-		// clang-format on
-	}
-
+	});
 	return result;
 }

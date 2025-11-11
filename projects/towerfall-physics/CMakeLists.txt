@@ -6,32 +6,26 @@ set(PLATFORMER_HEADERS
     src/gamestate.h
 
     src/entity/actor.h
-    src/entity/base.h
     src/entity/solid.h
 
     # solids
     src/entity/solid/platform.h
 
     # actors
-    src/entity/actor/player.h
-
-    src/entity/registry.h)
+    src/entity/actor/player.h)
 
 set(PLATFORMER_SRC
     src/bank.cpp
     src/gamestate.cpp
 
     src/entity/actor.cpp
-    src/entity/base.cpp
     src/entity/solid.cpp
 
     # solids
     src/entity/solid/platform.cpp
 
     # actors
-    src/entity/actor/player.cpp
-
-    src/entity/registry.cpp)
+    src/entity/actor/player.cpp)
 
 set(PLATFORMER_FILES
     src/main.cpp
