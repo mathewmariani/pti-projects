@@ -1,10 +1,7 @@
-#include "solid.h"
-#include "registry.h"
-#include "../gamestate.h"
-#include "../bank.h"
 #include "pti/pti.h"
-
-#include <cmath>
+#include "solid.h"
+#include "actor.h"
+#include "../gamestate.h"
 
 void Actor::Physics() {
 	MoveX(speed.x, &Actor::HaltX);
@@ -18,7 +15,9 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 	remainder.x += amount;
 	int move = std::round(remainder.x);
 	if (move != 0) {
-		const int dx = _pti_sign(move);
+		direction.x = _pti_sign(move);
+		remainder.x -= move;
+		const int dx = direction.x;
 		const CoordXY<int> dir{dx, 0};
 		while (move != 0) {
 			if (!PlaceMeeting(dir) && !CollidesWithSolids(dir)) {
@@ -31,7 +30,6 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 				break;
 			}
 		}
-		remainder.x = 0;
 	}
 }
 
@@ -39,7 +37,9 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 	remainder.y += amount;
 	int move = std::round(remainder.y);
 	if (move != 0) {
-		const int dy = _pti_sign(move);
+		direction.y = _pti_sign(move);
+		remainder.y -= move;
+		const int dy = direction.y;
 		const CoordXY<int> dir{0, dy};
 		while (move != 0) {
 			if (!PlaceMeeting(dir) && !CollidesWithSolids(dir)) {
@@ -52,7 +52,6 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 				break;
 			}
 		}
-		remainder.y = 0;
 	}
 }
 
@@ -83,29 +82,23 @@ void Actor::HaltY(void) {
 	speed.y = 0;
 }
 
-bool Actor::IsRidding(const EntityBase *base) const {
-	return Overlaps(base, {0, 0}) || Overlaps(base, {0, 1});
+bool Actor::IsRiding(const EntityBase *base) const {
+	if (!CanBeMoved()) { return false; }
+	return Overlaps(base, CoordXY<int>::Zero) || Overlaps(base, CoordXY<int>::Up);
 }
 
 bool Actor::IsGrounded(void) const {
-	const CoordXY<int> dir{0, 1};
+	const auto dir = CoordXY<int>::Up;
 	return PlaceMeeting(dir) || CollidesWithSolids(dir);
 }
 
 bool Actor::CollidesWithSolids(const CoordXY<int> &dir) const {
-	for (auto &e : GetGameState().Entities) {
-		// clang-format off
-		auto collided = std::visit([&](auto &obj) {
-			using U = std::decay_t<decltype(obj)>;
-			if constexpr (std::is_base_of_v<Solid, U>) {
-				return this->Overlaps(&obj, dir);
-			}
-      return false;
-		}, e);
-		// clang-format on
-		if (collided) {
-			return true;
+	auto collided = false;
+	GetGameState().Entities.ForEach<Solid>([&](Solid *solid) {
+		if (this->Overlaps(solid, dir)) {
+			collided = true;
+			return;
 		}
-	}
-	return false;
+	});
+	return collided;
 }

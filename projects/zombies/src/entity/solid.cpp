@@ -1,10 +1,9 @@
 #include "pti/pti.h"
 #include "solid.h"
 #include "actor.h"
-#include "registry.h"
 #include "../gamestate.h"
 
-#include <cmath>
+#include <unordered_set>
 
 void Solid::Physics(void) {
 	MoveX(speed.x);
@@ -13,42 +12,62 @@ void Solid::Physics(void) {
 
 void Solid::MoveX(float amount) {
 	remainder.x += amount;
-	int move = std::round(remainder.x);
-	if (move != 0) {
-		auto actors = GetEntitiesOfType<Actor>();
-		int dx = _pti_sign(move);
-		while (move != 0) {
-			for (auto *actor : actors) {
-				if (Overlaps(actor, {dx, 0})) {
-					actor->MoveX(dx, &Actor::Squish);
-				} else if (actor->IsRidding(this)) {
-					actor->MoveX(dx, nullptr);
-				}
-			}
-			position.x += dx;
-			move -= dx;
+	int move = static_cast<int>(remainder.x);
+	if (move == 0) {
+		return;
+	}
+
+	const auto actors = GetEntitiesOfType<Actor>();
+
+	remainder.x -= move;
+	int dx = _pti_sign(move);
+
+	std::unordered_set<Actor *> riding;
+	for (auto *actor : actors) {
+		if (actor->IsRiding(this)) {
+			riding.insert(actor);
 		}
-		remainder.x = 0;
+	}
+
+	while (move != 0) {
+		position.x += dx;
+		move -= dx;
+
+		for (auto *actor : actors) {
+			if (riding.contains(actor)) {
+				actor->MoveX(dx, &Actor::Squish);
+			}
+		}
 	}
 }
 
 void Solid::MoveY(float amount) {
 	remainder.y += amount;
-	int move = std::round(remainder.y);
-	if (move != 0) {
-		auto actors = GetEntitiesOfType<Actor>();
-		int dy = _pti_sign(move);
-		while (move != 0) {
-			for (auto *actor : actors) {
-				if (Overlaps(actor, {0, dy})) {
-					actor->MoveY(dy, &Actor::Squish);
-				} else if (actor->IsRidding(this)) {
-					actor->MoveY(dy, nullptr);
-				}
-			}
-			position.y += dy;
-			move -= dy;
+	int move = static_cast<int>(remainder.y);
+	if (move == 0) {
+		return;
+	}
+
+	auto actors = GetEntitiesOfType<Actor>();
+
+	remainder.y -= move;
+	int dy = _pti_sign(move);
+
+	std::unordered_set<Actor *> riding;
+	for (auto *actor : actors) {
+		if (actor->IsRiding(this)) {
+			riding.insert(actor);
 		}
-		remainder.y = 0;
+	}
+
+	while (move != 0) {
+		position.y += dy;
+		move -= dy;
+
+		for (auto *actor : actors) {
+			if (riding.contains(actor)) {
+				actor->MoveY(dy, &Actor::Squish);
+			}
+		}
 	}
 }

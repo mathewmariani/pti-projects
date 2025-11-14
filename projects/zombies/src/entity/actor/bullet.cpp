@@ -1,5 +1,4 @@
 #include "bullet.h"
-#include "../registry.h"
 #include "../../gamestate.h"
 #include "../../bank.h"
 #include "pti/pti.h"
@@ -31,7 +30,7 @@ void Bullet::Update() {
 	speed = direction * kBulletMaxSpeed;
 
 	auto collision = false;
-	for (auto *zombie : GetCollisions<Zombie>(*this, direction)) {
+	for (auto *zombie : GetCollisions<Zombie>(this, direction)) {
 		zombie->Hurt(direction);
 		collision = true;
 	}

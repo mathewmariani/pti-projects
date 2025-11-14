@@ -41,18 +41,9 @@ set(COINRUSH_SRC
     src/entity/solid/platform.cpp
     src/entity/solid/shooter.cpp)
 
-if(CMAKE_SYSTEM_NAME STREQUAL Windows)
-    add_executable(coinrush WIN32 ${COINRUSH_SRC} ${COINRUSH_HEADERS})
-else()
-    add_executable(coinrush src/main.cpp ${COINRUSH_SRC} ${COINRUSH_HEADERS})
-endif()
+set(COINRUSH_FILES
+    src/main.cpp
+    ${COINRUSH_SRC}
+    ${COINRUSH_HEADERS})
 
-target_link_libraries(coinrush PRIVATE batteries)
-target_link_libraries(coinrush PRIVATE cute)
-target_link_libraries(coinrush PRIVATE pti)
-target_link_libraries(coinrush PRIVATE imgui)
-target_link_libraries(coinrush PRIVATE dbgui)
-target_link_libraries(coinrush PRIVATE tracy)
-
-emscripten(coinrush)
-copy_assets(coinrush)
+pti_project(coinrush "${COINRUSH_FILES}")

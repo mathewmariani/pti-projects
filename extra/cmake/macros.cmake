@@ -39,8 +39,6 @@ macro(preload_assets target src_dir)
   )
 endmacro()
 
-
-
 macro(copy_assets target)
   if(IS_EMSCRIPTEN)
     preload_assets(${target} "${CMAKE_CURRENT_SOURCE_DIR}/assets")
@@ -52,9 +50,16 @@ macro(copy_assets target)
   endif()
 endmacro()
 
-
-macro(pti_executable target files)
+macro(pti_project target files)
   add_executable(${target} ${files})
-  target_link_libraries(${target} PRIVATE engine)
+
+  target_link_libraries(${target} PRIVATE batteries)
+  target_link_libraries(${target} PRIVATE cute)
+  target_link_libraries(${target} PRIVATE pti)
+  target_link_libraries(${target} PRIVATE imgui)
+  target_link_libraries(${target} PRIVATE dbgui)
+  target_link_libraries(${target} PRIVATE tracy)
+
   emscripten(${target})
+  copy_assets(${target})
 endmacro()

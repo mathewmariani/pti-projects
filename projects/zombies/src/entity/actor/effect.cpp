@@ -1,8 +1,7 @@
-#include "pti/pti.h"
 #include "effect.h"
-#include "../registry.h"
 #include "../../gamestate.h"
 #include "../../bank.h"
+#include "pti/pti.h"
 
 constexpr int kEffectOffsetX = -4;
 constexpr int kEffectOffsetY = -4;

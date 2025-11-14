@@ -1,9 +1,18 @@
+#include "pti/pti.h"
+#include "bank.h"
 #include "gamestate.h"
 
 #include "entity/actor.h"
 #include "entity/solid.h"
 
 #include <memory>
+#include <vector>
+
+#include "batteries/assets.h"
+#include "batteries/helper.h"
+
+#define XPOS(x) (x * kTileSize)
+#define YPOS(y) (y * kTileSize)
 
 static auto _gameState = std::make_unique<GameState_t>();
 
@@ -12,32 +21,81 @@ GameState_t &GetGameState() {
 }
 
 void GameStateInit() {
-	ResetAllEntities();
+	_gameState->Entities.Clear();
 }
 
 void GameStateReset() {
-	ResetAllEntities();
+	_gameState->Entities.Clear();
 	_gameState->PlayerIsDead = false;
 	_gameState->ResetTimer = 0.0f;
 }
 
 template<typename T>
 void UpdateEntitiesOfType() {
-	for (auto &e : GetGameState().Entities) {
-		// clang-format off
-		std::visit([&](auto &obj) {
-			using U = std::decay_t<decltype(obj)>;
-			if constexpr (std::is_base_of_v<T, U>) {
-				obj.timer += PTI_DELTA;
-				obj.Update();
-				obj.Physics();
-			}
-		}, e);
-		// clang-format on
-	}
+	_gameState->Entities.ForEach<T>([](T *e) {
+		e->timer += PTI_DELTA;
+		e->Update();
+		e->Physics();
+	});
 }
 
 void GameStateTick() {
 	UpdateEntitiesOfType<Solid>();
 	UpdateEntitiesOfType<Actor>();
+}
+
+void RenderAllEntities() {
+	_gameState->Entities.ForEach<EntityBase>([](EntityBase *e) {
+		e->Render();
+	});
+}
+
+void RemoveEntity(EntityBase *entity) {
+	if (entity) {
+		_gameState->Entities.RemoveAt(entity->id);
+	}
+}
+
+void ChangeLevels(void) {
+	// we reload the assets because we alter the RAM when we load level.
+	batteries::reload();
+
+	_gameState->Entities.Clear();
+	_gameState->PlayerIsDead = false;
+	_gameState->ResetTimer = 0.0f;
+
+	auto &levels = _gameState->levels;
+	auto next = -1;
+	do {
+		next = RandomRange(0, levels.size() - 1);
+	} while (next == _gameState->CurrentLevelIndex);
+
+	pti_set_tilemap(levels[next]);
+
+	int i, j, t;
+	for (i = 0; i < EN_ROOM_COLS; i++) {
+		for (j = 0; j < EN_ROOM_ROWS; j++) {
+			t = pti_mget(i, j);
+			switch (t) {
+				case 48: {
+					if (auto *e = CreateEntity<Player>(); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+				} break;
+				case 51: {
+					if (auto *e = CreateEntity<Platform>(Platform::Type::Vertical); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+				} break;
+				case 52: {
+					if (auto *e = CreateEntity<Platform>(Platform::Type::Horizontal); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+				} break;
+			}
+		}
+	}
 }
