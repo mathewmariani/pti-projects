@@ -1,0 +1,40 @@
+---
+const { title, items } = Astro.props;
+---
+
+<section>
+  <h2><b>{title}</b></h2>
+  <div class="row row-cols-1 row-cols-sm-4 g-4">
+    {
+      items.map(({ href, name }) => (
+        <div class="col">
+          <div class="card h-100">
+            <a href={href}>
+              <img
+                src={`/pti-projects/images/${name}.png`}
+                class="card-img-top"
+                alt={name}
+                width={128}
+                height={128}
+              />
+            </a>
+            <div class="card-footer">
+              <small class="text-body-secondary">{name}</small>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .card {
+    width: 128px;
+    height: 128px;
+  }
+
+  .card-img-top {
+    object-fit: contain;
+  }
+</style>

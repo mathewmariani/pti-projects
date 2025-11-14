@@ -1,6 +1,6 @@
 ---
 title: Moire
-src: empty
+src: https://github.com/mathewmariani/pti-projects/blob/main/projects/samples/moire.c
 dimensions:
   width: 128
   height: 128

@@ -1,6 +1,6 @@
 ---
 title: Mosaic
-src: empty
+src: https://github.com/mathewmariani/pti-projects/blob/main/projects/samples/mosaic.c
 dimensions:
   width: 128
   height: 128

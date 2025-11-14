@@ -1,14 +1,15 @@
 ---
 import Meta from "@/components/Meta.astro";
 import Footer from "@/components/Footer.astro";
+import Showcase from "@/components/Showcase.astro";
 
-const projects = [
+const demos = [
   { href: "projects/platformer/index.html", name: "platformer" },
   { href: "projects/towerfall-physics/index.html", name: "towerfall-physics" },
   { href: "projects/zombies/index.html", name: "zombies" },
   { href: "projects/coinrush/index.html", name: "coinrush" },
-
-  // samples
+];
+const samples = [
   { href: "projects/samples/moire/index.html", name: "moire" },
   { href: "projects/samples/mosaic/index.html", name: "mosaic" },
   { href: "projects/samples/rosecurve/index.html", name: "rosecurve" },
@@ -22,49 +23,28 @@ const projects = [
 
   <body class="container" id="top">
     <main>
-      <h1 class="display-2"><b>pti showcase</b></h1>
-      <div class="highlight"></div>
+      <section>
+        <h1 class="display-2"><b>pti.h</b></h1>
+        <div class="highlight"></div>
 
-      <p class="lead">
-        pti is an *small* framework you can use to make 2D games in C/C++.
-      </p>
+        <p class="lead">
+          Hi there 👋 <code>pti.h</code> is a *petit* framework you can use to make
+          retro 2D games with chunky pixels in C/C++. It's free, open-source, and
+          works on Windows, macOS, and on the web.
+        </p>
+        <p>
+          The source can be found on <a
+            href="https://github.com/mathewmariani/pti">GitHub</a
+          >.
+        </p>
+      </section>
 
-      <!-- projects -->
-      <section class="row row-cols-1 row-cols-sm-4 g-4">
-        {
-          projects.map(({ href, name }) => (
-            <div class="col">
-              <div class="card h-100">
-                <a href={href}>
-                  <img
-                    src={`/pti-projects/images/${name}.png`}
-                    class="card-img-top"
-                    alt={name}
-                    width={128}
-                    height={128}
-                  />
-                </a>
-                <div class="card-footer">
-                  <small class="text-body-secondary">{name}</small>
-                </div>
-              </div>
-            </div>
-          ))
-        }
+      <section>
+        <Showcase title="Demos" items={demos} />
+        <Showcase title="Samples" items={samples} />
       </section>
     </main>
 
     <Footer />
   </body>
 </html>
-
-<style>
-  .card {
-    width: 128px;
-    height: 128px;
-  }
-
-  .card-img-top {
-    object-fit: contain;
-  }
-</style>
