@@ -68,33 +68,31 @@ void Player::HandleVerticalMovement() {
 	static int hang_time = 0;
 
 	float grav = kPlayerPhysicsVerticalGravFall;
+
 	if (!grounded && coyoteTime > 0.0f) {
-		grav *= 0.5f;// slow fall when walking off ledge
+		grav *= 0.5f;
 	}
 
-	if (!grounded && state == PlayerState::Jump) {
+	bool in_jump = (!grounded && state == PlayerState::Jump);
+	if (in_jump) {
 		if (speed.y <= -0.5f) {
 			hang_time = 3;
 			speed.y += grav;
+		} else if (hang_time > 0) {
+			--hang_time;
+			speed.y = 0;
 		} else {
-			if (hang_time > 0) {
-				--hang_time;
-				speed.y = 0;
-			} else {
-				speed.y += grav;
-			}
-		}
-	} else {
-		if (!grounded) {
 			speed.y += grav;
 		}
+	} else if (!grounded) {
+		speed.y += grav;
+	} else {
+		speed.y = 0.0f;
 	}
 
-	// Limit vertical speed
-	if (speed.y > kPlayerPhysicsVerticalMax) {
-		speed.y = kPlayerPhysicsVerticalMax;
-	}
+	speed.y = std::min(speed.y, kPlayerPhysicsVerticalMax);
 }
+
 
 void Player::HandleJump() {
 	bool kJumpPressed = pti_pressed(PTI_UP);

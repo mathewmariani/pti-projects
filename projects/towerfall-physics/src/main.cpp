@@ -123,7 +123,7 @@ static void frame(void) {
 
 #if defined(PTI_DEBUG)
 void debug(void) {
-	ImGui::Begin("Zombies", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::Begin("Towerfall Physics", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
 	const auto &gameState = GetGameState();
 

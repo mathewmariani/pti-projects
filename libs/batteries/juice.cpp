@@ -21,7 +21,7 @@ void Shake(void) {
 }
 
 void DoShake(void) {
-	// generate random offsets between -16 and +16
+	// generate random offsets between -kShakeLowerBound and +kShakeLowerBound
 	float shakex = kShakeLowerBound - rnd(kShakeOffset);
 	float shakey = kShakeLowerBound - rnd(kShakeOffset);
 
