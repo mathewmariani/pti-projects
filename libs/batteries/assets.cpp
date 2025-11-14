@@ -78,11 +78,11 @@ namespace batteries {
 		cute_aseprite_free(ase);
 
 		return (pti_tileset_t) {
-				.count = count,
-				.width = atlas_w,
-				.height = atlas_h,
-				.tile_w = tile_w,
-				.tile_h = tile_h,
+				.count = (uint32_t) count,
+				.width = (uint16_t) atlas_w,
+				.height = (uint16_t) atlas_h,
+				.tile_w = (uint16_t) tile_w,
+				.tile_h = (uint16_t) tile_h,
 				.pixels = atlas_pixels,
 		};
 	}
