@@ -111,7 +111,7 @@ static void frame(void) {
 
 #if defined(PTI_DEBUG)
 void debug(void) {
-	ImGui::Begin("CoinRush", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::Begin("Zombies", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
 	const auto &gameState = GetGameState();
 
@@ -143,7 +143,6 @@ void debug(void) {
 
 	if (ImGui::CollapsingHeader("entities", ImGuiTreeNodeFlags_DefaultOpen)) {
 		auto players = GetEntitiesOfType<Player>();
-
 		if (players.size() > 0) {
 			auto *player = players[0];
 			ImGui::Text("position: (%d, %d)", player->position.x, player->position.y);
