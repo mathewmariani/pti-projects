@@ -7,7 +7,6 @@
 
 constexpr float kRockMaxSpeed = 3.0f;
 constexpr float kRockAcceleration = 20.0f;
-constexpr float kRockFriction = 1.0f;
 constexpr float kRockPhysicsVerticalMax = 6.0f;
 constexpr float kRockPhysicsVerticalGrav = 0.24f;
 constexpr float kRockPhysicsVerticalGravFall = 0.5f;
@@ -34,9 +33,10 @@ constexpr int kRockFrameMod = 2;
 constexpr float kRockShootingKnockback = 0.85f;
 constexpr float kRockHurtKnockback = 4.0f;
 
-constexpr float kRockThrowSpeed = 4.7397f;// initial speed multiplier
-constexpr float kRockGravity = 1.6f;      // units per frame²
-constexpr float kRockVerticalMax = 15.0f; // terminal velocity
+constexpr float kRockFriction = 5.0f;
+constexpr float kRockThrowSpeed = 4.7397f * 2.0f;// initial speed multiplier
+constexpr float kRockGravity = 10.0f;            // units per frame²
+constexpr float kRockVerticalMax = 15.0f;        // terminal velocity
 
 Rock::Rock() {
 	bx = kRockHitboxOffsetX;
@@ -78,7 +78,7 @@ void Rock::HandleHorizontalMovement() {
 
 void Rock::HandleVerticalMovement() {
 	if (!grounded) {
-		speed.y += kRockGravity * PTI_DELTA;// gravity pulls down
+		speed.y += kRockGravity * PTI_DELTA;
 		if (speed.y > kRockVerticalMax) {
 			speed.y = kRockVerticalMax;
 		}

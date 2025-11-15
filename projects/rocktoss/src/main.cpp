@@ -128,6 +128,8 @@ static void debug(void) {
 			auto *player = players[0];
 			ImGui::Text("position: (%d, %d)", player->position.x, player->position.y);
 			ImGui::Text("speed: (%.2f, %.2f)", player->speed.x, player->speed.y);
+			ImGui::Text("remainder: (%.2f, %.2f)", player->remainder.x, player->remainder.y);
+			ImGui::Text("direction: (%d, %d)", player->direction.x, player->direction.y);
 			ImGui::Text("grounded: (%s)", player->IsGrounded() ? "true" : "false");
 
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 6));
