@@ -6,6 +6,7 @@
 
 // actors
 #include "entity/actor/player.h"
+#include "entity/actor/rock.h"
 
 // scenes
 #include "scene/game.h"
@@ -27,7 +28,7 @@ constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 #define PTI_DELTA (1.0 / 30.0)
 constexpr float kDeathResetTimer = 2.0f;
 
-using BasicScene = batteries::Scene<256, Player>;
+using BasicScene = batteries::Scene<256, Player, Rock>;
 
 enum class SceneType {
 	Menu = 0,
