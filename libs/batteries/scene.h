@@ -4,6 +4,7 @@
 #include "registry.h"
 
 #include <vector>
+<<<<<<< HEAD
 #include "entity.h"
 
 struct Actor;
@@ -44,12 +45,30 @@ namespace batteries {
 			}
 		}
 
+=======
+
+namespace batteries {
+
+	template<size_t Max, typename... Types>
+	struct Scene {
+		void Reset() {
+			entities.Clear();
+		}
+
+>>>>>>> d203c5a (Recovered project after git object corruption)
 		template<typename T, typename... Args>
 		EntityBase *CreateEntity(Args &&...args) {
 			return entities.template Create<T>(std::forward<Args>(args)...);
 		}
 
+<<<<<<< HEAD
 		void RemoveEntity(EntityBase *entity) override {
+=======
+		sadasdasd
+
+				void
+				RemoveEntity(EntityBase *entity) {
+>>>>>>> d203c5a (Recovered project after git object corruption)
 			if (entity) {
 				entities.RemoveAt(entity->id);
 			}
@@ -89,8 +108,19 @@ namespace batteries {
 			});
 		}
 
+<<<<<<< HEAD
+=======
+		virtual void Init(void) {};
+		virtual void Update(void) {};
+		virtual void Render(void) {};
+
+>>>>>>> d203c5a (Recovered project after git object corruption)
 	private:
 		EntityManager<Max, Types...> entities;
 	};
 
+<<<<<<< HEAD
 }// namespace batteries
+=======
+}// namespace batteries
+>>>>>>> d203c5a (Recovered project after git object corruption)
