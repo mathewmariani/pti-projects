@@ -30,6 +30,7 @@ constexpr int kPlayerFrameMod = 2;
 
 constexpr float kPlayerShootingKnockback = 0.85f;
 constexpr float kPlayerHurtKnockback = 4.0f;
+constexpr CoordXY<float> kPlayerThrowDirection = {0.60f, -0.40f};
 
 Player::Player() {
 	bx = kPlayerHitboxOffsetX;
@@ -137,7 +138,7 @@ void Player::HandlePickup() {
 	bool kPickupPressed = pti_pressed(PTI_A);
 
 	if (held && kPickupPressed) {
-		const auto dir = CoordXY<float>{0.5f, -0.5f} * direction;
+		const auto dir = kPlayerThrowDirection * CoordXY<int>{direction.x, 1};
 		held->Throw(dir);
 		held = nullptr;
 		return;

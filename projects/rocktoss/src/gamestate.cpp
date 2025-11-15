@@ -41,7 +41,7 @@ void GameStateReset() {
 }
 
 void GameStateTick() {
-	_gameState->CurrentScene->UpdateEntitiesOfType<Actor>();
+	_gameState->CurrentScene->Update();
 	_gameState->CurrentScene->Render();
 }
 

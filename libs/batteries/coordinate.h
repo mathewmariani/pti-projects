@@ -20,10 +20,10 @@ struct CoordXY {
 		return {Up, Left, Down, Right};
 	}
 
-	CoordXY() : x(0), y(0) {}
-	CoordXY(T x_, T y_) : x(x_), y(y_) {}
-	CoordXY(const CoordXY &) = default;
-	CoordXY(CoordXY &&) = default;
+	constexpr CoordXY() : x(0), y(0) {}
+	constexpr CoordXY(T x_, T y_) : x(x_), y(y_) {}
+	constexpr CoordXY(const CoordXY &) = default;
+	constexpr CoordXY(CoordXY &&) = default;
 
 	CoordXY<T> operator*(const T rhs) const {
 		return {x * rhs, y * rhs};

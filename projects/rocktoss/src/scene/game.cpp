@@ -39,7 +39,7 @@ void GameScene::Init(void) {
 }
 
 void GameScene::Update(void) {
-	UpdateEntitiesOfType<EntityBase>();
+	UpdateEntitiesOfType<Actor>();
 }
 
 void GameScene::Render(void) {
