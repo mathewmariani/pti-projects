@@ -62,6 +62,7 @@ namespace batteries {
 		}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		void RemoveEntity(EntityBase *entity) override {
 =======
 		sadasdasd
@@ -69,6 +70,9 @@ namespace batteries {
 				void
 				RemoveEntity(EntityBase *entity) {
 >>>>>>> d203c5a (Recovered project after git object corruption)
+=======
+		void RemoveEntity(EntityBase *entity) {
+>>>>>>> ce55dfa (Removed uneeded files)
 			if (entity) {
 				entities.RemoveAt(entity->id);
 			}
