@@ -18,10 +18,7 @@ namespace batteries {
 			return entities.template Create<T>(std::forward<Args>(args)...);
 		}
 
-		sadasdasd
-
-				void
-				RemoveEntity(EntityBase *entity) {
+		void RemoveEntity(EntityBase *entity) {
 			if (entity) {
 				entities.RemoveAt(entity->id);
 			}
