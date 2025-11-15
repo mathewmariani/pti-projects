@@ -27,6 +27,12 @@ void GameScene::Init(void) {
 						pti_mset(i, j, 0);
 					}
 				} break;
+				case 49: {
+					if (auto *e = CreateEntity<Rock>(); e) {
+						e->SetLocation({XPOS(i), YPOS(j)});
+						pti_mset(i, j, 0);
+					}
+				} break;
 			}
 		}
 	}
