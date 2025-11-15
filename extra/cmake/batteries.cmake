@@ -11,7 +11,8 @@ if(BUILD_WITH_BATTERIES)
     ${BATTERIES_DIR}/entity.cpp
     ${BATTERIES_DIR}/juice.cpp
     ${BATTERIES_DIR}/helper.h
-    ${BATTERIES_DIR}/registry.h)
+    ${BATTERIES_DIR}/registry.h
+    ${BATTERIES_DIR}/scene.h)
 
   add_library(batteries STATIC ${BATTERIES_SRC})
 
