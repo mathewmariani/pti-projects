@@ -1,5 +1,6 @@
 add_subdirectory(coinrush)
 add_subdirectory(platformer)
+add_subdirectory(rocktoss)
 add_subdirectory(samples)
 add_subdirectory(towerfall-physics)
 add_subdirectory(zombies)
