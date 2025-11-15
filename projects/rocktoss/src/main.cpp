@@ -29,6 +29,7 @@ static void init(void) {
 	tileset = batteries::tileset("assets/tilemap.ase");
 	tilemap = batteries::tilemap("assets/tilemap.ase");
 	bitmap_player = batteries::sprite("assets/dog.ase");
+	bitmap_bullet = batteries::sprite("assets/bullet.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
 
 	pti_set_tilemap(tilemap);
@@ -47,13 +48,6 @@ static void cleanup(void) {
 }
 
 static void frame(void) {
-	auto &gameState = GetGameState();
-	if (pti_down(PTI_DBG)) {
-		GameStateReset();
-		load();
-		return;
-	}
-
 	GameStateTick();
 	DoShake();
 
@@ -103,10 +97,6 @@ static void debug(void) {
 
 		ImGui::Checkbox("overlay", &show_overlays);
 
-		if (ImGui::Button("reload level")) {
-			std::printf("reload level\n");
-		}
-
 		static SceneType selected = SceneType::Menu;
 		if (ImGui::BeginCombo("##SceneCombo", SceneTypeToString(selected))) {
 			for (SceneType t : {SceneType::Menu, SceneType::Game}) {
@@ -124,6 +114,12 @@ static void debug(void) {
 		if (ImGui::Button("Load")) {
 			GetGameState().SwitchScenes(selected);
 		}
+		ImGui::SameLine();
+		if (ImGui::Button("Reset")) {
+			batteries::reload();
+			GetGameState().CurrentScene->Reset();
+			GetGameState().CurrentScene->Init();
+		}
 	}
 
 	if (ImGui::CollapsingHeader("entities", ImGuiTreeNodeFlags_DefaultOpen)) {
@@ -136,11 +132,11 @@ static void debug(void) {
 
 			ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(2, 6));
 			if (ImGui::Button("hurt")) {
-				std::printf("hurt\n");
+				player->Hurt(CoordXY<float>::Zero);
 			}
 			ImGui::SameLine();
 			if (ImGui::Button("kill")) {
-				std::printf("kill\n");
+				player->Kill();
 			}
 			ImGui::PopStyleVar();
 		} else {

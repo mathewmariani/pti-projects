@@ -41,8 +41,10 @@ Player::Player() {
 
 void Player::Hurt(const CoordXY<float> &direction) {
 	speed = direction * kPlayerHurtKnockback;
-	RemoveEntity(this);
+}
 
+void Player::Kill() {
+	RemoveEntity(this);
 	Shake();
 }
 
@@ -50,12 +52,7 @@ void Player::Update() {
 	HandleHorizontalMovement();
 	HandleVerticalMovement();
 	HandleJump();
-
-	// check for spikes
-	if (PlaceMeeting(direction, 42) || PlaceMeeting(direction, 43) || PlaceMeeting(direction, 53) || PlaceMeeting(direction, 54)) {
-		Hurt(CoordXY<float>::Zero);
-		return;
-	}
+	HandlePickup();
 }
 
 void Player::Render() {
@@ -132,6 +129,25 @@ void Player::HandleJump() {
 	if (state == Player::State::Jump && speed.y < -(kPlayerPhysicsJumpStrength * 0.5f)) {
 		if (kJumpReleased) {
 			speed.y = -(kPlayerPhysicsJumpStrength * 0.5f);
+		}
+	}
+}
+
+void Player::HandlePickup() {
+	bool kPickupPressed = pti_pressed(PTI_A);
+
+	if (held && kPickupPressed) {
+		const auto dir = CoordXY<float>{0.5f, -0.5f} * direction;
+		held->Throw(dir);
+		held = nullptr;
+		return;
+	}
+
+	if (kPickupPressed && !held) {
+		for (auto *rock : GetCollisions<Rock>(this, direction)) {
+			rock->Pickup(this);
+			held = rock;
+			break;// pick up only one rock
 		}
 	}
 }

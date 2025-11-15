@@ -3,8 +3,11 @@
 #include "batteries/scene.h"
 
 #include "../entity/actor/player.h"
+#include "../entity/actor/rock.h"
 
-struct MenuScene : public batteries::Scene<256, Player> {
+using BasicScene = batteries::Scene<256, Player, Rock>;
+
+struct MenuScene : public BasicScene {
 	void Init(void) override;
 	void Update(void) override;
 	void Render(void) override;

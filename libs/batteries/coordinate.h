@@ -84,6 +84,12 @@ auto operator*(U lhs, const CoordXY<T> &rhs)
 	return {lhs * rhs.x, lhs * rhs.y};
 }
 
+template<typename T>
+auto operator*(const CoordXY<float> &lhs, const CoordXY<T> &rhs)
+		-> CoordXY<float> {
+	return {lhs.x * static_cast<float>(rhs.x), lhs.y * static_cast<float>(rhs.y)};
+}
+
 template<>
 struct std::hash<CoordXY<int>> {
 	std::size_t operator()(const CoordXY<int> &location) const noexcept {
