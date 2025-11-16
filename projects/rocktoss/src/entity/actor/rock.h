@@ -11,6 +11,9 @@ struct Rock : Actor {
 	void Pickup(const Actor *actor);
 	void Throw(const CoordXY<float> &dir);
 
+	void HaltX() override;
+	void HaltY() override;
+
 private:
 	void HandleHorizontalMovement();
 	void HandleVerticalMovement();
