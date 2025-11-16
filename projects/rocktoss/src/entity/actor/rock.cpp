@@ -64,12 +64,21 @@ void Rock::Pickup(const Actor *actor) {
 	}
 
 	owner = actor;
+	grounded = false;
+	speed = CoordXY<float>::Zero;
 }
 
 void Rock::Throw(const CoordXY<float> &dir) {
 	speed = dir * kRockThrowSpeed;
 	owner = nullptr;
 	grounded = false;
+}
+
+void Rock::HaltX() {
+	speed.x = -speed.x * 0.75f;
+}
+void Rock::HaltY() {
+	speed.y = 0.0f;
 }
 
 void Rock::HandleHorizontalMovement() {
