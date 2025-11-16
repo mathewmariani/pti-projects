@@ -1,6 +1,9 @@
 #include "menu.h"
+#include "../gamestate.h"
 
 #include "pti/pti.h"
+
+#include <cstdlib>
 
 struct MenuItem {
 	const char *name;
@@ -19,13 +22,25 @@ void MenuScene::Init(void) {
 }
 
 void MenuScene::Update(void) {
-	if (pti_down(PTI_DOWN)) {
+	if (pti_pressed(PTI_DOWN)) {
 		current_index++;
-	} else if (pti_down(PTI_UP)) {
+	} else if (pti_pressed(PTI_UP)) {
 		current_index--;
+	} else if (pti_pressed(PTI_A)) {
+		switch (current_index) {
+		case 0:
+			GetGameState().SwitchScenes(SceneType::Game);
+			break;
+		case 1:
+			/* code */
+			break;
+		case 2:
+			std::exit(0);
+			break;
+		}
 	}
 
-	_pti_clamp(current_index, 0, items.size() - 1);
+	current_index = _pti_clamp(current_index, 0, (int) items.size() - 1);
 }
 
 void MenuScene::Render(void) {
