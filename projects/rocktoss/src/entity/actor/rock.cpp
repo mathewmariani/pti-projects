@@ -78,7 +78,7 @@ void Rock::HaltX() {
 	speed.x = -speed.x * 0.75f;
 }
 void Rock::HaltY() {
-	speed.y = 0.0f;
+	speed.y = -speed.y * 0.75f;
 }
 
 void Rock::HandleHorizontalMovement() {

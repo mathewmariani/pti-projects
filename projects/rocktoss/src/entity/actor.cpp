@@ -62,7 +62,7 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 					// moving down:
 					squished = (PlaceMeeting({0, -1}) || CollidesWithSolids({0, -1}));
 				}
-				if (squished && func) {
+				if (func) {
 					(this->*func)();
 				}
 				break;
