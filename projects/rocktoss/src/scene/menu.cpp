@@ -46,11 +46,13 @@ void MenuScene::Update(void) {
 void MenuScene::Render(void) {
 	pti_cls(0xffef7d57);
 
+	pti_print("Rock Toss", 12, 8);
+
 	for (auto i = 0; i < items.size(); ++i) {
-		auto y = 8 + (i * 10);
-		pti_print(items[i].name, 12, y);
+		auto y = 16 + ((i + 1) * 10);
+		pti_print(items[i].name, 24, y);
 		if (current_index == i) {
-			pti_print(">", 3, y);
+			pti_print(">", 12, y);
 		}
 	}
 }
