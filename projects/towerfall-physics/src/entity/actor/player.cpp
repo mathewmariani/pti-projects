@@ -39,6 +39,10 @@ Player::Player() {
 	state = PlayerState::Normal;
 }
 
+void Player::Squish() {
+	RemoveEntity(this);
+}
+
 void Player::Update() {
 	HandleHorizontalMovement();
 	HandleVerticalMovement();

@@ -11,8 +11,10 @@ enum class PlayerState : uint8_t {
 struct Player : Actor {
 	Player();
 
+	void Squish() override;
+
 	void Update() override;
-	void Render() override;
+	void Render() override;	
 
 private:
 	void HandleHorizontalMovement();

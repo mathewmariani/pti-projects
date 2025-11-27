@@ -1,9 +1,12 @@
 /* engine */
 #include "pti/pti.h"
 
+/* batteries */
+#include "batteries/assets.h"
+#include "batteries/registry.h"
+
 #include "bank.h"
 #include "gamestate.h"
-#include "batteries/assets.h"
 
 /* solids */
 #include "entity/solid/platform.h"
@@ -11,24 +14,14 @@
 /* actors */
 #include "entity/actor/player.h"
 
-#include "batteries/registry.h"
 
 #include <math.h>
-
 #include <string>
 
 #if defined(PTI_DEBUG)
 #include "imgui/imgui.h"
 bool show_overlays = false;
 #endif
-
-namespace {
-	constexpr int width = 176;
-	constexpr int height = 128;
-	auto t = 0.0f;
-
-	float resetTimer = 0.0f;
-}// namespace
 
 #define XPOS(x) (x * kTileSize)
 #define YPOS(y) (y * kTileSize)
@@ -80,7 +73,6 @@ static void init(void) {
 	load();
 
 	/* graphics state: */
-	pti_dither(0x5a5a);
 	pti_clip(0, 0, EN_ROOM_WIDTH, EN_ROOM_HEIGHT);
 }
 

@@ -5,6 +5,15 @@
 
 #include <unordered_set>
 
+inline void CollectRidingActors(const Solid* solid, const CoordXY<int> dir, std::unordered_set<Actor*>& out) {
+	const auto actors = GetEntitiesOfType<Actor>();
+    for (auto* actor : actors) {
+        if (actor->IsRiding(solid) || solid->Overlaps(actor, dir)) {
+            out.insert(actor);
+        }
+    }
+}
+
 void Solid::Physics(void) {
 	MoveX(speed.x);
 	MoveY(speed.y);
@@ -17,26 +26,17 @@ void Solid::MoveX(float amount) {
 		return;
 	}
 
-	const auto actors = GetEntitiesOfType<Actor>();
-
 	remainder.x -= move;
 	int dx = _pti_sign(move);
 
 	std::unordered_set<Actor *> riding;
-	for (auto *actor : actors) {
-		if (actor->IsRiding(this)) {
-			riding.insert(actor);
-		}
-	}
+	CollectRidingActors(this, {dx, 0}, riding);
 
 	while (move != 0) {
 		position.x += dx;
 		move -= dx;
-
-		for (auto *actor : actors) {
-			if (riding.contains(actor)) {
-				actor->MoveX(dx, &Actor::Squish);
-			}
+		for (auto* actor : riding) {
+			actor->MoveX(dx, &Actor::Squish);
 		}
 	}
 }
@@ -48,26 +48,17 @@ void Solid::MoveY(float amount) {
 		return;
 	}
 
-	auto actors = GetEntitiesOfType<Actor>();
-
 	remainder.y -= move;
 	int dy = _pti_sign(move);
 
 	std::unordered_set<Actor *> riding;
-	for (auto *actor : actors) {
-		if (actor->IsRiding(this)) {
-			riding.insert(actor);
-		}
-	}
+	CollectRidingActors(this, {0, dy}, riding);
 
 	while (move != 0) {
 		position.y += dy;
 		move -= dy;
-
-		for (auto *actor : actors) {
-			if (riding.contains(actor)) {
-				actor->MoveY(dy, &Actor::Squish);
-			}
+		for (auto* actor : riding) {
+			actor->MoveY(dy, &Actor::Squish);
 		}
 	}
 }

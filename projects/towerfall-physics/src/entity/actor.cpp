@@ -99,7 +99,7 @@ void Actor::HaltY(void) {
 
 bool Actor::IsRiding(const EntityBase *base) const {
 	if (!CanBeMoved()) { return false; }
-	return Overlaps(base, CoordXY<int>::Zero) || Overlaps(base, CoordXY<int>::Up);
+	return Overlaps(base, CoordXY<int>::Up);
 }
 
 bool Actor::IsGrounded(void) const {

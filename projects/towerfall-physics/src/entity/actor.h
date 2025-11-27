@@ -11,7 +11,7 @@ struct Actor : EntityBase {
 	void MoveY(float amount, MoveFunc func);
 
 	bool CanWiggle(void);
-	void Squish(void);
+	virtual void Squish(void);
 	virtual void HaltX(void);
 	virtual void HaltY(void);
 
