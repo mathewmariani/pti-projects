@@ -41,6 +41,7 @@ Player::Player() {
 
 void Player::Squish() {
 	RemoveEntity(this);
+	GetGameState().PlayerIsDead = true;
 }
 
 void Player::Update() {
