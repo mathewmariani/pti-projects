@@ -48,20 +48,26 @@ void ChangeLevels();
 void RenderAllEntities();
 
 template<typename T, typename... Args>
-T *CreateEntity(Args &&...args) {
-	return batteries::CreateEntity<T>(GetGameState().Entities, std::forward<Args>(args)...);
+EntityBase *CreateEntity(Args &&...args) {
+	return GetGameState().Entities.Create<T>(std::forward<Args>(args)...);
 }
 
-inline void RemoveEntity(EntityBase *entity) {
-	batteries::RemoveEntity(GetGameState().Entities, entity);
-}
+void RemoveEntity(EntityBase *entity);
 
 template<typename T>
 std::vector<T *> GetEntitiesOfType() {
-	return batteries::GetEntitiesOfType<T>(GetGameState().Entities);
+	return GetGameState().Entities.GetList<T>();
 }
 
 template<typename T>
 std::vector<T *> GetCollisions(EntityBase *subject, const CoordXY<int> &dir) {
-	return batteries::GetCollisions<T>(GetGameState().Entities, subject, dir);
+	std::vector<T *> result;
+	result.reserve(kMaxEntities);
+
+	GetGameState().Entities.ForEach<T>([&](T *other) {
+		if (subject->Overlaps(other, dir)) {
+			result.push_back(other);
+		}
+	});
+	return result;
 }

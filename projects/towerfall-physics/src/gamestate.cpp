@@ -54,6 +54,12 @@ void RenderAllEntities() {
 	});
 }
 
+void RemoveEntity(EntityBase *entity) {
+	if (entity) {
+		GetGameState().Entities.RemoveAt(entity->id);
+	}
+}
+
 void ChangeLevels(void) {
 	// we reload the assets because we alter the RAM when we load level.
 	batteries::reload();
