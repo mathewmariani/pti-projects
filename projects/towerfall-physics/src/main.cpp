@@ -151,7 +151,7 @@ void debug(void) {
 			auto *player = players[0];
 			ImGui::Text("position: (%d, %d)", player->position.x, player->position.y);
 			ImGui::Text("speed: (%.2f, %.2f)", player->speed.x, player->speed.y);
-			// ImGui::Text("grounded: (%s)", player->IsGrounded() ? "true" : "false");
+			ImGui::Text("grounded: (%s)", player->IsGrounded() ? "true" : "false");
 
 			if (ImGui::Button("hurt")) {
 				std::printf("hurt\n");

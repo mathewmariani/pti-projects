@@ -25,7 +25,9 @@ constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 #define PTI_DELTA (1.0 / 30.0)
 constexpr float kDeathResetTimer = 2.0f;
 
-struct GameState final : public GameState_t<Bullet, Coin, Effect, Player, Zombie> {
+using ThisNeedsAName = GameWorld<Bullet, Coin, Effect, Player, Zombie>;
+
+struct GameState final : public ThisNeedsAName {
 	uint8_t Coins = 0;
 	uint8_t Deaths = 0;
 	int CurrentLevelIndex = -1;
