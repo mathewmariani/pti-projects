@@ -7,6 +7,9 @@
 
 inline void CollectRidingActors(const Solid *solid, const CoordXY<int> dir, std::unordered_set<Actor *> &out) {
 	World()->ForEachActor([&](Actor &actor) {
+		if (!actor.CanBeMoved()) {
+			return;
+		}
 		if (actor.IsRiding(solid) || solid->Overlaps(&actor, dir)) {
 			out.insert(&actor);
 		}

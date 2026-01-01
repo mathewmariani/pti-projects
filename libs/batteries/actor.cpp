@@ -33,7 +33,11 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 				position.x += dx;
 				move -= dx;
 			} else {
-				if (func) {
+				auto squished = false;
+				if (dx != 0) {
+					squished = (PlaceMeeting({-dx, 0}) || CollidesWithSolids({-dx, 0}));
+				}
+				if (squished && func) {
 					(this->*func)();
 				}
 				break;
@@ -98,7 +102,6 @@ void Actor::HaltY(void) {
 }
 
 bool Actor::IsRiding(const EntityBase *base) const {
-	if (!CanBeMoved()) { return false; }
 	return Overlaps(base, CoordXY<int>::Up);
 }
 
