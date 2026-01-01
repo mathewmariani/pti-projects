@@ -3,6 +3,7 @@
 #include <variant>
 #include <vector>
 
+#include "batteries/gamestate.h"
 #include "batteries/registry.h"
 
 // actors
@@ -12,8 +13,6 @@
 #include "entity/solid/platform.h"
 
 typedef struct pti_tilemap_t pti_tilemap_t;
-
-constexpr int kMaxEntities = 256;
 
 constexpr int kScreenWidth = 320;
 constexpr int kScreenHeight = 224;
@@ -25,8 +24,7 @@ constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 #define PTI_DELTA (1.0 / 30.0)
 constexpr float kDeathResetTimer = 2.0f;
 
-struct GameState_t {
-	EntityManager<kMaxEntities, Player, Platform> Entities;
+struct GameState final : public GameState_t<Player, Platform> {
 	uint8_t Coins = 0;
 	uint8_t Deaths = 0;
 	int CurrentLevelIndex = -1;
@@ -37,7 +35,7 @@ struct GameState_t {
 	float ResetTimer = 0.0f;
 };
 
-GameState_t &GetGameState();
+GameState &GetGameState();
 
 void GameStateInit();
 void GameStateReset();
@@ -48,26 +46,20 @@ void ChangeLevels();
 void RenderAllEntities();
 
 template<typename T, typename... Args>
-EntityBase *CreateEntity(Args &&...args) {
-	return GetGameState().Entities.Create<T>(std::forward<Args>(args)...);
+T *CreateEntity(Args &&...args) {
+	return batteries::CreateEntity<T>(GetGameState().Entities, std::forward<Args>(args)...);
 }
 
-void RemoveEntity(EntityBase *entity);
+inline void RemoveEntity(EntityBase *entity) {
+	batteries::RemoveEntity(GetGameState().Entities, entity);
+}
 
 template<typename T>
 std::vector<T *> GetEntitiesOfType() {
-	return GetGameState().Entities.GetList<T>();
+	return batteries::GetEntitiesOfType<T>(GetGameState().Entities);
 }
 
 template<typename T>
 std::vector<T *> GetCollisions(EntityBase *subject, const CoordXY<int> &dir) {
-	std::vector<T *> result;
-	result.reserve(kMaxEntities);
-
-	GetGameState().Entities.ForEach<T>([&](T *other) {
-		if (subject->Overlaps(other, dir)) {
-			result.push_back(other);
-		}
-	});
-	return result;
+	return batteries::GetCollisions<T>(GetGameState().Entities, subject, dir);
 }
