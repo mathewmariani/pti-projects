@@ -26,8 +26,8 @@ static void load(void) {
 	batteries::reload();
 
 	int i, j, t;
-	for (i = 0; i < (528 / kTileSize); i++) {
-		for (j = 0; j < (384 / kTileSize); j++) {
+	for (i = 0; i < EN_ROOM_COLS; i++) {
+		for (j = 0; j < EN_ROOM_ROWS; j++) {
 			t = pti_mget(i, j);
 			switch (t) {
 				case 48: {

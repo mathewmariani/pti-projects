@@ -17,9 +17,11 @@ typedef struct pti_tilemap_t pti_tilemap_t;
 
 constexpr int kScreenWidth = 176;
 constexpr int kScreenHeight = 128;
+constexpr int kWorldWidth = 528;
+constexpr int kWorldHeight = 384;
 constexpr int kTileSize = 8;
-constexpr int EN_ROOM_WIDTH = (kScreenWidth);
-constexpr int EN_ROOM_HEIGHT = (kScreenHeight);
+constexpr int EN_ROOM_WIDTH = (kWorldWidth);
+constexpr int EN_ROOM_HEIGHT = (kWorldHeight);
 constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / kTileSize;
 constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 #define PTI_DELTA (1.0 / 30.0)
