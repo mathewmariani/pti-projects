@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../actor.h"
+#include "batteries/actor.h"
 #include <vector>
 
 enum class ZombieState : uint8_t {

@@ -2,21 +2,20 @@
 #include "bank.h"
 #include "gamestate.h"
 
-#include "entity/actor.h"
-#include "entity/solid.h"
-
 #include <memory>
 #include <vector>
 
+#include "batteries/actor.h"
 #include "batteries/assets.h"
+#include "batteries/physics.h"
 #include "batteries/helper.h"
 
 #define XPOS(x) (x * kTileSize)
 #define YPOS(y) (y * kTileSize)
 
-static auto _gameState = std::make_unique<GameState_t>();
+static auto _gameState = std::make_unique<GameState>();
 
-GameState_t &GetGameState() {
+GameState &GetGameState() {
 	return *_gameState;
 }
 
@@ -30,30 +29,20 @@ void GameStateReset() {
 	_gameState->ResetTimer = 0.0f;
 }
 
-template<typename T>
-void UpdateEntitiesOfType() {
-	_gameState->Entities.ForEach<T>([](T *e) {
-		e->timer += PTI_DELTA;
-		e->Update();
-		e->Physics();
-	});
-}
-
 void GameStateTick() {
-	UpdateEntitiesOfType<Solid>();
-	UpdateEntitiesOfType<Actor>();
+	PhysicsSystem physics{GetGameState().Entities};
+	_gameState->Entities.ForEach<Actor>([&](Actor *actor) {
+		actor->timer += PTI_DELTA;
+		actor->Update();
+		physics.ActorMoveX(*actor, actor->speed.x, &Actor::HaltX);
+		physics.ActorMoveY(*actor, actor->speed.y, &Actor::HaltY);
+	});
 }
 
 void RenderAllEntities() {
 	_gameState->Entities.ForEach<EntityBase>([](EntityBase *e) {
 		e->Render();
 	});
-}
-
-void RemoveEntity(EntityBase *entity) {
-	if (entity) {
-		_gameState->Entities.RemoveAt(entity->id);
-	}
 }
 
 void ChangeLevels(void) {

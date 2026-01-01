@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../actor.h"
+#include "batteries/actor.h"
 
 struct Coin : Actor {
 	static void Create(const CoordXY<int> &location);

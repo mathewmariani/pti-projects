@@ -26,8 +26,8 @@ static void load(void) {
 	batteries::reload();
 
 	int i, j, t;
-	for (i = 0; i < EN_ROOM_COLS; i++) {
-		for (j = 0; j < EN_ROOM_ROWS; j++) {
+	for (i = 0; i < (528 / kTileSize); i++) {
+		for (j = 0; j < (384 / kTileSize); j++) {
 			t = pti_mget(i, j);
 			switch (t) {
 				case 48: {
@@ -145,7 +145,7 @@ static void frame(void) {
 
 #if defined(PTI_DEBUG)
 void debug(void) {
-	ImGui::Begin("CoinRush", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::Begin("Zombies", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
 	const auto &gameState = GetGameState();
 
@@ -181,7 +181,7 @@ void debug(void) {
 			auto *player = players[0];
 			ImGui::Text("position: (%d, %d)", player->position.x, player->position.y);
 			ImGui::Text("speed: (%.2f, %.2f)", player->speed.x, player->speed.y);
-			ImGui::Text("grounded: (%s)", player->IsGrounded() ? "true" : "false");
+			ImGui::Text("grounded: (%s)", player->grounded ? "true" : "false");
 
 			if (ImGui::Button("hurt")) {
 				std::printf("hurt\n");

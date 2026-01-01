@@ -5,8 +5,6 @@
 
 #include "registry.h"
 
-typedef struct pti_tilemap_t pti_tilemap_t;
-
 constexpr int kMaxEntities = 256;
 
 template<typename... EntityTypes>

@@ -5,10 +5,6 @@ set(ZOMBIES_HEADERS
     src/bank.h
     src/gamestate.h
 
-    # lib
-    src/entity/actor.h
-    src/entity/solid.h
-
     # actors
     src/entity/actor/bullet.h
     src/entity/actor/coin.h
@@ -19,10 +15,6 @@ set(ZOMBIES_HEADERS
 set(ZOMBIES_SRC
     src/bank.cpp
     src/gamestate.cpp
-
-    # lib
-    src/entity/actor.cpp
-    src/entity/solid.cpp
 
     # actors
     src/entity/actor/bullet.cpp

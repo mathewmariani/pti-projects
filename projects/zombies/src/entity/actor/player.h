@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../actor.h"
+#include "batteries/actor.h"
 
 enum class PlayerState : uint8_t {
 	Normal,
