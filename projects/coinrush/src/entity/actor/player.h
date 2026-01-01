@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../actor.h"
+#include "batteries/actor.h"
 
 struct Player : Actor {
 	enum class State : uint8_t {

@@ -3,6 +3,8 @@
 #include <variant>
 #include <vector>
 
+// batteries
+#include "batteries/gamestate.h"
 #include "batteries/registry.h"
 
 // actors
@@ -19,8 +21,6 @@
 
 typedef struct pti_tilemap_t pti_tilemap_t;
 
-constexpr int kMaxEntities = 256;
-
 constexpr int kScreenWidth = 320;
 constexpr int kScreenHeight = 224;
 constexpr int kTileSize = 8;
@@ -31,8 +31,9 @@ constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 #define PTI_DELTA (1.0 / 30.0)
 constexpr float kDeathResetTimer = 2.0f;
 
-struct GameState_t {
-	EntityManager<kMaxEntities, Bullet, Coin, Effect, Flag, Goomba, Player, Shooter, Platform> Entities;
+using ThisNeedsAName = GameWorld<Bullet, Coin, Effect, Flag, Goomba, Player, Shooter, Platform>;
+
+struct GameState final : public ThisNeedsAName {
 	uint8_t Coins = 0;
 	uint8_t Deaths = 0;
 	int CurrentLevelIndex = -1;
@@ -43,7 +44,7 @@ struct GameState_t {
 	float ResetTimer = 0.0f;
 };
 
-GameState_t &GetGameState();
+GameState &GetGameState();
 
 void GameStateInit();
 void GameStateReset();

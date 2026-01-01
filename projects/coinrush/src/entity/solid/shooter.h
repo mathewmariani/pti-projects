@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../solid.h"
+#include "batteries/solid.h"
 
 struct Shooter : Solid {
 	Shooter(const CoordXY<int> &dir);

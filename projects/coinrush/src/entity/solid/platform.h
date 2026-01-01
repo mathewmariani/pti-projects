@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../solid.h"
+#include "batteries/solid.h"
 
 constexpr float kPlatformRange = 5 * 8.0f;
 constexpr float kPlatformMaxSpeed = 12.0f;
