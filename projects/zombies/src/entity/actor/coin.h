@@ -7,6 +7,8 @@ struct Coin : Actor {
 
 	Coin();
 
+	void Collect();
+
 	void Update() override;
 	void Render() override;
 };

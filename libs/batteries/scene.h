@@ -4,6 +4,7 @@
 #include "registry.h"
 
 #include <vector>
+#include "entity.h"
 
 struct Actor;
 struct Solid;

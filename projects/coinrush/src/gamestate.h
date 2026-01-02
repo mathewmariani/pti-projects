@@ -1,16 +1,6 @@
 #pragma once
 
-#include <unordered_map>
-#include <variant>
 #include <vector>
-
-// actors
-#include "entity/actor/bullet.h"
-#include "entity/actor/coin.h"
-#include "entity/actor/effect.h"
-#include "entity/actor/flag.h"
-#include "entity/actor/goomba.h"
-#include "entity/actor/player.h"
 
 // solids
 #include "entity/solid/platform.h"

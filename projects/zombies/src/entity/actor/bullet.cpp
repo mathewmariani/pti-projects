@@ -1,7 +1,11 @@
-#include "bullet.h"
+#include "pti/pti.h"
+
 #include "../../gamestate.h"
 #include "../../bank.h"
-#include "pti/pti.h"
+
+#include "bullet.h"
+#include "effect.h"
+#include "zombie.h"
 
 constexpr float kBulletMaxSpeed = 6.25f;
 constexpr int kBulletBoundaryOffset = 2;
@@ -37,7 +41,7 @@ void Bullet::Update() {
 
 	if (collision || PlaceMeeting(direction)) {
 		Effect::Create(position, Effect::Type::Collect);
-		RemoveEntity(this);
+		Destroy();
 	}
 }
 
