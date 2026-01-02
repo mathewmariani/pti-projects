@@ -2,7 +2,7 @@
 #include "bank.h"
 #include "gamestate.h"
 
-#include "entity/actor.h"
+#include "batteries/actor.h"
 
 #include <memory>
 #include <vector>
@@ -28,12 +28,20 @@ void GameState::SwitchScenes(SceneType type) {
 
 static auto _gameState = std::make_unique<GameState>();
 
+static IWorld *gWorld = nullptr;
+
+IWorld *&World() {
+	return gWorld;
+}
+
 GameState &GetGameState() {
 	return *_gameState;
 }
 
 void GameStateInit() {
 	_gameState->SwitchScenes(SceneType::Menu);
+	World() = &GetGameState();
+	((GameState *) World())->Entities.Clear();
 }
 
 void GameStateReset() {

@@ -5,9 +5,6 @@ set(ROCKTOSS_HEADERS
     src/bank.h
     src/gamestate.h
 
-    # entities
-    src/entity/actor.h
-
     # scenes
     src/scene/game.h
     src/scene/menu.h
@@ -19,9 +16,6 @@ set(ROCKTOSS_HEADERS
 set(ROCKTOSS_SRC
     src/bank.cpp
     src/gamestate.cpp
-
-    # entities
-    src/entity/actor.cpp
 
     # scenes
     src/scene/game.cpp

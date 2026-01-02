@@ -43,6 +43,8 @@ Rock::Rock() {
 	by = kRockHitboxOffsetY;
 	bw = kRockHitboxWidth;
 	bh = kRockHitboxHeight;
+
+	thrown = false;
 }
 
 void Rock::Update() {
@@ -65,6 +67,7 @@ void Rock::Pickup(const Actor *actor) {
 
 	owner = actor;
 	grounded = false;
+	thrown = false;
 	speed = CoordXY<float>::Zero;
 }
 
@@ -72,13 +75,7 @@ void Rock::Throw(const CoordXY<float> &dir) {
 	speed = dir * kRockThrowSpeed;
 	owner = nullptr;
 	grounded = false;
-}
-
-void Rock::HaltX() {
-	speed.x = -speed.x * 0.75f;
-}
-void Rock::HaltY() {
-	speed.y = -speed.y * 0.75f;
+	thrown = true;
 }
 
 void Rock::HandleHorizontalMovement() {

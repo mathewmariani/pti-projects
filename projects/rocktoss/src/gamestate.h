@@ -13,6 +13,7 @@
 #include "scene/menu.h"
 
 // batteries
+#include "batteries/gamestate.h"
 #include "batteries/registry.h"
 #include "batteries/scene.h"
 
@@ -35,7 +36,9 @@ enum class SceneType {
 	Game = 1,
 };
 
-struct GameState {
+using ThisNeedsAName = GameWorld<Player, Rock>;
+
+struct GameState final : public ThisNeedsAName {
 	BasicScene *CurrentScene;
 	void SwitchScenes(SceneType type);
 

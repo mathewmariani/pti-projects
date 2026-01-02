@@ -4,7 +4,7 @@
 #include "../bank.h"
 #include "../gamestate.h"
 
-#include "../entity/actor.h"
+#include "batteries/actor.h"
 
 #include <memory>
 #include <vector>
