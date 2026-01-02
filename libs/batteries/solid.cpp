@@ -38,7 +38,11 @@ void Solid::MoveX(float amount) {
 		position.x += dx;
 		move -= dx;
 		for (auto *actor : riding) {
-			actor->MoveX(dx, &Actor::Squish);
+			if (Overlaps(actor, {0, 0})) {
+				actor->MoveX(dx, &Actor::Squish);
+			} else {
+				actor->MoveX(dx, nullptr);
+			}
 		}
 	}
 }
@@ -60,7 +64,11 @@ void Solid::MoveY(float amount) {
 		position.y += dy;
 		move -= dy;
 		for (auto *actor : riding) {
-			actor->MoveY(dy, &Actor::Squish);
+			if (Overlaps(actor, {0, 0})) {
+				actor->MoveY(dy, &Actor::Squish);
+			} else {
+				actor->MoveY(dy, nullptr);
+			}
 		}
 	}
 }

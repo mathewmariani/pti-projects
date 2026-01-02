@@ -33,11 +33,7 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 				position.x += dx;
 				move -= dx;
 			} else {
-				auto squished = false;
-				if (dx != 0) {
-					squished = (PlaceMeeting({-dx, 0}) || CollidesWithSolids({-dx, 0}));
-				}
-				if (squished && func) {
+				if (func) {
 					(this->*func)();
 				}
 				break;
@@ -59,15 +55,7 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 				position.y += dy;
 				move -= dy;
 			} else {
-				auto squished = false;
-				if (dy < 0) {
-					// moving up:
-					squished = !CanWiggle();
-				} else if (dy > 0) {
-					// moving down:
-					squished = (PlaceMeeting({0, -1}) || CollidesWithSolids({0, -1}));
-				}
-				if (squished && func) {
+				if (func) {
 					(this->*func)();
 				}
 				break;
@@ -95,10 +83,12 @@ void Actor::Squish(void) {
 
 void Actor::HaltX(void) {
 	speed.x = 0;
+	remainder.x = 0;
 }
 
 void Actor::HaltY(void) {
 	speed.y = 0;
+	remainder.y = 0;
 }
 
 bool Actor::IsRiding(const EntityBase *base) const {
