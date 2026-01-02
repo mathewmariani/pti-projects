@@ -40,9 +40,9 @@ enum class SceneType {
 	Game = 0,
 };
 
-using ThisNeedsAName = GameWorld<Bullet, Coin, Effect, Flag, Goomba, Player, Shooter, Platform>;
+using CoinRushGameState = batteries::GameState<Bullet, Coin, Effect, Flag, Goomba, Player, Shooter, Platform>;
 
-struct GameState final : public ThisNeedsAName {
+struct GameState final : public CoinRushGameState {
 	void SwitchScenes(SceneType type);
 
 	uint8_t Coins = 0;
@@ -61,11 +61,6 @@ private:
 GameState &GetGameState();
 
 void GameStateInit();
-void GameStateReset();
-void GameStateTick();
-
-void RenderAllEntities();
-
 void ChangeLevels();
 
 template<typename T, typename... Args>

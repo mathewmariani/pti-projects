@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "registry.h"
-#include "world.h"
 #include "scene.h"
 
 #include "solid.h"
@@ -12,25 +11,43 @@
 
 constexpr int kMaxEntities = 256;
 
-template<typename... EntityTypes>
-struct GameWorld : IWorld {
-	batteries::Scene<kMaxEntities, EntityTypes...> *CurrentScene;
+namespace batteries {
 
-	void ForEachActor(const std::function<void(Actor &)> &fn) override {
-		for (auto *actor : CurrentScene->template GetEntitiesOfType<Actor>()) {
-			if (actor) {
-				fn(*actor);
+	struct IGameState {
+		virtual ~IGameState() = default;
+		virtual void Reset(void) = 0;
+		virtual void Tick(void) = 0;
+		virtual void ForEachActor(const std::function<void(Actor &)> &fn) = 0;
+		virtual void ForEachSolid(const std::function<void(Solid &)> &fn) = 0;
+	};
+
+	template<typename... EntityTypes>
+	struct GameState : IGameState {
+		batteries::Scene<kMaxEntities, EntityTypes...> *CurrentScene;
+
+		void ForEachActor(const std::function<void(Actor &)> &fn) override {
+			for (auto *actor : CurrentScene->template GetEntitiesOfType<Actor>()) {
+				if (actor) fn(*actor);
 			}
 		}
-	}
 
-	void ForEachSolid(const std::function<void(Solid &)> &fn) override {
-		for (auto *solid : CurrentScene->template GetEntitiesOfType<Solid>()) {
-			if (solid) {
-				fn(*solid);
+		void ForEachSolid(const std::function<void(Solid &)> &fn) override {
+			for (auto *solid : CurrentScene->template GetEntitiesOfType<Solid>()) {
+				if (solid) fn(*solid);
 			}
 		}
-	}
-};
 
-IWorld *&World();
+		void Reset(void) override {
+			CurrentScene->Reset();
+		}
+
+		void Tick(void) override {
+			CurrentScene->Update();
+			CurrentScene->Render();
+		}
+	};
+
+}// namespace batteries
+
+batteries::IGameState *World();
+batteries::IScene *Scene();

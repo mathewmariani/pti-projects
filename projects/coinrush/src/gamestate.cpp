@@ -25,10 +25,12 @@ void GameState::SwitchScenes(SceneType type) {
 
 static auto _gameState = std::make_unique<GameState>();
 
-static IWorld *gWorld = nullptr;
+batteries::IGameState *World() {
+	return (batteries::IGameState *) _gameState.get();
+}
 
-IWorld *&World() {
-	return gWorld;
+batteries::IScene *Scene() {
+	return (batteries::IScene *) _gameState->CurrentScene;
 }
 
 GameState &GetGameState() {
@@ -37,20 +39,10 @@ GameState &GetGameState() {
 
 void GameStateInit() {
 	_gameState->SwitchScenes(SceneType::Game);
-	World() = &GetGameState();
 
 	// reset the game state
 	_gameState->PlayerIsDead = false;
 	_gameState->ResetTimer = 0.0f;
-}
-
-void GameStateReset() {
-	_gameState->CurrentScene->Reset();
-}
-
-void GameStateTick() {
-	_gameState->CurrentScene->Update();
-	_gameState->CurrentScene->Render();
 }
 
 void RemoveEntity(EntityBase *entity) {

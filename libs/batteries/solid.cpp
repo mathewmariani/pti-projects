@@ -6,7 +6,7 @@
 #include <unordered_set>
 
 inline void CollectRidingActors(const Solid *solid, const CoordXY<int> dir, std::unordered_set<Actor *> &out) {
-	World()->ForEachActor([&](Actor &actor) {
+	Scene()->ForEachActor([&](Actor &actor) {
 		if (!actor.CanBeMoved()) {
 			return;
 		}

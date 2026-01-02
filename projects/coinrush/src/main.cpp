@@ -62,7 +62,7 @@ static void cleanup(void) {
 static void frame(void) {
 	auto &gameState = GetGameState();
 	if (pti_down(PTI_DBG)) {
-		GameStateReset();
+		GetGameState().Reset();
 		load();
 		return;
 	}
@@ -76,7 +76,7 @@ static void frame(void) {
 		}
 	}
 
-	GameStateTick();
+	GetGameState().Tick();
 	DoShake();
 
 	/* render ui */

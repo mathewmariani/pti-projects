@@ -5,12 +5,34 @@
 
 #include <vector>
 
+struct Actor;
+struct Solid;
+
 namespace batteries {
 
+	struct IScene {
+		virtual ~IScene() = default;
+		virtual void ForEachActor(const std::function<void(Actor &)> &fn) = 0;
+		virtual void ForEachSolid(const std::function<void(Solid &)> &fn) = 0;
+	};
+
+
 	template<size_t Max, typename... Types>
-	struct Scene {
+	struct Scene : IScene {
 		void Reset() {
 			entities.Clear();
+		}
+
+		void ForEachActor(const std::function<void(Actor &)> &fn) override {
+			for (auto *actor : entities.template GetList<Actor>()) {
+				if (actor) fn(*actor);
+			}
+		}
+
+		void ForEachSolid(const std::function<void(Solid &)> &fn) override {
+			for (auto *solid : entities.template GetList<Solid>()) {
+				if (solid) fn(*solid);
+			}
 		}
 
 		template<typename T, typename... Args>
