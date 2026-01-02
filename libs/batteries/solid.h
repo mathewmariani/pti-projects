@@ -1,6 +1,6 @@
 #pragma once
 
-#include "batteries/entity.h"
+#include "entity.h"
 
 struct Solid : EntityBase {
 	void Physics(void);

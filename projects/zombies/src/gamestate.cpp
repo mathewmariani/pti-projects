@@ -2,37 +2,42 @@
 #include "bank.h"
 #include "gamestate.h"
 
-#include "entity/actor.h"
-#include "entity/solid.h"
-
 #include <memory>
 #include <vector>
 
+#include "batteries/actor.h"
 #include "batteries/assets.h"
 #include "batteries/helper.h"
 
 #define XPOS(x) (x * kTileSize)
 #define YPOS(y) (y * kTileSize)
 
-static auto _gameState = std::make_unique<GameState_t>();
+static auto _gameState = std::make_unique<GameState>();
 
-GameState_t &GetGameState() {
+static IWorld *gWorld = nullptr;
+
+IWorld *&World() {
+	return gWorld;
+}
+
+GameState &GetGameState() {
 	return *_gameState;
 }
 
 void GameStateInit() {
-	_gameState->Entities.Clear();
+	World() = &GetGameState();
+	((GameState *) World())->Entities.Clear();
 }
 
 void GameStateReset() {
-	_gameState->Entities.Clear();
-	_gameState->PlayerIsDead = false;
-	_gameState->ResetTimer = 0.0f;
+	GetGameState().Entities.Clear();
+	GetGameState().PlayerIsDead = false;
+	GetGameState().ResetTimer = 0.0f;
 }
 
 template<typename T>
 void UpdateEntitiesOfType() {
-	_gameState->Entities.ForEach<T>([](T *e) {
+	GetGameState().Entities.ForEach<T>([](T *e) {
 		e->timer += PTI_DELTA;
 		e->Update();
 		e->Physics();
@@ -40,19 +45,17 @@ void UpdateEntitiesOfType() {
 }
 
 void GameStateTick() {
-	UpdateEntitiesOfType<Solid>();
 	UpdateEntitiesOfType<Actor>();
 }
-
 void RenderAllEntities() {
-	_gameState->Entities.ForEach<EntityBase>([](EntityBase *e) {
+	GetGameState().Entities.ForEach<EntityBase>([](EntityBase *e) {
 		e->Render();
 	});
 }
 
 void RemoveEntity(EntityBase *entity) {
 	if (entity) {
-		_gameState->Entities.RemoveAt(entity->id);
+		GetGameState().Entities.RemoveAt(entity->id);
 	}
 }
 
@@ -60,15 +63,15 @@ void ChangeLevels(void) {
 	// we reload the assets because we alter the RAM when we load level.
 	batteries::reload();
 
-	_gameState->Entities.Clear();
-	_gameState->PlayerIsDead = false;
-	_gameState->ResetTimer = 0.0f;
+	GetGameState().Entities.Clear();
+	GetGameState().PlayerIsDead = false;
+	GetGameState().ResetTimer = 0.0f;
 
-	auto &levels = _gameState->levels;
+	auto &levels = GetGameState().levels;
 	auto next = -1;
 	do {
 		next = RandomRange(0, levels.size() - 1);
-	} while (next == _gameState->CurrentLevelIndex);
+	} while (next == GetGameState().CurrentLevelIndex);
 
 	pti_set_tilemap(levels[next]);
 

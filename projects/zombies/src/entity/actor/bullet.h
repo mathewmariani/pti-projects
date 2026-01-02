@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../actor.h"
-
+#include "batteries/actor.h"
 
 struct Bullet : Actor {
 	Bullet();

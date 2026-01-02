@@ -145,7 +145,7 @@ static void frame(void) {
 
 #if defined(PTI_DEBUG)
 void debug(void) {
-	ImGui::Begin("CoinRush", NULL, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::Begin("Zombies", NULL, ImGuiWindowFlags_AlwaysAutoResize);
 
 	const auto &gameState = GetGameState();
 

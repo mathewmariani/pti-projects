@@ -1,6 +1,6 @@
 #pragma once
 
-#include "batteries/entity.h"
+#include "entity.h"
 
 struct Actor : EntityBase {
 	using MoveFunc = void (Actor::*)(void);

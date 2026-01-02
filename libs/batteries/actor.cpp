@@ -1,7 +1,7 @@
 #include "pti/pti.h"
 #include "solid.h"
 #include "actor.h"
-#include "../gamestate.h"
+#include "gamestate.h"
 
 void Actor::Physics() {
 	MoveX(speed.x, &Actor::HaltX);
@@ -20,11 +20,24 @@ void Actor::MoveX(float amount, Actor::MoveFunc func = nullptr) {
 		const int dx = direction.x;
 		const CoordXY<int> dir{dx, 0};
 		while (move != 0) {
+			// moving up slope:
+			if (PlaceMeeting({dx, 0}) && !(PlaceMeeting({dx, -1}))) {
+				position.y -= 1;
+			}
+			// moving down slope:
+			if (!(PlaceMeeting({dx, 0})) && !(PlaceMeeting({dx, 1})) && PlaceMeeting({dx, 2})) {
+				position.y += 1;
+			}
+			// always last:
 			if (!PlaceMeeting(dir) && !CollidesWithSolids(dir)) {
 				position.x += dx;
 				move -= dx;
 			} else {
-				if (func) {
+				auto squished = false;
+				if (dx != 0) {
+					squished = (PlaceMeeting({-dx, 0}) || CollidesWithSolids({-dx, 0}));
+				}
+				if (squished && func) {
 					(this->*func)();
 				}
 				break;
@@ -46,7 +59,15 @@ void Actor::MoveY(float amount, Actor::MoveFunc func = nullptr) {
 				position.y += dy;
 				move -= dy;
 			} else {
-				if (func) {
+				auto squished = false;
+				if (dy < 0) {
+					// moving up:
+					squished = !CanWiggle();
+				} else if (dy > 0) {
+					// moving down:
+					squished = (PlaceMeeting({0, -1}) || CollidesWithSolids({0, -1}));
+				}
+				if (squished && func) {
 					(this->*func)();
 				}
 				break;
@@ -69,9 +90,7 @@ bool Actor::CanWiggle() {
 }
 
 void Actor::Squish(void) {
-	RemoveEntity(this);
-	GetGameState().Deaths++;
-	GetGameState().PlayerIsDead = true;
+	/* do nothing */
 }
 
 void Actor::HaltX(void) {
@@ -83,8 +102,7 @@ void Actor::HaltY(void) {
 }
 
 bool Actor::IsRiding(const EntityBase *base) const {
-	if (!CanBeMoved()) { return false; }
-	return Overlaps(base, CoordXY<int>::Zero) || Overlaps(base, CoordXY<int>::Up);
+	return Overlaps(base, CoordXY<int>::Up);
 }
 
 bool Actor::IsGrounded(void) const {
@@ -94,8 +112,8 @@ bool Actor::IsGrounded(void) const {
 
 bool Actor::CollidesWithSolids(const CoordXY<int> &dir) const {
 	auto collided = false;
-	GetGameState().Entities.ForEach<Solid>([&](Solid *solid) {
-		if (this->Overlaps(solid, dir)) {
+	World()->ForEachSolid([&](Solid &solid) {
+		if (this->Overlaps(&solid, dir)) {
 			collided = true;
 			return;
 		}

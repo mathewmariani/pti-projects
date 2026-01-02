@@ -3,6 +3,7 @@
 #include <variant>
 #include <vector>
 
+#include "batteries/gamestate.h"
 #include "batteries/registry.h"
 
 // actors
@@ -14,33 +15,33 @@
 
 typedef struct pti_tilemap_t pti_tilemap_t;
 
-constexpr int kMaxEntities = 256;
-
 constexpr int kScreenWidth = 176;
 constexpr int kScreenHeight = 128;
+constexpr int kWorldWidth = 528;
+constexpr int kWorldHeight = 384;
 constexpr int kTileSize = 8;
-constexpr int EN_ROOM_WIDTH = (kScreenWidth * 3);
-constexpr int EN_ROOM_HEIGHT = (kScreenHeight * 3);
+constexpr int EN_ROOM_WIDTH = (kWorldWidth);
+constexpr int EN_ROOM_HEIGHT = (kWorldHeight);
 constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / kTileSize;
 constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 #define PTI_DELTA (1.0 / 30.0)
 constexpr float kDeathResetTimer = 2.0f;
 
-struct GameState_t {
-	EntityManager<kMaxEntities, Bullet, Coin, Effect, Player, Zombie> Entities;
+using ThisNeedsAName = GameWorld<Bullet, Coin, Effect, Player, Zombie>;
+
+struct GameState final : public ThisNeedsAName {
 	uint8_t Coins = 0;
 	uint8_t Deaths = 0;
 	int CurrentLevelIndex = -1;
 
-	Player *player;
-
 	std::vector<pti_tilemap_t *> levels;
+	Player *player;
 
 	bool PlayerIsDead = false;
 	float ResetTimer = 0.0f;
 };
 
-GameState_t &GetGameState();
+GameState &GetGameState();
 
 void GameStateInit();
 void GameStateReset();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../actor.h"
+#include "batteries/actor.h"
 
 enum class PlayerState : uint8_t {
 	Normal,
@@ -14,7 +14,7 @@ struct Player : Actor {
 	void Squish() override;
 
 	void Update() override;
-	void Render() override;	
+	void Render() override;
 
 private:
 	void HandleHorizontalMovement();
