@@ -3,6 +3,7 @@
 
 // sokol
 #include "sokol/sokol_app.h"
+#include "sokol/sokol_audio.h"
 #include "sokol/sokol_log.h"
 
 #if defined(PTI_DEBUG)
@@ -59,11 +60,15 @@ sapp_desc sokol_main(int argc, char *argv[]) {
 			},
 #if defined(SOKOL_GLCORE)
 #if defined(__APPLE__)
-			.gl_major_version = 4,
-			.gl_minor_version = 1,
+			.gl = {
+					.major_version = 4,
+					.minor_version = 1,
+			}
 #else
-			.gl_major_version = 4,
-			.gl_minor_version = 2,
+			.gl = {
+					.major_version = 4,
+					.minor_version = 2,
+			}
 #endif
 #endif
 	};
@@ -86,6 +91,9 @@ static struct {
 	} gl;
 
 	bool crt = false;
+
+	pti_audio_t tone;
+
 
 #if defined(PTI_TRACE_HOOKS)
 	pti_trace_hooks hooks;
@@ -281,6 +289,43 @@ void sokol_gfx_draw() {
 	glBindTexture(GL_TEXTURE_2D, state.gl.color0);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
+
+static void sokol_audio_cb(float *buffer, int num_frames, int num_channels) {
+	// always clear buffer
+	memset(buffer, 0, num_frames * num_channels * sizeof(float));
+
+	for (int i = 0; i < num_frames; i++) {
+		float mixed = 0.0f;
+
+		// mix your 4 virtual channels
+		for (int ch = 0; ch < PTI_NUM_CHANNELS; ch++) {
+			if (!_pti.vm.audio.channel[ch].playing) continue;
+
+			pti_audio_t *sfx = _pti.vm.audio.channel[ch].sfx;
+			int pos = _pti.vm.audio.channel[ch].position;
+
+			mixed += sfx->samples[pos];
+
+			pos++;
+			if (pos >= sfx->num_frames) {
+				if (_pti.vm.audio.channel[ch].looping) {
+					pos = 0;
+				} else {
+					_pti.vm.audio.channel[ch].playing = false;
+					pos = sfx->num_frames - 1;
+				}
+			}
+
+			_pti.vm.audio.channel[ch].position = pos;
+		}
+
+		// write mixed sample to all output channels
+		for (int c = 0; c < num_channels; c++) {
+			buffer[i * num_channels + c] = mixed;
+		}
+	}
+}
+
 
 #if defined(PTI_DEBUG)
 void imgui_debug_draw() {
@@ -482,6 +527,14 @@ static void init(void) {
 	/* initialize graphics */
 	sokol_init_gfx();
 
+	/* initialize audio */
+	auto audio_desc = (saudio_desc) {
+			.stream_cb = sokol_audio_cb,
+			.logger = {
+					.func = slog_func,
+			}};
+	saudio_setup(audio_desc);
+
 #if defined(PTI_DEBUG)
 	/* initialize debug ui */
 	__dbgui_setup();
@@ -503,6 +556,7 @@ static void init(void) {
 }
 
 static void cleanup(void) {
+	saudio_shutdown();
 	glDeleteVertexArrays(1, &state.gl.vao);
 	glDeleteBuffers(1, &state.gl.vbo);
 	glDeleteTextures(1, &state.gl.color0);

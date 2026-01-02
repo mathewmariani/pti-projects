@@ -2,7 +2,7 @@
 # update the required pti headers
 
 # repo url
-BRANCH="main"
+BRANCH="pti-audio"
 PTI_PREFIX="https://raw.githubusercontent.com/mathewmariani/pti/$BRANCH"
 
 # files
