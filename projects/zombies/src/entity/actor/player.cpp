@@ -1,8 +1,13 @@
-#include "player.h"
-#include "bullet.h"
+#include "pti/pti.h"
+
 #include "../../gamestate.h"
 #include "../../bank.h"
-#include "pti/pti.h"
+
+#include "batteries/juice.h"
+
+#include "player.h"
+#include "bullet.h"
+#include "coin.h"
 
 constexpr float kPlayerMaxSpeed = 0.8f;
 constexpr float kPlayerAcceleration = 5.0f;
@@ -36,13 +41,13 @@ void Player::Hurt(const CoordXY<float> &direction) {
 
 	if (health <= 0) {
 		GetGameState().PlayerIsDead = true;
-		RemoveEntity(this);
+		Shake();
+		Destroy();
 	}
 }
 
 void Player::Update() {
 	shoot_timer -= PTI_DELTA;
-
 
 	HandleHorizontalMovement();
 	HandleVerticalMovement();
@@ -69,8 +74,7 @@ void Player::Update() {
 
 	// collect coins
 	for (auto *coin : GetCollisions<Coin>(this, direction)) {
-		RemoveEntity(coin);
-		GetGameState().Coins++;
+		coin->Collect();
 	}
 
 	// camera movement

@@ -5,6 +5,9 @@ set(PLATFORMER_HEADERS
     src/bank.h
     src/gamestate.h
 
+    # scenes
+    src/scene/game.h
+
     # solids
     src/entity/solid/platform.h
 
@@ -14,6 +17,9 @@ set(PLATFORMER_HEADERS
 set(PLATFORMER_SRC
     src/bank.cpp
     src/gamestate.cpp
+
+    # scenes
+    src/scene/game.cpp
 
     # solids
     src/entity/solid/platform.cpp

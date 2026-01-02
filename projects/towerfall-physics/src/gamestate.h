@@ -1,16 +1,14 @@
 #pragma once
 
-#include <variant>
 #include <vector>
 
+// scenes
+#include "scene/game.h"
+
+// batteries
 #include "batteries/gamestate.h"
 #include "batteries/registry.h"
-
-// actors
-#include "entity/actor/player.h"
-
-// solids
-#include "entity/solid/platform.h"
+#include "batteries/scene.h"
 
 typedef struct pti_tilemap_t pti_tilemap_t;
 
@@ -24,9 +22,13 @@ constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 #define PTI_DELTA (1.0 / 30.0)
 constexpr float kDeathResetTimer = 2.0f;
 
-using ThisNeedsAName = GameWorld<Player, Platform>;
+enum class SceneType {
+	Game = 0,
+};
 
-struct GameState final : public ThisNeedsAName {
+struct GameState final : public batteries::GameState {
+	void SwitchScenes(SceneType type);
+
 	uint8_t Coins = 0;
 	uint8_t Deaths = 0;
 	int CurrentLevelIndex = -1;
@@ -35,39 +37,29 @@ struct GameState final : public ThisNeedsAName {
 
 	bool PlayerIsDead = false;
 	float ResetTimer = 0.0f;
+
+private:
+	GameScene gameScene;
 };
 
 GameState &GetGameState();
 
 void GameStateInit();
-void GameStateReset();
-void GameStateTick();
-
 void ChangeLevels();
 
-void RenderAllEntities();
+// helpers:
 
 template<typename T, typename... Args>
-EntityBase *CreateEntity(Args &&...args) {
-	return GetGameState().Entities.Create<T>(std::forward<Args>(args)...);
-}
-
-void RemoveEntity(EntityBase *entity);
-
-template<typename T>
-std::vector<T *> GetEntitiesOfType() {
-	return GetGameState().Entities.GetList<T>();
+inline EntityBase *CreateEntity(Args &&...args) {
+	return ((BasicScene *) Scene())->CreateEntity<T>(std::forward<Args>(args)...);
 }
 
 template<typename T>
-std::vector<T *> GetCollisions(EntityBase *subject, const CoordXY<int> &dir) {
-	std::vector<T *> result;
-	result.reserve(kMaxEntities);
+inline std::vector<T *> GetEntitiesOfType() {
+	return ((BasicScene *) Scene())->GetEntitiesOfType<T>();
+}
 
-	GetGameState().Entities.ForEach<T>([&](T *other) {
-		if (subject->Overlaps(other, dir)) {
-			result.push_back(other);
-		}
-	});
-	return result;
+template<typename T>
+inline std::vector<T *> GetCollisions(EntityBase *subject, const CoordXY<int> &dir) {
+	return ((BasicScene *) Scene())->GetCollisions<T>(subject, dir);
 }

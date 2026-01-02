@@ -9,9 +9,6 @@
 #include <utility>
 #include <optional>
 
-// Example entity base
-#include "entity.h"// defines EntityBase, Actor, Player, etc.
-
 template<std::size_t MaxEntities, typename... Ts>
 class EntityManager {
 public:

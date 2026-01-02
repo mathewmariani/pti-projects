@@ -43,6 +43,8 @@ struct EntityBase {
 	bool PlaceMeeting(const CoordXY<int> &dir) const;
 	bool PlaceMeeting(const CoordXY<int> &dir, const int index) const;
 
+	void Destroy(void);
+
 private:
 	template<typename Predicate>
 	bool CheckTiles(const CoordXY<int> &dir, Predicate &&pred) const;

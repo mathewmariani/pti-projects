@@ -4,6 +4,8 @@
 #include "bank.h"
 #include "gamestate.h"
 #include "batteries/assets.h"
+#include "batteries/helper.h"
+#include "batteries/juice.h"
 
 /* actors */
 #include "entity/actor/bullet.h"
@@ -23,40 +25,7 @@ bool show_overlays = false;
 
 static void load(void) {
 	GameStateInit();
-	batteries::reload();
-
-	int i, j, t;
-	for (i = 0; i < EN_ROOM_COLS; i++) {
-		for (j = 0; j < EN_ROOM_ROWS; j++) {
-			t = pti_mget(i, j);
-			switch (t) {
-				case 48: {
-					if (auto *e = CreateEntity<Player>(); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-						GetGameState().player = static_cast<Player *>(e);
-
-						auto cam_x = e->position.x - kScreenWidth / 2.0f;
-						auto cam_y = e->position.y - kScreenHeight / 2.0f;
-						pti_camera(cam_x, cam_y);
-					}
-				} break;
-				case 50: {
-					if (auto *e = CreateEntity<Zombie>(); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-					}
-				} break;
-			}
-		}
-	}
-
-	for (auto i = 0; i < 200; i++) {
-		auto location = RandomOutsideCamera();
-		if (auto *e = CreateEntity<Zombie>(); e) {
-			e->SetLocation(location);
-		}
-	}
+	// batteries::reload();
 }
 
 static void init(void) {
@@ -71,6 +40,10 @@ static void init(void) {
 	bitmap_platform = batteries::sprite("assets/platform.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
 	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
+
+	GetGameState().levels = {
+			batteries::tilemap("assets/tilemap.ase"),
+	};
 
 	pti_set_tilemap(tilemap);
 	pti_set_tileset(tileset);
@@ -90,7 +63,7 @@ static void cleanup(void) {
 static void frame(void) {
 	auto &gameState = GetGameState();
 	if (pti_down(PTI_DBG)) {
-		GameStateReset();
+		GetGameState().Reset();
 		load();
 		return;
 	}
@@ -98,41 +71,13 @@ static void frame(void) {
 	if (gameState.PlayerIsDead) {
 		gameState.ResetTimer += PTI_DELTA;
 		if (gameState.ResetTimer >= kDeathResetTimer) {
-			GameStateReset();
-			load();
+			GameStateInit();
 			return;
 		}
 	}
 
-	GameStateTick();
-
-	for (auto *zombie : GetEntitiesOfType<Zombie>()) {
-		if (IsWithinSpawnZone(zombie->position)) {
-			continue;
-		}
-
-		zombie->position = RandomOutsideCamera();
-	}
-
-	pti_cls(0xffef7d57);
-
-	// keep camera inbounds
-	int cam_x, cam_y;
-	pti_get_camera(&cam_x, &cam_y);
-	int cx = _pti_max(0, _pti_min(EN_ROOM_WIDTH - kScreenWidth, cam_x));
-	int cy = _pti_max(0, _pti_min(EN_ROOM_HEIGHT - kScreenHeight, cam_y));
-	pti_camera(cx, cy);
-
-	pti_map(0, 0);
-	RenderAllEntities();
-
-	pti_rectf(cx, cy, kScreenWidth, 16, 0xff000000);
-
-	for (auto i = 0; i < gameState.player->GetHealth(); i++) {
-		int x = (cam_x + 8) + (i * 8);
-		int y = cam_y + 8;
-		pti_spr(bitmap_heart, 0, x - 4, y - 3, false, false);
-	}
+	GetGameState().Tick();
+	DoShake();
 
 #if defined(PTI_DEBUG)
 	if (show_overlays) {

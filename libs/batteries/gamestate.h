@@ -4,28 +4,28 @@
 #include <vector>
 
 #include "registry.h"
-#include "world.h"
+#include "scene.h"
 
 #include "solid.h"
 #include "actor.h"
 
 constexpr int kMaxEntities = 256;
 
-template<typename... EntityTypes>
-struct GameWorld : IWorld {
-	EntityManager<kMaxEntities, EntityTypes...> Entities;
+namespace batteries {
 
-	void ForEachActor(const std::function<void(Actor &)> &fn) override {
-		Entities.template ForEach<Actor>([&](Actor *a) {
-			fn(*a);
-		});
-	}
+	struct GameState {
+		IScene *CurrentScene;
 
-	void ForEachSolid(const std::function<void(Solid &)> &fn) override {
-		Entities.template ForEach<Solid>([&](Solid *s) {
-			fn(*s);
-		});
-	}
-};
+		void Reset(void) {
+			CurrentScene->Reset();
+		}
 
-IWorld *&World();
+		void Tick(void) {
+			CurrentScene->Update();
+			CurrentScene->Render();
+		}
+	};
+
+}// namespace batteries
+
+batteries::IScene *Scene();

@@ -37,18 +37,18 @@ Bullet::Bullet() {
 
 void Bullet::HaltX(void) {
 	Effect::Create(position, Effect::Type::Collect);
-	RemoveEntity(this);
+	Destroy();
 }
 
 void Bullet::HaltY(void) {
 	Effect::Create(position, Effect::Type::Collect);
-	RemoveEntity(this);
+	Destroy();
 }
 
 void Bullet::Update() {
 	if (PlaceMeeting(direction) || CollidesWithSolids(direction)) {
 		Effect::Create(position, Effect::Type::Collect);
-		RemoveEntity(this);
+		Destroy();
 	}
 
 	speed = direction * kBulletMaxSpeed;

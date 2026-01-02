@@ -1,9 +1,11 @@
-#include "player.h"
-#include "../../gamestate.h"
-#include "../../bank.h"
 #include "pti/pti.h"
 
 #include "batteries/juice.h"
+
+#include "../../gamestate.h"
+#include "../../bank.h"
+
+#include "player.h"
 
 constexpr float kPlayerMaxSpeed = 3.0f;
 constexpr float kPlayerAcceleration = 20.0f;
@@ -40,8 +42,9 @@ Player::Player() {
 }
 
 void Player::Squish() {
-	RemoveEntity(this);
 	GetGameState().PlayerIsDead = true;
+	Shake();
+	Destroy();
 }
 
 void Player::Update() {

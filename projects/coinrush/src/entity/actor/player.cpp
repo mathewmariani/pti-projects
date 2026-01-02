@@ -44,7 +44,7 @@ void Player::Hurt(const CoordXY<float> &direction) {
 
 	speed = direction * kPlayerHurtKnockback;
 	GetGameState().PlayerIsDead = true;
-	RemoveEntity(this);
+	Destroy();
 
 	Shake();
 }
@@ -62,9 +62,7 @@ void Player::Update() {
 
 	// collect coins
 	for (auto *coin : GetCollisions<Coin>(this, direction)) {
-		Effect::Create(coin->position);
-		RemoveEntity(coin);
-		GetGameState().Coins++;
+		coin->Collect();
 	}
 }
 

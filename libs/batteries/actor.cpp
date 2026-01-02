@@ -102,7 +102,7 @@ bool Actor::IsGrounded(void) const {
 
 bool Actor::CollidesWithSolids(const CoordXY<int> &dir) const {
 	auto collided = false;
-	World()->ForEachSolid([&](Solid &solid) {
+	Scene()->ForEachSolid([&](Solid &solid) {
 		if (this->Overlaps(&solid, dir)) {
 			collided = true;
 			return;

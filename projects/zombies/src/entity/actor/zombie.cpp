@@ -74,7 +74,7 @@ void Zombie::Hurt(const CoordXY<int> &direction) {
 	if (health <= 0) {
 		// Coin::Create(position);
 		Effect::Create(position, Effect::Type::Collect);
-		RemoveEntity(this);
+		Destroy();
 	}
 }
 

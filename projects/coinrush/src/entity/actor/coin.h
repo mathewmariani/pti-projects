@@ -10,5 +10,7 @@ struct Coin : Actor {
 	void Update() override;
 	void Render() override;
 
+	void Collect();
+
 	bool CanBeMoved(void) const override { return false; }
 };

@@ -31,7 +31,7 @@ Effect::Effect() {
 void Effect::Update() {
 	auto frame = static_cast<int>(timer * kEffectFrameCount);
 	if (frame == (kEffectFrameMod)) {
-		RemoveEntity(this);
+		Destroy();
 	}
 }
 

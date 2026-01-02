@@ -17,9 +17,7 @@ bool show_overlays = false;
 
 static void load(void) {
 	GameStateInit();
-	batteries::reload();
-
-	ChangeLevels();
+	// batteries::reload();
 }
 
 static void init(void) {
@@ -64,7 +62,7 @@ static void cleanup(void) {
 static void frame(void) {
 	auto &gameState = GetGameState();
 	if (pti_down(PTI_DBG)) {
-		GameStateReset();
+		GetGameState().Reset();
 		load();
 		return;
 	}
@@ -73,18 +71,12 @@ static void frame(void) {
 		gameState.ResetTimer += PTI_DELTA;
 		if (gameState.ResetTimer >= kDeathResetTimer) {
 			gameState.Deaths++;
-			ChangeLevels();
+			GameStateInit();
 			return;
 		}
 	}
 
-	GameStateTick();
-
-	pti_cls(0xffef7d57);
-	pti_map(0, 0);
-
-	RenderAllEntities();
-
+	GetGameState().Tick();
 	DoShake();
 
 	/* render ui */
