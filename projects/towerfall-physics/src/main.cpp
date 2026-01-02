@@ -3,17 +3,11 @@
 
 /* batteries */
 #include "batteries/assets.h"
-#include "batteries/registry.h"
+#include "batteries/helper.h"
+#include "batteries/juice.h"
 
 #include "bank.h"
 #include "gamestate.h"
-
-/* solids */
-#include "entity/solid/platform.h"
-
-/* actors */
-#include "entity/actor/player.h"
-
 
 #include <math.h>
 #include <string>
@@ -28,34 +22,7 @@ bool show_overlays = false;
 
 static void load(void) {
 	GameStateInit();
-	batteries::reload();
-
-	int i, j, t;
-	for (i = 0; i < EN_ROOM_COLS; i++) {
-		for (j = 0; j < EN_ROOM_ROWS; j++) {
-			t = pti_mget(i, j);
-			switch (t) {
-				case 48: {
-					if (auto *e = CreateEntity<Player>(); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-					}
-				} break;
-				case 51:
-					if (auto *e = CreateEntity<Platform>(Platform::Type::Vertical); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-					}
-					break;
-				case 52:
-					if (auto *e = CreateEntity<Platform>(Platform::Type::Horizontal); e) {
-						e->SetLocation({XPOS(i), YPOS(j)});
-						pti_mset(i, j, 0);
-					}
-					break;
-			}
-		}
-	}
+	// batteries::reload();
 }
 
 static void init(void) {
@@ -65,6 +32,10 @@ static void init(void) {
 	bitmap_player = batteries::sprite("assets/dog.ase");
 	bitmap_platform = batteries::sprite("assets/platform.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
+
+	GetGameState().levels = {
+			batteries::tilemap("assets/tilemap.ase"),
+	};
 
 	pti_set_tilemap(tilemap);
 	pti_set_tileset(tileset);
@@ -83,7 +54,7 @@ static void cleanup(void) {
 static void frame(void) {
 	auto &gameState = GetGameState();
 	if (pti_down(PTI_DBG)) {
-		GameStateReset();
+		GetGameState().Reset();
 		load();
 		return;
 	}
@@ -91,18 +62,14 @@ static void frame(void) {
 	if (gameState.PlayerIsDead) {
 		gameState.ResetTimer += PTI_DELTA;
 		if (gameState.ResetTimer >= kDeathResetTimer) {
-			GameStateReset();
-			load();
+			gameState.Deaths++;
+			GameStateInit();
 			return;
 		}
 	}
 
-	GameStateTick();
-
-	pti_cls(0xffef7d57);
-
-	pti_map(0, 0);
-	RenderAllEntities();
+	GetGameState().Tick();
+	DoShake();
 
 #if defined(PTI_DEBUG)
 	if (show_overlays) {
