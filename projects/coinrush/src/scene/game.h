@@ -14,7 +14,6 @@
 #include "../entity/solid/platform.h"
 #include "../entity/solid/shooter.h"
 
-
 using BasicScene = batteries::Scene<256, Bullet, Coin, Effect, Flag, Goomba, Player, Shooter, Platform>;
 
 struct GameScene : public BasicScene {

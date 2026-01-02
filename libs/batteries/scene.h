@@ -12,17 +12,24 @@ namespace batteries {
 
 	struct IScene {
 		virtual ~IScene() = default;
+		virtual void Reset(void) = 0;
+		virtual void Init(void) = 0;
+		virtual void Update(void) = 0;
+		virtual void Render(void) = 0;
 		virtual void RemoveEntity(EntityBase *entity) = 0;
 		virtual void ForEachActor(const std::function<void(Actor &)> &fn) = 0;
 		virtual void ForEachSolid(const std::function<void(Solid &)> &fn) = 0;
 	};
 
-
 	template<size_t Max, typename... Types>
 	struct Scene : IScene {
-		void Reset() {
+		void Reset() override {
 			entities.Clear();
 		}
+
+		virtual void Init(void) override {};
+		virtual void Update(void) override {};
+		virtual void Render(void) override {};
 
 		void ForEachActor(const std::function<void(Actor &)> &fn) override {
 			for (auto *actor : entities.template GetList<Actor>()) {
@@ -80,10 +87,6 @@ namespace batteries {
 				e->Render();
 			});
 		}
-
-		virtual void Init(void) {};
-		virtual void Update(void) {};
-		virtual void Render(void) {};
 
 	private:
 		EntityManager<Max, Types...> entities;

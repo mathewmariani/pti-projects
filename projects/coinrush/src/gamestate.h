@@ -40,9 +40,7 @@ enum class SceneType {
 	Game = 0,
 };
 
-using CoinRushGameState = batteries::GameState<Bullet, Coin, Effect, Flag, Goomba, Player, Shooter, Platform>;
-
-struct GameState final : public CoinRushGameState {
+struct GameState final : public batteries::GameState {
 	void SwitchScenes(SceneType type);
 
 	uint8_t Coins = 0;

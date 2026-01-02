@@ -25,10 +25,6 @@ void GameState::SwitchScenes(SceneType type) {
 
 static auto _gameState = std::make_unique<GameState>();
 
-batteries::IGameState *World() {
-	return (batteries::IGameState *) _gameState.get();
-}
-
 batteries::IScene *Scene() {
 	return (batteries::IScene *) _gameState->CurrentScene;
 }
