@@ -1,11 +1,8 @@
 #pragma once
 
+#include <unordered_map>
 #include <variant>
 #include <vector>
-
-// batteries
-#include "batteries/gamestate.h"
-#include "batteries/registry.h"
 
 // actors
 #include "entity/actor/bullet.h"
@@ -19,6 +16,14 @@
 #include "entity/solid/platform.h"
 #include "entity/solid/shooter.h"
 
+// scenes
+#include "scene/game.h"
+
+// batteries
+#include "batteries/gamestate.h"
+#include "batteries/registry.h"
+#include "batteries/scene.h"
+
 typedef struct pti_tilemap_t pti_tilemap_t;
 
 constexpr int kScreenWidth = 320;
@@ -31,9 +36,15 @@ constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 #define PTI_DELTA (1.0 / 30.0)
 constexpr float kDeathResetTimer = 2.0f;
 
+enum class SceneType {
+	Game = 0,
+};
+
 using ThisNeedsAName = GameWorld<Bullet, Coin, Effect, Flag, Goomba, Player, Shooter, Platform>;
 
 struct GameState final : public ThisNeedsAName {
+	void SwitchScenes(SceneType type);
+
 	uint8_t Coins = 0;
 	uint8_t Deaths = 0;
 	int CurrentLevelIndex = -1;
@@ -42,6 +53,9 @@ struct GameState final : public ThisNeedsAName {
 
 	bool PlayerIsDead = false;
 	float ResetTimer = 0.0f;
+
+private:
+	GameScene gameScene;
 };
 
 GameState &GetGameState();
@@ -50,31 +64,23 @@ void GameStateInit();
 void GameStateReset();
 void GameStateTick();
 
-void ChangeLevels();
-
 void RenderAllEntities();
 
+void ChangeLevels();
+
 template<typename T, typename... Args>
-EntityBase *CreateEntity(Args &&...args) {
-	return GetGameState().Entities.Create<T>(std::forward<Args>(args)...);
+inline EntityBase *CreateEntity(Args &&...args) {
+	return GetGameState().CurrentScene->CreateEntity<T>(std::forward<Args>(args)...);
 }
 
 void RemoveEntity(EntityBase *entity);
 
 template<typename T>
-std::vector<T *> GetEntitiesOfType() {
-	return GetGameState().Entities.GetList<T>();
+inline std::vector<T *> GetEntitiesOfType() {
+	return GetGameState().CurrentScene->GetEntitiesOfType<T>();
 }
 
 template<typename T>
-std::vector<T *> GetCollisions(EntityBase *subject, const CoordXY<int> &dir) {
-	std::vector<T *> result;
-	result.reserve(kMaxEntities);
-
-	GetGameState().Entities.ForEach<T>([&](T *other) {
-		if (subject->Overlaps(other, dir)) {
-			result.push_back(other);
-		}
-	});
-	return result;
+inline std::vector<T *> GetCollisions(EntityBase *subject, const CoordXY<int> &dir) {
+	return GetGameState().CurrentScene->GetCollisions<T>(subject, dir);
 }
