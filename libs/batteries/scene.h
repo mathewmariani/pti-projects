@@ -12,6 +12,7 @@ namespace batteries {
 
 	struct IScene {
 		virtual ~IScene() = default;
+		virtual void RemoveEntity(EntityBase *entity) = 0;
 		virtual void ForEachActor(const std::function<void(Actor &)> &fn) = 0;
 		virtual void ForEachSolid(const std::function<void(Solid &)> &fn) = 0;
 	};
@@ -40,7 +41,7 @@ namespace batteries {
 			return entities.template Create<T>(std::forward<Args>(args)...);
 		}
 
-		void RemoveEntity(EntityBase *entity) {
+		void RemoveEntity(EntityBase *entity) override {
 			if (entity) {
 				entities.RemoveAt(entity->id);
 			}

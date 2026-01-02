@@ -63,19 +63,19 @@ GameState &GetGameState();
 void GameStateInit();
 void ChangeLevels();
 
+// helpers:
+
 template<typename T, typename... Args>
 inline EntityBase *CreateEntity(Args &&...args) {
-	return GetGameState().CurrentScene->CreateEntity<T>(std::forward<Args>(args)...);
+	return ((BasicScene *) Scene())->CreateEntity<T>(std::forward<Args>(args)...);
 }
-
-void RemoveEntity(EntityBase *entity);
 
 template<typename T>
 inline std::vector<T *> GetEntitiesOfType() {
-	return GetGameState().CurrentScene->GetEntitiesOfType<T>();
+	return ((BasicScene *) Scene())->GetEntitiesOfType<T>();
 }
 
 template<typename T>
 inline std::vector<T *> GetCollisions(EntityBase *subject, const CoordXY<int> &dir) {
-	return GetGameState().CurrentScene->GetCollisions<T>(subject, dir);
+	return ((BasicScene *) Scene())->GetCollisions<T>(subject, dir);
 }

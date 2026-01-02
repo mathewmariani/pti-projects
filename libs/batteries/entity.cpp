@@ -4,6 +4,8 @@
 #include "registry.h"
 #include <algorithm>
 
+#include "gamestate.h"
+
 constexpr int kScreenWidth = 176;
 constexpr int kScreenHeight = 128;
 constexpr int kTileSize = 8;
@@ -130,4 +132,8 @@ bool EntityBase::PlaceMeeting(const CoordXY<int> &dir, int index) const {
 		}
 		return PlaceMeetingForTile(i, j, dir, flags);
 	});
+}
+
+void EntityBase::Destroy(void) {
+	Scene()->RemoveEntity(this);
 }

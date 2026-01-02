@@ -45,10 +45,6 @@ void GameStateInit() {
 	_gameState->ResetTimer = 0.0f;
 }
 
-void RemoveEntity(EntityBase *entity) {
-	_gameState->CurrentScene->RemoveEntity(entity);
-}
-
 void ChangeLevels() {
 	// we reload the assets because we alter the RAM when we load level.
 	batteries::reload();

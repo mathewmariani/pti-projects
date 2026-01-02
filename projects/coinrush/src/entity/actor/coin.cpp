@@ -32,6 +32,12 @@ Coin::Coin() {
 	bh = kCoinHitboxHeight;
 }
 
+void Coin::Collect() {
+	Effect::Create(position);
+	GetGameState().Coins++;
+	Destroy();
+}
+
 void Coin::Update() {
 	// nothing.
 }
