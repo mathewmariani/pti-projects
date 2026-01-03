@@ -45,7 +45,7 @@ void Player::Hurt(const CoordXY<float> &direction) {
 }
 
 void Player::Kill() {
-	RemoveEntity(this);
+	Destroy();
 	Shake();
 }
 

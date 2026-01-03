@@ -15,23 +15,19 @@
 
 void GameState::SwitchScenes(SceneType type) {
 	switch (type) {
-		case SceneType::Menu: {
-			CurrentScene = &menuScene;
-		} break;
 		case SceneType::Game: {
 			CurrentScene = &gameScene;
 		} break;
 	}
 
+	ChangeLevels();
 	CurrentScene->Init();
 }
 
 static auto _gameState = std::make_unique<GameState>();
 
-static IWorld *gWorld = nullptr;
-
-IWorld *&World() {
-	return gWorld;
+batteries::IScene *Scene() {
+	return (batteries::IScene *) _gameState->CurrentScene;
 }
 
 GameState &GetGameState() {
@@ -39,9 +35,7 @@ GameState &GetGameState() {
 }
 
 void GameStateInit() {
-	_gameState->SwitchScenes(SceneType::Menu);
-	World() = &GetGameState();
-	((GameState *) World())->Entities.Clear();
+	_gameState->SwitchScenes(SceneType::Game);
 }
 
 void GameStateReset() {
@@ -55,4 +49,19 @@ void GameStateTick() {
 
 void RemoveEntity(EntityBase *entity) {
 	_gameState->CurrentScene->RemoveEntity(entity);
+}
+
+void ChangeLevels() {
+	// we reload the assets because we alter the RAM when we load level.
+	batteries::reload();
+
+	auto &levels = GetGameState().levels;
+	auto next = -1;
+	do {
+		next = RandomRange(0, levels.size() - 1);
+	} while (next == GetGameState().CurrentLevelIndex);
+
+	pti_set_tilemap(levels[next]);
+
+	_gameState->CurrentScene->Init();
 }

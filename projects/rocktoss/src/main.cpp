@@ -19,9 +19,8 @@ bool show_overlays = false;
 #define YPOS(y) (y * kTileSize)
 
 static void load(void) {
-	// copties the bank contents into memory
-	batteries::reload();
 	GameStateInit();
+	// batteries::reload();
 }
 
 static void init(void) {
@@ -32,7 +31,10 @@ static void init(void) {
 	bitmap_bullet = batteries::sprite("assets/bullet.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
 
-	pti_set_tilemap(tilemap);
+	GetGameState().levels = {
+			batteries::tilemap("assets/tilemap.ase"),
+	};
+
 	pti_set_tileset(tileset);
 	pti_set_font(bitmap_font);
 
@@ -48,7 +50,14 @@ static void cleanup(void) {
 }
 
 static void frame(void) {
-	GameStateTick();
+	auto &gameState = GetGameState();
+	if (pti_down(PTI_DBG)) {
+		GetGameState().Reset();
+		load();
+		return;
+	}
+
+	GetGameState().Tick();
 	DoShake();
 
 #if defined(PTI_DEBUG)
@@ -63,8 +72,6 @@ static void frame(void) {
 #if defined(PTI_DEBUG)
 static const char *SceneTypeToString(SceneType t) {
 	switch (t) {
-		case SceneType::Menu:
-			return "Menu";
 		case SceneType::Game:
 			return "Game";
 	}
@@ -97,9 +104,9 @@ static void debug(void) {
 
 		ImGui::Checkbox("overlay", &show_overlays);
 
-		static SceneType selected = SceneType::Menu;
+		static SceneType selected = SceneType::Game;
 		if (ImGui::BeginCombo("##SceneCombo", SceneTypeToString(selected))) {
-			for (SceneType t : {SceneType::Menu, SceneType::Game}) {
+			for (SceneType t : {SceneType::Game}) {
 				bool is_selected = (selected == t);
 				if (ImGui::Selectable(SceneTypeToString(t), is_selected)) {
 					selected = t;

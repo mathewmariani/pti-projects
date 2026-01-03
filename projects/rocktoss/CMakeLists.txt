@@ -7,7 +7,6 @@ set(ROCKTOSS_HEADERS
 
     # scenes
     src/scene/game.h
-    src/scene/menu.h
 
     # actors
     src/entity/actor/player.h
@@ -19,7 +18,6 @@ set(ROCKTOSS_SRC
 
     # scenes
     src/scene/game.cpp
-    src/scene/menu.cpp
 
     # actors
     src/entity/actor/player.cpp

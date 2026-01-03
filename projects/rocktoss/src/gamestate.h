@@ -1,16 +1,9 @@
 #pragma once
 
-#include <unordered_map>
-#include <variant>
 #include <vector>
-
-// actors
-#include "entity/actor/player.h"
-#include "entity/actor/rock.h"
 
 // scenes
 #include "scene/game.h"
-#include "scene/menu.h"
 
 // batteries
 #include "batteries/gamestate.h"
@@ -29,48 +22,38 @@ constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
 #define PTI_DELTA (1.0 / 30.0)
 constexpr float kDeathResetTimer = 2.0f;
 
-using BasicScene = batteries::Scene<256, Player, Rock>;
-
 enum class SceneType {
-	Menu = 0,
-	Game = 1,
+	Game = 0,
 };
 
-using ThisNeedsAName = GameWorld<Player, Rock>;
-
-struct GameState final : public ThisNeedsAName {
-	BasicScene *CurrentScene;
+struct GameState final : public batteries::GameState {
 	void SwitchScenes(SceneType type);
 
-	// game specific variables
-	int Coins = 0;
+	int CurrentLevelIndex = -1;
+	std::vector<pti_tilemap_t *> levels;
 
 private:
 	GameScene gameScene;
-	MenuScene menuScene;
 };
 
 GameState &GetGameState();
 
 void GameStateInit();
-void GameStateReset();
-void GameStateTick();
+void ChangeLevels();
 
-void RenderAllEntities();
+// helpers:
 
 template<typename T, typename... Args>
 inline EntityBase *CreateEntity(Args &&...args) {
-	return GetGameState().CurrentScene->CreateEntity<T>(std::forward<Args>(args)...);
+	return ((BasicScene *) Scene())->CreateEntity<T>(std::forward<Args>(args)...);
 }
-
-void RemoveEntity(EntityBase *entity);
 
 template<typename T>
 inline std::vector<T *> GetEntitiesOfType() {
-	return GetGameState().CurrentScene->GetEntitiesOfType<T>();
+	return ((BasicScene *) Scene())->GetEntitiesOfType<T>();
 }
 
 template<typename T>
 inline std::vector<T *> GetCollisions(EntityBase *subject, const CoordXY<int> &dir) {
-	return GetGameState().CurrentScene->GetCollisions<T>(subject, dir);
+	return ((BasicScene *) Scene())->GetCollisions<T>(subject, dir);
 }
