@@ -1,4 +1,5 @@
 add_subdirectory(coinrush)
+add_subdirectory(controller)
 add_subdirectory(menu)
 add_subdirectory(platformer)
 add_subdirectory(rocktoss)
