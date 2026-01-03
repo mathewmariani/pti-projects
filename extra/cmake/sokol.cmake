@@ -27,7 +27,8 @@ if(BUILD_WITH_SOKOL)
     target_link_libraries(sokol
         "-framework QuartzCore"
         "-framework Cocoa"
-        "-framework OpenGL")
+        "-framework OpenGL"
+        "-framework AudioToolbox")
   else()
     if (CMAKE_SYSTEM_NAME STREQUAL Linux)
       target_link_libraries(sokol INTERFACE X11 Xi Xcursor GL asound dl m)
