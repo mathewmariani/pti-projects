@@ -11,7 +11,6 @@ static void init(void) {
 	// gfx state
 	pti_dither(0x5a5a);
 	// pti_dither(0xeae0);
-	pti_clip(0, 0, 128, 128);
 }
 
 static void cleanup(void) {}

@@ -108,10 +108,6 @@ static void init(void) {
 	pti_set_font(bitmap_font);
 
 	load();
-
-	/* graphics state: */
-	pti_dither(0x5a5a);
-	pti_clip(0, 0, 240, 135);
 }
 
 static void cleanup(void) {
@@ -137,7 +133,7 @@ static void frame(void) {
 
 	GameStateTick();
 
-	pti_cls(0xffef7d57);
+	pti_cls(0xff575757);
 
 	/* adjust camera */
 	int cam_x, cam_y;
@@ -154,6 +150,7 @@ static void frame(void) {
 	std::snprintf(buffer, sizeof(buffer), "coins: %d\n", gameState.Coins);
 	std::string coin_str(buffer);
 
+	pti_color(0xffffffff);
 	pti_print(coin_str.c_str(), 4, 0);
 }
 

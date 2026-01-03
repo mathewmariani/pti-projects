@@ -49,10 +49,6 @@ static void init(void) {
 	pti_set_font(bitmap_font);
 
 	load();
-
-	/* graphics state: */
-	// pti_dither(0x5a5a);
-	pti_clip(0, 0, kScreenWidth, kScreenHeight);
 }
 
 static void cleanup(void) {
@@ -81,6 +77,8 @@ static void frame(void) {
 
 	/* render ui */
 	char buffer[100];
+
+	pti_color(0xffffffff);
 
 	// coin counter
 	std::snprintf(buffer, sizeof(buffer), "Coins: %d\n", gameState.Coins);

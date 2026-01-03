@@ -32,9 +32,6 @@ static void init(void) {
 	pti_set_font(bitmap_font);
 
 	load();
-
-	/* graphics state: */
-	pti_clip(0, 0, EN_ROOM_WIDTH, EN_ROOM_HEIGHT);
 }
 
 static void cleanup(void) {

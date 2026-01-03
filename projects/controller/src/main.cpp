@@ -22,24 +22,25 @@ bool show_overlays = false;
 
 static void load(void) {
 	GameStateInit();
-	// batteries::reload();
+	batteries::reload();
 }
 
 static void init(void) {
 	batteries::init();
-	tileset = batteries::tileset("assets/tilemap.ase");
-	tilemap = batteries::tilemap("assets/tilemap.ase");
-	bitmap_player = batteries::sprite("assets/dog.ase");
-	bitmap_platform = batteries::sprite("assets/platform.ase");
-	bitmap_font = batteries::sprite("assets/font.ase");
+	bitmap_a = batteries::sprite("assets/btn_a.ase");
+	bitmap_b = batteries::sprite("assets/btn_b.ase");
+	bitmap_x = batteries::sprite("assets/btn_x.ase");
+	bitmap_y = batteries::sprite("assets/btn_y.ase");
 
-	GetGameState().levels = {
-			batteries::tilemap("assets/tilemap.ase"),
-	};
+	bitmap_left = batteries::sprite("assets/btn_left.ase");
+	bitmap_right = batteries::sprite("assets/btn_right.ase");
+	bitmap_up = batteries::sprite("assets/btn_up.ase");
+	bitmap_down = batteries::sprite("assets/btn_down.ase");
 
-	pti_set_tilemap(tilemap);
-	pti_set_tileset(tileset);
-	pti_set_font(bitmap_font);
+	bitmap_start = batteries::sprite("assets/btn_start.ase");
+	bitmap_select = batteries::sprite("assets/btn_select.ase");
+	bitmap_rshoulder = batteries::sprite("assets/btn_rshoulder.ase");
+	bitmap_lshoulder = batteries::sprite("assets/btn_lshoulder.ase");
 
 	load();
 }
@@ -54,15 +55,6 @@ static void frame(void) {
 		GetGameState().Reset();
 		load();
 		return;
-	}
-
-	if (gameState.PlayerIsDead) {
-		gameState.ResetTimer += PTI_DELTA;
-		if (gameState.ResetTimer >= kDeathResetTimer) {
-			gameState.Deaths++;
-			GameStateInit();
-			return;
-		}
 	}
 
 	GetGameState().Tick();
@@ -109,24 +101,24 @@ void debug(void) {
 		}
 	}
 
-	if (ImGui::CollapsingHeader("entities", ImGuiTreeNodeFlags_DefaultOpen)) {
-		auto players = GetEntitiesOfType<Player>();
-		if (players.size() > 0) {
-			auto *player = players[0];
-			ImGui::Text("position: (%d, %d)", player->position.x, player->position.y);
-			ImGui::Text("speed: (%.2f, %.2f)", player->speed.x, player->speed.y);
-			ImGui::Text("grounded: (%s)", player->IsGrounded() ? "true" : "false");
+	// if (ImGui::CollapsingHeader("entities", ImGuiTreeNodeFlags_DefaultOpen)) {
+	// 	auto players = GetEntitiesOfType<Player>();
+	// 	if (players.size() > 0) {
+	// 		auto *player = players[0];
+	// 		ImGui::Text("position: (%d, %d)", player->position.x, player->position.y);
+	// 		ImGui::Text("speed: (%.2f, %.2f)", player->speed.x, player->speed.y);
+	// 		ImGui::Text("grounded: (%s)", player->IsGrounded() ? "true" : "false");
 
-			if (ImGui::Button("hurt")) {
-				std::printf("hurt\n");
-			}
-			if (ImGui::Button("kill")) {
-				std::printf("kill\n");
-			}
-		} else {
-			ImGui::Text("player is dead\n");
-		}
-	}
+	// 		if (ImGui::Button("hurt")) {
+	// 			std::printf("hurt\n");
+	// 		}
+	// 		if (ImGui::Button("kill")) {
+	// 			std::printf("kill\n");
+	// 		}
+	// 	} else {
+	// 		ImGui::Text("player is dead\n");
+	// 	}
+	// }
 
 	ImGui::End();
 }
