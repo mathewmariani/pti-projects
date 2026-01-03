@@ -55,7 +55,10 @@ typedef enum pti_button {
 	PTI_B,
 	PTI_X,
 	PTI_Y,
-
+	PTI_LSHOULDER,
+	PTI_RSHOULDER,
+	PTI_START,
+	PTI_SELECT,
 	PTI_DBG,
 
 	// always last.
