@@ -150,6 +150,7 @@ static void frame(void) {
 	std::snprintf(buffer, sizeof(buffer), "coins: %d\n", gameState.Coins);
 	std::string coin_str(buffer);
 
+	pti_color(0xffffffff);
 	pti_print(coin_str.c_str(), 4, 0);
 }
 

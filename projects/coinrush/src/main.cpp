@@ -78,6 +78,8 @@ static void frame(void) {
 	/* render ui */
 	char buffer[100];
 
+	pti_color(0xffffffff);
+
 	// coin counter
 	std::snprintf(buffer, sizeof(buffer), "Coins: %d\n", gameState.Coins);
 	std::string coin_str(buffer);

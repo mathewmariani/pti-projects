@@ -123,6 +123,7 @@ void MenuScene::Update(void) {
 
 void MenuScene::Render(void) {
 	pti_cls(0xff575757);
+	pti_color(0xffffffff);
 
 	pti_print("OPTIONS", 12, 8);
 
