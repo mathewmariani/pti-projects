@@ -3,7 +3,6 @@
 
 // sokol
 #include "sokol/sokol_app.h"
-#include "sokol/sokol_audio.h"
 #include "sokol/sokol_log.h"
 
 #if defined(PTI_DEBUG)
@@ -76,11 +75,6 @@ sapp_desc sokol_main(int argc, char *argv[]) {
 
 static struct {
 	struct {
-		unsigned int tick;
-		int tick_accum;
-	} timing;
-
-	struct {
 		GLuint vao;
 		GLuint vbo;
 		GLuint color0;
@@ -91,9 +85,6 @@ static struct {
 	} gl;
 
 	bool crt = false;
-
-	pti_audio_t tone;
-
 
 #if defined(PTI_TRACE_HOOKS)
 	pti_trace_hooks hooks;
@@ -131,7 +122,7 @@ static GLuint create_program(GLuint vs, GLuint fs) {
 	return program;
 }
 
-static void sokol_init_gfx(void) {
+static void gl_init(void) {
 	const char *default_vs_src =
 #if defined(SOKOL_GLCORE)
 			"#version 410\n"
@@ -265,7 +256,7 @@ static void sokol_init_gfx(void) {
 	glDeleteShader(default_fs_stage);
 }
 
-void sokol_gfx_draw() {
+void gl_draw() {
 	const int width = _pti.vm.screen.width;
 	const int height = _pti.vm.screen.height;
 
@@ -289,43 +280,6 @@ void sokol_gfx_draw() {
 	glBindTexture(GL_TEXTURE_2D, state.gl.color0);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
-
-static void sokol_audio_cb(float *buffer, int num_frames, int num_channels) {
-	// always clear buffer
-	memset(buffer, 0, num_frames * num_channels * sizeof(float));
-
-	for (int i = 0; i < num_frames; i++) {
-		float mixed = 0.0f;
-
-		// mix your 4 virtual channels
-		for (int ch = 0; ch < PTI_NUM_CHANNELS; ch++) {
-			if (!_pti.vm.audio.channel[ch].playing) continue;
-
-			pti_audio_t *sfx = _pti.vm.audio.channel[ch].sfx;
-			int pos = _pti.vm.audio.channel[ch].position;
-
-			mixed += sfx->samples[pos];
-
-			pos++;
-			if (pos >= sfx->num_frames) {
-				if (_pti.vm.audio.channel[ch].looping) {
-					pos = 0;
-				} else {
-					_pti.vm.audio.channel[ch].playing = false;
-					pos = sfx->num_frames - 1;
-				}
-			}
-
-			_pti.vm.audio.channel[ch].position = pos;
-		}
-
-		// write mixed sample to all output channels
-		for (int c = 0; c < num_channels; c++) {
-			buffer[i * num_channels + c] = mixed;
-		}
-	}
-}
-
 
 #if defined(PTI_DEBUG)
 void imgui_debug_draw() {
@@ -525,15 +479,7 @@ static void _pti_set_tileset(pti_tileset_t *ptr) {
 
 static void init(void) {
 	/* initialize graphics */
-	sokol_init_gfx();
-
-	/* initialize audio */
-	auto audio_desc = (saudio_desc) {
-			.stream_cb = sokol_audio_cb,
-			.logger = {
-					.func = slog_func,
-			}};
-	saudio_setup(audio_desc);
+	gl_init();
 
 #if defined(PTI_DEBUG)
 	/* initialize debug ui */
@@ -556,7 +502,6 @@ static void init(void) {
 }
 
 static void cleanup(void) {
-	saudio_shutdown();
 	glDeleteVertexArrays(1, &state.gl.vao);
 	glDeleteBuffers(1, &state.gl.vbo);
 	glDeleteTextures(1, &state.gl.color0);
@@ -567,33 +512,17 @@ static void cleanup(void) {
 #endif
 }
 
-#define PTI_FRAMERATE (30.0)
-#define PTI_DELTA (1.0 / PTI_FRAMERATE)
-#define TICK_DURATION_NS (PTI_DELTA * 1e9)
-#define TICK_TOLERANCE_NS (1000000)
-
 static void frame(void) {
+	if (_pti.vm.flags == PTI_REQUEST_SHUTDOWN) {
+		sapp_request_quit();
+		return;
+	}
+
 	double frame_time_ns = sapp_frame_duration() * 1000000000.0;
-	if (frame_time_ns > TICK_DURATION_NS) {
-		frame_time_ns = TICK_DURATION_NS;
-	}
-
-	state.timing.tick_accum += frame_time_ns;
-	while (state.timing.tick_accum + TICK_TOLERANCE_NS >= TICK_DURATION_NS) {
-		state.timing.tick_accum -= TICK_DURATION_NS;
-		state.timing.tick++;
-
-		if (_pti.desc.frame_cb != NULL) {
-			_pti.desc.frame_cb();
-		}
-
-		for (int i = 0; i < PTI_BUTTON_COUNT; i++) {
-			_pti.vm.hardware.btn_state[i] &= ~(_PTI_KEY_PRESSED | _PTI_KEY_RELEASED);
-		}
-	}
+	pti_tick(frame_time_ns);
 
 	/* draw graphics */
-	sokol_gfx_draw();
+	gl_draw();
 
 #if defined(PTI_DEBUG)
 	/* debug ui */
@@ -608,15 +537,13 @@ static void frame(void) {
 
 static inline void btn_down(int pti_key, int sapp_key, int sapp_alt, const sapp_event *ev) {
 	if (ev->key_code == sapp_key || ev->key_code == sapp_alt) {
-		_pti.vm.hardware.btn_state[pti_key] |= (_PTI_KEY_STATE | _PTI_KEY_PRESSED);
-		_pti.vm.hardware.btn_state[pti_key] &= ~_PTI_KEY_RELEASED;
+		pti_event(PTI_EVENTTYPE_KEY_DOWN, pti_key);
 	}
 }
 
 static inline void btn_up(int pti_key, int sapp_key, int sapp_alt, const sapp_event *ev) {
 	if (ev->key_code == sapp_key || ev->key_code == sapp_alt) {
-		_pti.vm.hardware.btn_state[pti_key] &= ~(_PTI_KEY_STATE | _PTI_KEY_PRESSED);
-		_pti.vm.hardware.btn_state[pti_key] |= _PTI_KEY_RELEASED;
+		pti_event(PTI_EVENTTYPE_KEY_UP, pti_key);
 	}
 }
 

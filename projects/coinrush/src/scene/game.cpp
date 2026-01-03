@@ -100,7 +100,7 @@ void GameScene::Update(void) {
 }
 
 void GameScene::Render(void) {
-	pti_cls(0xffef7d57);
+	pti_cls(0xff575757);
 	pti_map(0, 0);
 
 	RenderEntitiesOfType<EntityBase>();
