@@ -22,21 +22,13 @@ bool show_overlays = false;
 
 static void load(void) {
 	GameStateInit();
-	// batteries::reload();
+	batteries::reload();
 }
 
 static void init(void) {
 	batteries::init();
-	tileset = batteries::tileset("assets/tilemap.ase");
-	tilemap = batteries::tilemap("assets/tilemap.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
 
-	GetGameState().levels = {
-			batteries::tilemap("assets/tilemap.ase"),
-	};
-
-	pti_set_tilemap(tilemap);
-	pti_set_tileset(tileset);
 	pti_set_font(bitmap_font);
 
 	load();
@@ -55,15 +47,6 @@ static void frame(void) {
 		GetGameState().Reset();
 		load();
 		return;
-	}
-
-	if (gameState.PlayerIsDead) {
-		gameState.ResetTimer += PTI_DELTA;
-		if (gameState.ResetTimer >= kDeathResetTimer) {
-			gameState.Deaths++;
-			GameStateInit();
-			return;
-		}
 	}
 
 	GetGameState().Tick();
