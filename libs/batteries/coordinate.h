@@ -20,10 +20,10 @@ struct CoordXY {
 		return {Up, Left, Down, Right};
 	}
 
-	CoordXY() : x(0), y(0) {}
-	CoordXY(T x_, T y_) : x(x_), y(y_) {}
-	CoordXY(const CoordXY &) = default;
-	CoordXY(CoordXY &&) = default;
+	constexpr CoordXY() : x(0), y(0) {}
+	constexpr CoordXY(T x_, T y_) : x(x_), y(y_) {}
+	constexpr CoordXY(const CoordXY &) = default;
+	constexpr CoordXY(CoordXY &&) = default;
 
 	CoordXY<T> operator*(const T rhs) const {
 		return {x * rhs, y * rhs};
@@ -82,6 +82,12 @@ template<typename T, typename U>
 auto operator*(U lhs, const CoordXY<T> &rhs)
 		-> CoordXY<decltype(lhs * rhs.x)> {
 	return {lhs * rhs.x, lhs * rhs.y};
+}
+
+template<typename T>
+auto operator*(const CoordXY<float> &lhs, const CoordXY<T> &rhs)
+		-> CoordXY<float> {
+	return {lhs.x * static_cast<float>(rhs.x), lhs.y * static_cast<float>(rhs.y)};
 }
 
 template<>
