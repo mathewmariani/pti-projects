@@ -9,6 +9,7 @@ export const SYMLINKS = [
   { source: `build/${folder}/projects/zombies`, target: `website/public/projects/zombies` },
   { source: `build/${folder}/projects/coinrush`, target: `website/public/projects/coinrush` },
   { source: `build/${folder}/projects/rocktoss`, target: `website/public/projects/rocktoss` },
+  { source: `build/${folder}/projects/menu`, target: `website/public/projects/menu` },
 ] as const;
 
 export const HomeLink = (): string => '/pti-projects/';
