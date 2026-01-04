@@ -2,23 +2,27 @@
 
 #include "batteries/actor.h"
 
-enum class PlayerState : uint8_t {
-	Normal,
-	Death,
-};
-
 struct Player : Actor {
-	Player();
+	enum class State {
+		Idle,
+		Move,
+	};
 
-	void Hurt(const CoordXY<float> &direction);
+	Player();
 
 	void Update() override;
 	void Render() override;
 
 private:
-	void HandleHorizontalMovement();
-	void HandleVerticalMovement();
+	bool Walkable(const CoordXY<int> &distance) const;
+	void WaitForInput();
+	void HandleMovement();
 
 private:
-	PlayerState state;
+	State state;
+	int move_distance = 0;
+
+	int animation_timer = 0;
+	int animation_index = 0;
+	int animation_frame = 0;
 };

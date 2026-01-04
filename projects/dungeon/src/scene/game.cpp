@@ -2,16 +2,29 @@
 
 #include "batteries/actor.h"
 #include "batteries/solid.h"
+#include "batteries/assets.h"
 
 #include "game.h"
+#include "../bank.h"
 
 #include "../entity/actor/player.h"
 
 void GameScene::Init(void) {
+	batteries::init();
+	bitmap_player = batteries::sprite("assets/link.ase");
+	tilemap = batteries::tilemap("assets/tilemap.ase");
+	tileset = batteries::tileset("assets/tilemap.ase");
+
+	pti_set_tilemap(tilemap);
+	pti_set_tileset(tileset);
+
+	// reload loads the specific bank into pti
+	batteries::reload();
+
 	Reset();
 
 	if (auto *e = CreateEntity<Player>(); e) {
-		e->SetLocation({64, 64});
+		e->SetLocation({56, 56});
 	}
 }
 

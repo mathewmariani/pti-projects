@@ -3,7 +3,6 @@
 
 #include "bank.h"
 #include "gamestate.h"
-#include "batteries/assets.h"
 #include "batteries/helper.h"
 #include "batteries/juice.h"
 
@@ -19,12 +18,6 @@ bool show_overlays = false;
 #define YPOS(y) (y * kTileSize)
 
 static void init(void) {
-	batteries::init();
-	bitmap_player = batteries::sprite("assets/dog.ase");
-
-	// reload loads the specific bank into pti
-	batteries::reload();
-
 	GameStateInit();
 }
 
@@ -107,7 +100,7 @@ void debug(void) {
 }
 #endif
 
-constexpr int kScreenWidth = 176;
+constexpr int kScreenWidth = 128;
 constexpr int kScreenHeight = 128;
 
 pti_desc pti_main(int argc, char *argv[]) {
@@ -119,7 +112,7 @@ pti_desc pti_main(int argc, char *argv[]) {
 #if defined(PTI_DEBUG)
 			.debug_cb = debug,
 #endif
-			.memory_size = _pti_kilobytes(512), /* 256KB */
+			.memory_size = _pti_kilobytes(256),
 			.width = kScreenWidth,
 			.height = kScreenHeight,
 	};
