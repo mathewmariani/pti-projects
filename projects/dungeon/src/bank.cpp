@@ -1,0 +1,8 @@
+#include "bank.h"
+
+// tilemap + tileset
+pti_tilemap_t *tilemap = nullptr;
+pti_tileset_t *tileset = nullptr;
+
+// entities
+pti_bitmap_t *bitmap_player = nullptr;
