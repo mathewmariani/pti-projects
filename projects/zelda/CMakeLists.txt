@@ -1,7 +1,7 @@
-project(dungeon)
+project(zelda)
 
-#=== EXECUTABLE: dungeon_cpp
-set(DUNGEON_HEADERS
+#=== EXECUTABLE: zelda_cpp
+set(ZELDA_HEADERS
     src/bank.h
     src/gamestate.h
 
@@ -11,7 +11,7 @@ set(DUNGEON_HEADERS
     # actors
     src/entity/actor/player.h)
 
-set(DUNGEON_SRC
+set(ZELDA_SRC
     src/bank.cpp
     src/gamestate.cpp
 
@@ -21,9 +21,9 @@ set(DUNGEON_SRC
     # actors
     src/entity/actor/player.cpp)
 
-set(DUNGEON_FILES
+set(ZELDA_FILES
     src/main.cpp
-    ${DUNGEON_SRC}
-    ${DUNGEON_HEADERS})
+    ${ZELDA_SRC}
+    ${ZELDA_HEADERS})
 
-pti_project(dungeon "${DUNGEON_FILES}")
+pti_project(zelda "${ZELDA_FILES}")
