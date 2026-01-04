@@ -5,6 +5,7 @@
 
 #include "pti/pti.h"
 #include "cute/cute_aseprite.h"
+#include "dr/dr_wav.h"
 #include "stb/stb_vorbis.c"
 
 namespace batteries {
@@ -12,6 +13,7 @@ namespace batteries {
 	static std::unordered_map<std::string, pti_bitmap_t> _sprite_cache;
 	static std::unordered_map<std::string, pti_tileset_t> _tileset_cache;
 	static std::unordered_map<std::string, pti_tilemap_t> _tilemap_cache;
+	static std::unordered_map<std::string, pti_sound_t> _sound_cache;
 
 	pti_bank_t bank;
 
@@ -112,6 +114,27 @@ namespace batteries {
 		return tilemap;
 	}
 
+	pti_sound_t __create_sound_wav(const std::string &path) {
+		unsigned int channels;
+		unsigned int rate;
+		drwav_uint64 count;
+		int16_t* samples = (int16_t* )drwav_open_file_and_read_pcm_frames_s16(path.c_str(), &channels, &rate, &count, NULL);
+
+		const size_t size = sizeof(int16_t) * count * channels;
+
+		pti_sound_t sound = {0};
+		sound.channels = channels;
+		sound.rate = rate;
+		sound.samples_count = count;
+		sound.samples = (int16_t *) pti_alloc(&bank, size);
+		pti_memcpy(sound.samples, samples, size);
+	
+		/* release cute resources. */
+		drwav_free(samples, NULL);
+
+		return sound;
+	}
+
 	pti_bitmap_t *sprite(const std::string &path) {
 		if (_sprite_cache.find(path) == _sprite_cache.end()) {
 			_sprite_cache.emplace(std::make_pair(path, __create_bitmap(path)));
@@ -131,6 +154,13 @@ namespace batteries {
 			_tilemap_cache.emplace(std::make_pair(path, __create_tilemap(path)));
 		}
 		return &_tilemap_cache[path];
+	}
+
+	pti_sound_t *sound_wav(const std::string &path) {
+		if (_sound_cache.find(path) == _sound_cache.end()) {
+			_sound_cache.emplace(std::make_pair(path, __create_sound_wav(path)));
+		}
+		return &_sound_cache[path];
 	}
 
 	pti_sound_t create_sine_tone(float frequency, float amplitude, float duration_seconds, int sample_rate, int num_channels) {

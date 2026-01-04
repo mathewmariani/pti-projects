@@ -15,6 +15,7 @@ namespace batteries {
 	extern pti_bitmap_t *sprite(const std::string &path);
 	extern pti_tileset_t *tileset(const std::string &path);
 	extern pti_tilemap_t *tilemap(const std::string &path);
+	extern pti_sound_t *sound_wav(const std::string &path);
 
 	extern pti_sound_t create_sine_tone(float frequency, float amplitude, float duration_seconds, int sample_rate, int num_channels);
 }// namespace batteries
