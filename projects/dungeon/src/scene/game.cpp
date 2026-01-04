@@ -22,6 +22,10 @@ typedef struct pti_tilemap_t pti_tilemap_t;
 
 void GameScene::Init(void) {
 	Reset();
+
+	if (auto *e = CreateEntity<Player>(); e) {
+		e->SetLocation({XPOS(8), YPOS(8)});
+	}
 }
 
 void GameScene::Update(void) {

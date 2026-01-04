@@ -22,6 +22,9 @@ static void init(void) {
 	batteries::init();
 	bitmap_player = batteries::sprite("assets/dog.ase");
 
+	// reload loads the specific bank into pti
+	batteries::reload();
+
 	GameStateInit();
 }
 
