@@ -961,6 +961,9 @@ void pti_rectf(int x, int y, int w, int h, uint64_t color) {
 }
 
 void pti_map(int x, int y) {
+	if (_pti.vm.tilemap == NULL) {
+		return;
+	}
 	const int map_w = _pti.vm.tilemap->width;
 	const int map_h = _pti.vm.tilemap->height;
 

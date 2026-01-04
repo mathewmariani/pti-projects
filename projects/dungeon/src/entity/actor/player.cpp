@@ -35,18 +35,9 @@ Player::Player() {
 
 void Player::Hurt(const CoordXY<float> &direction) {
 	speed = direction * kPlayerHurtKnockback;
-	health -= 1;
-
-	if (health <= 0) {
-		GetGameState().PlayerIsDead = true;
-		Shake();
-		Destroy();
-	}
 }
 
 void Player::Update() {
-	shoot_timer -= PTI_DELTA;
-
 	HandleHorizontalMovement();
 	HandleVerticalMovement();
 

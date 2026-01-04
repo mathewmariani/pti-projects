@@ -31,16 +31,6 @@ enum class SceneType {
 struct GameState final : public batteries::GameState {
 	void SwitchScenes(SceneType type);
 
-	uint8_t Coins = 0;
-	uint8_t Deaths = 0;
-	int CurrentLevelIndex = -1;
-
-	std::vector<pti_tilemap_t *> levels;
-	Player *player;
-
-	bool PlayerIsDead = false;
-	float ResetTimer = 0.0f;
-
 private:
 	GameScene gameScene;
 };

@@ -12,8 +12,6 @@ struct Player : Actor {
 
 	void Hurt(const CoordXY<float> &direction);
 
-	int GetHealth() const { return health; }
-
 	void Update() override;
 	void Render() override;
 
@@ -23,6 +21,4 @@ private:
 
 private:
 	PlayerState state;
-	float shoot_timer;
-	int health = 5;
 };

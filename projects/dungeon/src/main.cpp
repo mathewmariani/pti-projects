@@ -18,25 +18,11 @@ bool show_overlays = false;
 #define XPOS(x) (x * kTileSize)
 #define YPOS(y) (y * kTileSize)
 
-static void load(void) {
-	GameStateInit();
-	// batteries::reload();
-}
-
 static void init(void) {
 	batteries::init();
-	tileset = batteries::tileset("assets/tilemap.ase");
-	tilemap = batteries::tilemap("assets/tilemap.ase");
 	bitmap_player = batteries::sprite("assets/dog.ase");
 
-	GetGameState().levels = {
-			batteries::tilemap("assets/tilemap.ase"),
-	};
-
-	pti_set_tilemap(tilemap);
-	pti_set_tileset(tileset);
-
-	load();
+	GameStateInit();
 }
 
 static void cleanup(void) {
@@ -47,16 +33,8 @@ static void frame(void) {
 	auto &gameState = GetGameState();
 	if (pti_down(PTI_DBG)) {
 		GetGameState().Reset();
-		load();
+		GameStateInit();
 		return;
-	}
-
-	if (gameState.PlayerIsDead) {
-		gameState.ResetTimer += PTI_DELTA;
-		if (gameState.ResetTimer >= kDeathResetTimer) {
-			GameStateInit();
-			return;
-		}
 	}
 
 	GetGameState().Tick();
