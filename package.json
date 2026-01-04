@@ -7,6 +7,7 @@
     "libs:sokol": "./libs/sokol/update.sh",
     "libs:stb": "./libs/stb/update.sh",
     "libs:tracy": "./libs/tracy/update.sh",
+    "libs:stb": "./libs/stb/update.sh",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",

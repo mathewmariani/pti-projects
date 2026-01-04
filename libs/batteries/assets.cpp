@@ -5,6 +5,7 @@
 
 #include "pti/pti.h"
 #include "cute/cute_aseprite.h"
+#include "stb/stb_vorbis.c"
 
 namespace batteries {
 
@@ -130,5 +131,45 @@ namespace batteries {
 			_tilemap_cache.emplace(std::make_pair(path, __create_tilemap(path)));
 		}
 		return &_tilemap_cache[path];
+	}
+
+	pti_sound_t create_sine_tone(float frequency, float amplitude, float duration_seconds, int sample_rate, int num_channels) {
+		pti_sound_t tone = {0};
+	
+		tone.samples_count = (int) (duration_seconds * sample_rate);
+		tone.channels = num_channels;
+	
+		tone.samples = (int16_t *) pti_alloc(&bank, sizeof(int16_t) * tone.samples_count * num_channels);
+	
+		if (!tone.samples) {
+			tone.samples_count = 0;
+			tone.channels = 0;
+			return tone;// allocation failed
+		}
+	
+		if (amplitude > 1.0f) amplitude = 1.0f;
+		if (amplitude < 0.0f) amplitude = 0.0f;
+	
+		float phase = 0.0f;
+		float phase_inc = 2.0f * 3.14159265f * frequency / (float) sample_rate;
+	
+		for (int i = 0; i < tone.samples_count; i++) {
+			float value = sinf(phase) * amplitude;
+	
+			// clamp
+			if (value > 1.0f) value = 1.0f;
+			if (value < -1.0f) value = -1.0f;
+	
+			int16_t sample = (int16_t) (value * 32767.0f);
+	
+			for (int ch = 0; ch < num_channels; ch++) {
+				tone.samples[i * num_channels + ch] = sample;
+			}
+	
+			phase += phase_inc;
+			if (phase >= 2.0f * 3.14159265f) phase -= 2.0f * 3.14159265f;
+		}
+	
+		return tone;
 	}
 }// namespace batteries

@@ -4,37 +4,8 @@
 
 #include "pti/pti.h"
 
-#include <array>
-#include <variant>
-#include <type_traits>
-#include <cstdio>
-
-pti_audio_t tone;
-int current_index = 0;
-
-void MenuScene::Init(void) {
-	constexpr float sample_rate = 44100.0f;
-	constexpr float beep_duration = 0.1f;
-	const int num_frames = (int) (sample_rate * beep_duration);
-
-	current_index = 0;
-	tone.num_frames = num_frames;
-	tone.num_channels = 1;
-	tone.samples = (float *) malloc(tone.num_frames * sizeof(float));
-
-	float frequency = 300.0f;
-	float amplitude = 0.15f;
-	float phase = 0.0f;
-
-	for (int i = 0; i < tone.num_frames; i++) {
-		tone.samples[i] = sinf(phase) * amplitude;
-		phase += 2.0f * 3.14159265f * frequency / sample_rate;
-		if (phase >= 2.0f * 3.14159265f) phase -= 2.0f * 3.14159265f;
-	}
-}
-
-void MenuScene::Update(void) {
-}
+void MenuScene::Init(void) {}
+void MenuScene::Update(void) {}
 
 #define DRAW_BTN(btn, bitmap, x, y)                          \
 	do {                                                     \

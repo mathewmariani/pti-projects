@@ -20,6 +20,7 @@ include("extra/cmake/cute.cmake")
 include("extra/cmake/dbgui.cmake")
 include("extra/cmake/imgui.cmake")
 include("extra/cmake/sokol.cmake")
+include("extra/cmake/stb.cmake")
 include("extra/cmake/tracy.cmake")
 include("extra/cmake/pti.cmake")
 
