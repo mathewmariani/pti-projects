@@ -1,11 +1,9 @@
 #include "pti/pti.h"
 
-#include "../../gamestate.h"
-#include "../../bank.h"
-
-#include "batteries/juice.h"
-
 #include "player.h"
+
+#include "../../bank.h"      /* bitmap_player */
+#include "../../gamestate.h" /* PTI_DELTA */
 
 constexpr float kPlayerMaxSpeed = 0.8f;
 constexpr float kPlayerAcceleration = 5.0f;
@@ -40,13 +38,6 @@ void Player::Hurt(const CoordXY<float> &direction) {
 void Player::Update() {
 	HandleHorizontalMovement();
 	HandleVerticalMovement();
-
-	// camera movement
-	int cam_x, cam_y;
-	pti_get_camera(&cam_x, &cam_y);
-	cam_x += ((position.x - kScreenWidth / 2.0f) - cam_x) / 10;
-	cam_y += ((position.y - kScreenHeight / 2.0f) - cam_y) / 10;
-	pti_camera(cam_x, cam_y);
 }
 
 void Player::Render() {

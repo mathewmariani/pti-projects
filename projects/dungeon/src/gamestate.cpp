@@ -1,17 +1,9 @@
-#include "pti/pti.h"
-#include "bank.h"
 #include "gamestate.h"
-
-#include "batteries/actor.h"
-
-#include <memory>
-#include <vector>
 
 #include "batteries/assets.h"
 #include "batteries/helper.h"
 
-#define XPOS(x) (x * kTileSize)
-#define YPOS(y) (y * kTileSize)
+#include <memory>
 
 void GameState::SwitchScenes(SceneType type) {
 	switch (type) {
