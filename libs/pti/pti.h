@@ -642,6 +642,9 @@ bool pti_released(pti_button btn) {
 //>> map
 
 uint32_t pti_mget(int x, int y) {
+	if (_pti.vm.tilemap == NULL) {
+		return 0;
+	}
 	int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
 	return *(tiles + x + y * _pti.vm.tilemap->width);
 }
@@ -652,6 +655,9 @@ void pti_mset(int x, int y, int value) {
 }
 
 uint16_t pti_fget(int x, int y) {
+	if (_pti.vm.tilemap == NULL) {
+		return 0;
+	}
 	return (uint16_t) pti_mget(x, y);
 }
 
@@ -961,6 +967,9 @@ void pti_rectf(int x, int y, int w, int h, uint64_t color) {
 }
 
 void pti_map(int x, int y) {
+	if (_pti.vm.tilemap == NULL) {
+		return;
+	}
 	const int map_w = _pti.vm.tilemap->width;
 	const int map_h = _pti.vm.tilemap->height;
 
