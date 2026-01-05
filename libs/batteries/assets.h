@@ -2,6 +2,7 @@
 
 #include <string>
 
+typedef struct pti_palette_t pti_palette_t;
 typedef struct pti_flags_t pti_flags_t;
 typedef struct pti_tilemap_t pti_tilemap_t;
 typedef struct pti_tileset_t pti_tileset_t;
@@ -13,6 +14,7 @@ namespace batteries {
 	extern void init();
 	extern void reload();
 
+	extern pti_palette_t *palette(const std::string &path);
 	extern pti_bitmap_t *sprite(const std::string &path);
 	extern pti_flags_t *flags(const std::string &path);
 	extern pti_tileset_t *tileset(const std::string &path);

@@ -5,6 +5,12 @@
 #include <math.h>
 #include <unordered_map>
 
+#include <fstream>
+#include <string>
+#include <vector>
+#include <cstdint>
+#include <stdexcept>
+
 #include "pti/pti.h"
 #include "cute/cute_aseprite.h"
 #include "dr/dr_wav.h"
@@ -12,6 +18,7 @@
 
 namespace batteries {
 
+	static std::unordered_map<std::string, pti_palette_t> _palette_cache;
 	static std::unordered_map<std::string, pti_bitmap_t> _sprite_cache;
 	static std::unordered_map<std::string, pti_flags_t> _flags_cache;
 	static std::unordered_map<std::string, pti_tileset_t> _tileset_cache;
@@ -26,6 +33,41 @@ namespace batteries {
 
 	void reload() {
 		pti_load_bank(&bank);
+	}
+
+	pti_palette_t __create_palette(const std::string &path) {
+		std::ifstream file(path);
+		if (!file.is_open()) {
+			throw std::runtime_error("Failed to open palette file");
+		}
+
+		std::vector<uint32_t> colors;
+		std::string line;
+
+		while (std::getline(file, line)) {
+			if (line.empty()) continue;
+
+			if (line.size() != 6) {
+				throw std::runtime_error("Invalid hex color: " + line);
+			}
+
+			uint32_t rgb = std::stoul(line, nullptr, 16);
+
+			uint8_t r = (rgb >> 16) & 0xFF;
+			uint8_t g = (rgb >> 8) & 0xFF;
+			uint8_t b = (rgb >> 0) & 0xFF;
+			uint32_t argb = (0xFFu << 24) | (r << 16) | (g << 8) | (b << 0);
+
+			colors.push_back(argb);
+		}
+
+		pti_palette_t palette;
+		palette.count = (uint16_t) colors.size();
+		palette.colors = (uint32_t *) pti_alloc(&bank, palette.count * sizeof(uint32_t));
+
+		memcpy(palette.colors, colors.data(), palette.count * sizeof(uint32_t));
+
+		return palette;
 	}
 
 	pti_bitmap_t __create_bitmap(const std::string &path) {
@@ -44,7 +86,7 @@ namespace batteries {
 
 		for (int i = 0; i < ase->frame_count; ++i, data += size) {
 			auto *frame = ase->frames + i;
-			memcpy(data, frame->pixels, size);
+			memcpy(data, frame->ase, size);
 		}
 
 		/* release cute resources. */
@@ -54,33 +96,33 @@ namespace batteries {
 	}
 
 	pti_flags_t __create_flags(const std::string &path) {
-		pti_flags_t flags = {0, 0};  // initialize
-	
+		pti_flags_t flags = {0, 0};// initialize
+
 		FILE *fp = fopen(path.c_str(), "rb");
 		if (!fp) return flags;
-	
+
 		fseek(fp, 0, SEEK_END);
 		long filesize = ftell(fp);
 		rewind(fp);
-	
+
 		flags.flags = (uint8_t *) pti_alloc(&bank, filesize);
 		if (!flags.flags) {
 			fclose(fp);
 			return flags;
 		}
-	
-		memset(flags.flags, 0, filesize);   // zero memory first
+
+		memset(flags.flags, 0, filesize);// zero memory first
 		flags.count = filesize;
-	
+
 		size_t read = fread(flags.flags, 1, flags.count, fp);
 		if (read != flags.count) {
 			fprintf(stderr, "Warning: read %zu of %zu bytes\n", read, flags.count);
 		}
-	
+
 		fclose(fp);
 		return flags;
 	}
-	
+
 
 	pti_tileset_t __create_tileset(const std::string &path) {
 		ase_t *ase = cute_aseprite_load_from_file(path.c_str(), NULL);
@@ -150,7 +192,7 @@ namespace batteries {
 		unsigned int channels;
 		unsigned int rate;
 		drwav_uint64 count;
-		int16_t* samples = (int16_t* )drwav_open_file_and_read_pcm_frames_s16(path.c_str(), &channels, &rate, &count, NULL);
+		int16_t *samples = (int16_t *) drwav_open_file_and_read_pcm_frames_s16(path.c_str(), &channels, &rate, &count, NULL);
 
 		const size_t size = sizeof(int16_t) * count * channels;
 
@@ -160,11 +202,18 @@ namespace batteries {
 		sound.samples_count = count;
 		sound.samples = (int16_t *) pti_alloc(&bank, size);
 		pti_memcpy(sound.samples, samples, size);
-	
+
 		/* release cute resources. */
 		drwav_free(samples, NULL);
 
 		return sound;
+	}
+
+	pti_palette_t *palette(const std::string &path) {
+		if (_palette_cache.find(path) == _palette_cache.end()) {
+			_palette_cache.emplace(std::make_pair(path, __create_palette(path)));
+		}
+		return &_palette_cache[path];
 	}
 
 	pti_bitmap_t *sprite(const std::string &path) {
@@ -204,41 +253,41 @@ namespace batteries {
 
 	pti_sound_t create_sine_tone(float frequency, float amplitude, float duration_seconds, int sample_rate, int num_channels) {
 		pti_sound_t tone = {0};
-	
+
 		tone.samples_count = (int) (duration_seconds * sample_rate);
 		tone.channels = num_channels;
-	
+
 		tone.samples = (int16_t *) pti_alloc(&bank, sizeof(int16_t) * tone.samples_count * num_channels);
-	
+
 		if (!tone.samples) {
 			tone.samples_count = 0;
 			tone.channels = 0;
 			return tone;// allocation failed
 		}
-	
+
 		if (amplitude > 1.0f) amplitude = 1.0f;
 		if (amplitude < 0.0f) amplitude = 0.0f;
-	
+
 		float phase = 0.0f;
 		float phase_inc = 2.0f * 3.14159265f * frequency / (float) sample_rate;
-	
+
 		for (int i = 0; i < tone.samples_count; i++) {
 			float value = sinf(phase) * amplitude;
-	
+
 			// clamp
 			if (value > 1.0f) value = 1.0f;
 			if (value < -1.0f) value = -1.0f;
-	
+
 			int16_t sample = (int16_t) (value * 32767.0f);
-	
+
 			for (int ch = 0; ch < num_channels; ch++) {
 				tone.samples[i * num_channels + ch] = sample;
 			}
-	
+
 			phase += phase_inc;
 			if (phase >= 2.0f * 3.14159265f) phase -= 2.0f * 3.14159265f;
 		}
-	
+
 		return tone;
 	}
 }// namespace batteries
