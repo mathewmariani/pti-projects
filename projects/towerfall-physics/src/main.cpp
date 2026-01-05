@@ -27,6 +27,7 @@ static void load(void) {
 
 static void init(void) {
 	batteries::init();
+	flags = batteries::flags("assets/flags.bin");
 	tileset = batteries::tileset("assets/tilemap.ase");
 	tilemap = batteries::tilemap("assets/tilemap.ase");
 	bitmap_player = batteries::sprite("assets/dog.ase");
@@ -37,6 +38,7 @@ static void init(void) {
 			batteries::tilemap("assets/tilemap.ase"),
 	};
 
+	pti_set_flags(flags);
 	pti_set_tilemap(tilemap);
 	pti_set_tileset(tileset);
 	pti_set_font(bitmap_font);

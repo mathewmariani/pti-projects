@@ -7,6 +7,20 @@
 
 using EntityId = uint32_t;
 
+enum class Collisions : uint8_t {
+	None = 0x00,
+	Solid = 0x01,
+	Semi = 0x02,
+	SpikeT = 0x03,
+	SpikeR = 0x04,
+	SpikeB = 0x05,
+	SpikeL = 0x06,
+	SlopeRB = 0x07,
+	SlopeRT = 0x08,
+	SlopeLT = 0x09,
+	SlopeLB = 0x0A,
+};
+
 struct BoundingBox {
 	int top, left, width, height;
 	BoundingBox() : top(0), left(0), width(0), height(0) {}
@@ -49,5 +63,5 @@ private:
 	template<typename Predicate>
 	bool CheckTiles(const CoordXY<int> &dir, Predicate &&pred) const;
 
-	bool PlaceMeetingForTile(int i, int j, const CoordXY<int> &dir, int flags) const;
+	bool PlaceMeetingForTile(int i, int j, const CoordXY<int> &dir, uint8_t flags) const;
 };

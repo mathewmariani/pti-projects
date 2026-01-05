@@ -2,6 +2,7 @@
 #include "batteries/assets.h"
 
 // tilemap + tileset
+pti_flags_t *flags = nullptr;
 pti_tilemap_t *tilemap = nullptr;
 pti_tileset_t *tileset = nullptr;
 
