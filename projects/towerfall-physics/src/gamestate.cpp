@@ -1,17 +1,9 @@
-#include "pti/pti.h"
-#include "bank.h"
 #include "gamestate.h"
-
-#include "batteries/actor.h"
-
-#include <memory>
-#include <vector>
 
 #include "batteries/assets.h"
 #include "batteries/helper.h"
 
-#define XPOS(x) (x * kTileSize)
-#define YPOS(y) (y * kTileSize)
+#include <memory>
 
 void GameState::SwitchScenes(SceneType type) {
 	switch (type) {
@@ -20,7 +12,7 @@ void GameState::SwitchScenes(SceneType type) {
 		} break;
 	}
 
-	ChangeLevels();
+	CurrentScene->Init();
 }
 
 static auto _gameState = std::make_unique<GameState>();
@@ -39,19 +31,4 @@ void GameStateInit() {
 	// reset the game state
 	_gameState->PlayerIsDead = false;
 	_gameState->ResetTimer = 0.0f;
-}
-
-void ChangeLevels() {
-	// we reload the assets because we alter the RAM when we load level.
-	batteries::reload();
-
-	auto &levels = GetGameState().levels;
-	auto next = -1;
-	do {
-		next = RandomRange(0, levels.size() - 1);
-	} while (next == GetGameState().CurrentLevelIndex);
-
-	pti_set_tilemap(levels[next]);
-
-	_gameState->CurrentScene->Init();
 }

@@ -2,10 +2,10 @@
 #include "pti/pti.h"
 
 /* batteries */
-#include "batteries/assets.h"
 #include "batteries/helper.h"
 #include "batteries/juice.h"
 
+/* game */
 #include "bank.h"
 #include "gamestate.h"
 
@@ -17,33 +17,8 @@
 bool show_overlays = false;
 #endif
 
-#define XPOS(x) (x * kTileSize)
-#define YPOS(y) (y * kTileSize)
-
-static void load(void) {
-	GameStateInit();
-	// batteries::reload();
-}
-
 static void init(void) {
-	batteries::init();
-	flags = batteries::flags("assets/flags.bin");
-	tileset = batteries::tileset("assets/tilemap.ase");
-	tilemap = batteries::tilemap("assets/tilemap.ase");
-	bitmap_player = batteries::sprite("assets/dog.ase");
-	bitmap_platform = batteries::sprite("assets/platform.ase");
-	bitmap_font = batteries::sprite("assets/font.ase");
-
-	GetGameState().levels = {
-			batteries::tilemap("assets/tilemap.ase"),
-	};
-
-	pti_set_flags(flags);
-	pti_set_tilemap(tilemap);
-	pti_set_tileset(tileset);
-	pti_set_font(bitmap_font);
-
-	load();
+	GameStateInit();
 }
 
 static void cleanup(void) {
@@ -54,17 +29,8 @@ static void frame(void) {
 	auto &gameState = GetGameState();
 	if (pti_down(PTI_DBG)) {
 		GetGameState().Reset();
-		load();
+		GameStateInit();
 		return;
-	}
-
-	if (gameState.PlayerIsDead) {
-		gameState.ResetTimer += PTI_DELTA;
-		if (gameState.ResetTimer >= kDeathResetTimer) {
-			gameState.Deaths++;
-			GameStateInit();
-			return;
-		}
 	}
 
 	GetGameState().Tick();
