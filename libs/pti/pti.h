@@ -194,7 +194,7 @@ uint16_t pti_prand(void);
 //>> graphics api
 void pti_camera(int x, int y);
 void pti_get_camera(int *x, int *y);
-void pti_cls(const uint16_t color);
+void pti_cls(const uint8_t color);
 void pti_color(const uint16_t color);
 void pti_colorkey(const uint16_t color);
 void pti_dither(const uint16_t bstr);
@@ -830,14 +830,14 @@ void pti_get_camera(int *x, int *y) {
 	}
 }
 
-void pti_cls(const uint16_t color) {
+void pti_cls(const uint8_t idx) {
 	const int screen_w = _pti.vm.screen.width;
 	const int screen_h = _pti.vm.screen.height;
 	const size_t pixel_count = screen_w * screen_h;
 
-	uint32_t *pixels = (uint32_t *) _pti.screen;
+	uint32_t color = _pti.vm.draw.palette->colors[idx];
 	for (size_t i = 0; i < pixel_count; i++) {
-		pixels[i] = color;
+		*((uint32_t *) _pti.screen + i) = color;
 	}
 }
 
