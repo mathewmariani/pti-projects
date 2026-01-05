@@ -74,8 +74,8 @@ namespace batteries {
 		auto *ase = cute_aseprite_load_from_file(path.c_str(), NULL);
 
 		/* allocate bitmap data */
-		auto size = ase->w * ase->h * sizeof(ase_color_t);
-		auto *data = (char *) pti_alloc(&bank, size * ase->frame_count);
+		auto size = ase->w * ase->h * sizeof(uint8_t);
+		auto *data = (uint8_t *) pti_alloc(&bank, size * ase->frame_count);
 
 		/* initialize */
 		pti_bitmap_t bitmap;
@@ -86,7 +86,7 @@ namespace batteries {
 
 		for (int i = 0; i < ase->frame_count; ++i, data += size) {
 			auto *frame = ase->frames + i;
-			memcpy(data, frame->ase, size);
+			memcpy(data, frame->pixels, size);
 		}
 
 		/* release cute resources. */
@@ -131,23 +131,23 @@ namespace batteries {
 		int tile_w = ase_tileset.tile_w;
 		int tile_h = ase_tileset.tile_h;
 		int count = ase_tileset.tile_count;
-		const ase_color_t *src_pixels = (ase_color_t *) ase_tileset.pixels;
+		const uint8_t *src_pixels = (uint8_t *) ase_tileset.pixels;
 
 		int tiles_per_row = (int) ceilf(sqrtf((float) count));
 		int atlas_w = tiles_per_row * tile_w;
 		int atlas_h = ((count + tiles_per_row - 1) / tiles_per_row) * tile_h;
 
-		ase_color_t *atlas_pixels = (ase_color_t *) pti_alloc(&bank, atlas_w * atlas_h * sizeof(ase_color_t));
-		memset(atlas_pixels, 0, atlas_w * atlas_h * sizeof(ase_color_t));
+		uint8_t *atlas_pixels = (uint8_t *) pti_alloc(&bank, atlas_w * atlas_h * sizeof(uint8_t));
+		memset(atlas_pixels, 0, atlas_w * atlas_h * sizeof(uint8_t));
 
 		for (int i = 0; i < count; ++i) {
 			int tile_x = (i % tiles_per_row) * tile_w;
 			int tile_y = (i / tiles_per_row) * tile_h;
 
 			for (int y = 0; y < tile_h; ++y) {
-				const ase_color_t *src_row = &src_pixels[i * tile_w * tile_h + y * tile_w];
-				ase_color_t *dst_row = &atlas_pixels[(tile_y + y) * atlas_w + tile_x];
-				memcpy(dst_row, src_row, tile_w * sizeof(ase_color_t));
+				const uint8_t *src_row = &src_pixels[i * tile_w * tile_h + y * tile_w];
+				uint8_t *dst_row = &atlas_pixels[(tile_y + y) * atlas_w + tile_x];
+				memcpy(dst_row, src_row, tile_w * sizeof(uint8_t));
 			}
 		}
 
