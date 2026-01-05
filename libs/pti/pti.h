@@ -87,7 +87,7 @@ typedef struct pti_bitmap_t {
 	uint32_t frames;
 	uint32_t width;
 	uint32_t height;
-	void *pixels;// (width) x (height x frames)
+	uint8_t *pixels;// (width) x (height x frames)
 } pti_bitmap_t;
 
 typedef struct pti_sound_t {
@@ -103,7 +103,7 @@ typedef struct pti_tileset_t {
 	uint16_t height;
 	uint16_t tile_w;
 	uint16_t tile_h;
-	void *pixels;// (width) x (height x count)
+	uint8_t *pixels;// (width) x (height x count)
 } pti_tileset_t;
 
 typedef struct pti_tilemap_t {
@@ -742,20 +742,20 @@ _PTI_PRIVATE inline void _pti__set_pixel(int x, int y, uint16_t color) {
 	*(_pti.screen + (x + y * _pti.vm.screen.width)) = c;
 }
 
-_PTI_PRIVATE void _pti__plot(void *pixels, bool mask, int n, int dst_x, int dst_y, int dst_w, int dst_h, int src_x, int src_y, int src_w, int src_h, bool flip_x, bool flip_y) {
-#define PTI_PLOT_LOOP_BODY(EMIT_PIXEL)                           \
-	do {                                                         \
-		for (int y = dst_y1; y <= dst_y2; y++) {                 \
-			int src_row = src_y + (y - dst_y1) * iy;             \
-			uint32_t *src_pixel = src + src_row * src_w + src_x; \
-			for (int x = dst_x1; x <= dst_x2; x++) {             \
-				uint32_t src_color = *src_pixel;                 \
-				if (src_color != color_key) {                    \
-					EMIT_PIXEL;                                  \
-				}                                                \
-				src_pixel += ix;                                 \
-			}                                                    \
-		}                                                        \
+_PTI_PRIVATE void _pti__plot(uint8_t *pixels, bool mask, int n, int dst_x, int dst_y, int dst_w, int dst_h, int src_x, int src_y, int src_w, int src_h, bool flip_x, bool flip_y) {
+#define PTI_PLOT_LOOP_BODY(EMIT_PIXEL)                          \
+	do {                                                        \
+		for (int y = dst_y1; y <= dst_y2; y++) {                \
+			int src_row = src_y + (y - dst_y1) * iy;            \
+			uint8_t *src_pixel = src + src_row * src_w + src_x; \
+			for (int x = dst_x1; x <= dst_x2; x++) {            \
+				uint8_t src_color = *src_pixel;                 \
+				if (src_color != color_key) {                   \
+					EMIT_PIXEL;                                 \
+				}                                               \
+				src_pixel += ix;                                \
+			}                                                   \
+		}                                                       \
 	} while (0)
 
 	const int16_t clip_x0 = _pti.vm.draw.clip_x0;
@@ -797,7 +797,7 @@ _PTI_PRIVATE void _pti__plot(void *pixels, bool mask, int n, int dst_x, int dst_
 		src_y += (dst_y2 - dst_y1);
 	}
 
-	uint32_t *src = (uint32_t *) pixels + n * (src_w * src_h);
+	uint8_t *src = pixels + n * (src_w * src_h);
 	uint16_t color_key = _pti.vm.draw.ckey;
 
 	const int dst_width = _pti.desc.width;
@@ -806,7 +806,7 @@ _PTI_PRIVATE void _pti__plot(void *pixels, bool mask, int n, int dst_x, int dst_
 		PTI_PLOT_LOOP_BODY(
 				if (src_color != 0) {
 					uint16_t c = ((uint16_t) _pti.vm.draw.color.high << 8) | _pti.vm.draw.color.low;
-					_pti__set_pixel(x, y, c);
+					_pti__set_pixel(x, y, 5);
 				});
 	} else {
 		PTI_PLOT_LOOP_BODY({
@@ -996,7 +996,7 @@ void pti_map(int x, int y) {
 	const int tiles_per_row = tileset->width / tile_w;
 
 	const int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
-	void *pixels = (void *) _pti__ptr_to_bank((void *) tileset->pixels);
+	uint8_t *pixels = (uint8_t *) _pti__ptr_to_bank((void *) tileset->pixels);
 
 	_pti__transform(&x, &y);
 
@@ -1026,7 +1026,7 @@ void pti_map(int x, int y) {
 void pti_spr(const pti_bitmap_t *sprite, int n, int x, int y, bool flip_x, bool flip_y) {
 	const int bmp_w = sprite->width;
 	const int bmp_h = sprite->height;
-	void *pixels = (void *) _pti__ptr_to_bank((void *) sprite->pixels);
+	uint8_t *pixels = (uint8_t *) _pti__ptr_to_bank((void *) sprite->pixels);
 	_pti__transform(&x, &y);
 	_pti__plot(pixels, false, n, x, y, bmp_w, bmp_h, 0, 0, bmp_w, bmp_h, flip_x, flip_y);
 }
@@ -1061,7 +1061,7 @@ uint32_t _pti__next_utf8_code_point(const char *data, uint32_t *index, uint32_t 
 #define FONT_TAB_SIZE (3)
 
 void pti_print(const char *text, int x, int y) {
-	void *pixels = (void *) _pti__ptr_to_bank((void *) _pti.vm.draw.font->pixels);
+	uint8_t *pixels = (uint8_t *) _pti__ptr_to_bank((void *) _pti.vm.draw.font->pixels);
 	int cursor_x = x;
 	int cursor_y = y;
 	uint32_t text_length = strlen(text);
