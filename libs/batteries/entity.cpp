@@ -110,7 +110,8 @@ bool EntityBase::CheckTiles(const CoordXY<int> &dir, Predicate &&pred) const {
 
 	for (int j = top; j <= bottom; ++j) {
 		for (int i = left; i <= right; ++i) {
-			int flags = pti_fget(i, j);
+			int tile = pti_mget(i, j);
+			int flags = pti_fget(tile);
 			if (pred(i, j, flags)) {
 				return true;
 			}

@@ -140,7 +140,8 @@ CoordXY<int> RandomOutsideCamera() {
 		}
 
 		if (pt_tile.x >= 0 && pt_tile.y >= 0) {
-			if (pti_fget(pt_tile.x, pt_tile.y) == 0) {
+			auto tile = pti_mget(pt_tile.x, pt_tile.y);
+			if (pti_fget(tile) == 0) {
 				return pt_tile * kTileSize;
 			}
 		}

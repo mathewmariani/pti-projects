@@ -91,7 +91,8 @@ bool Zombie::CanSee(const Actor *e) const {
 	int err = dx - dy;
 
 	while (true) {
-		if (pti_fget(x0, y0) != 0) {
+		auto tile = pti_mget(x0, y0);
+		if (pti_fget(tile) != 0) {
 			return false;
 		}
 		if (x0 == x1 && y0 == y1) {
