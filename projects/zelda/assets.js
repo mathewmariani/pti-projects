@@ -128,6 +128,6 @@ Module['FS_createPath']("/", "assets", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/assets/link.ase", "start": 0, "end": 1567}, {"filename": "/assets/palette.ase", "start": 1567, "end": 1939}, {"filename": "/assets/tilemap.ase", "start": 1939, "end": 3624}, {"filename": "/assets/tileset.ase", "start": 3624, "end": 5034}], "remote_package_size": 5034});
+    loadPackage({"files": [{"filename": "/assets/link.ase", "start": 0, "end": 1567}, {"filename": "/assets/palette.ase", "start": 1567, "end": 1939}, {"filename": "/assets/tilemap.ase", "start": 1939, "end": 3699}, {"filename": "/assets/tileset.ase", "start": 3699, "end": 5109}], "remote_package_size": 5109});
 
   })();
