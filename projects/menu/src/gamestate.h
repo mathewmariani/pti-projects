@@ -36,7 +36,6 @@ private:
 GameState &GetGameState();
 
 void GameStateInit();
-void ChangeLevels();
 
 // helpers:
 

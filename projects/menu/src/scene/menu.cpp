@@ -1,14 +1,24 @@
-#include "menu.h"
-#include "../gamestate.h"
-
 #include "pti/pti.h"
 
-#include "batteries/assets.h"
-
 #include <array>
-#include <variant>
-#include <type_traits>
 #include <cstdio>
+#include <memory>
+#include <type_traits>
+#include <variant>
+#include <vector>
+
+// batteries
+#include "batteries/assets.h"
+#include "batteries/palettes.h"
+
+#include "menu.h"
+#include "../bank.h"
+#include "../gamestate.h"
+
+pti_palette_t pal = {
+		.count = 16,
+		.colors = &sweetie16[0],
+};
 
 template<int Min, int Max, int Default = (Min + Max) / 2>
 struct BoundedNumber {
@@ -67,7 +77,14 @@ pti_sound_t tone;
 int current_index = 0;
 
 void MenuScene::Init(void) {
+	batteries::init();
+	bitmap_font = batteries::sprite("assets/font.ase");
 	tone = batteries::create_sine_tone(440.0f, 0.3f, 0.125f, 44100.0f, 1);
+
+	batteries::reload();
+
+	pti_set_palette(&pal);
+	pti_set_font(bitmap_font);
 }
 
 void MenuScene::Update(void) {
@@ -107,8 +124,8 @@ void MenuScene::Update(void) {
 }
 
 void MenuScene::Render(void) {
-	pti_cls(0xff575757);
-	pti_color(0xffffffff);
+	pti_cls(0);
+	pti_color(12);
 
 	pti_print("OPTIONS", 12, 8);
 
