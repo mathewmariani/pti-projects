@@ -18,6 +18,8 @@ enum class SceneType {
 struct GameState final : public batteries::GameState {
 	void SwitchScenes(SceneType type);
 
+	CoordXY<int> currentRoom = {0, 0};
+
 private:
 	GameScene gameScene;
 };

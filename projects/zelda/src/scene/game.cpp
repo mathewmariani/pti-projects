@@ -7,6 +7,8 @@
 #include "game.h"
 #include "../bank.h"
 
+#include "../gamestate.h"
+
 #include "../entity/actor/player.h"
 
 void GameScene::Init(void) {
@@ -33,8 +35,18 @@ void GameScene::Update(void) {
 	UpdateEntitiesOfType<Actor>();
 }
 
+constexpr float kTransitionSpeed = 0.25f;
+
 void GameScene::Render(void) {
 	pti_cls(0xff575757);
+
+	auto gameState = GetGameState();
+	auto target = gameState.currentRoom * 128.0f;	
+	auto diff = (target - camera) * kTransitionSpeed;
+	camera = camera + diff;
+	
+	pti_camera((int)std::round(camera.x), (int)std::round(camera.y));
+
 	pti_map(0, 0);
 	RenderEntitiesOfType<EntityBase>();
 }

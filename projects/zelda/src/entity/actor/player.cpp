@@ -108,6 +108,9 @@ void Player::Update() {
 		} break;
 		case State::Move: {
 			HandleMovement();
+			auto &gameState = GetGameState();
+			gameState.currentRoom = position / 128;
+
 		} break;
 	}
 }
