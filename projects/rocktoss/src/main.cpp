@@ -1,13 +1,15 @@
 /* engine */
 #include "pti/pti.h"
 
-#include "bank.h"
-#include "gamestate.h"
-#include "batteries/assets.h"
-#include "batteries/registry.h"
+/* batteries */
 #include "batteries/helper.h"
 #include "batteries/juice.h"
 
+/* game */
+#include "bank.h"
+#include "gamestate.h"
+
+#include <math.h>
 #include <string>
 
 #if defined(PTI_DEBUG)
@@ -15,32 +17,8 @@
 bool show_overlays = false;
 #endif
 
-#define XPOS(x) (x * kTileSize)
-#define YPOS(y) (y * kTileSize)
-
-static void load(void) {
-	GameStateInit();
-	// batteries::reload();
-}
-
 static void init(void) {
-	batteries::init();
-	flags = batteries::flags("assets/flags.bin");
-	tileset = batteries::tileset("assets/tilemap.ase");
-	tilemap = batteries::tilemap("assets/tilemap.ase");
-	bitmap_player = batteries::sprite("assets/dog.ase");
-	bitmap_bullet = batteries::sprite("assets/bullet.ase");
-	bitmap_font = batteries::sprite("assets/font.ase");
-
-	GetGameState().levels = {
-			batteries::tilemap("assets/tilemap.ase"),
-	};
-
-	pti_set_flags(flags);
-	pti_set_tileset(tileset);
-	pti_set_font(bitmap_font);
-
-	load();
+	GameStateInit();
 }
 
 static void cleanup(void) {
@@ -51,7 +29,7 @@ static void frame(void) {
 	auto &gameState = GetGameState();
 	if (pti_down(PTI_DBG)) {
 		GetGameState().Reset();
-		load();
+		GameStateInit();
 		return;
 	}
 
@@ -121,7 +99,6 @@ static void debug(void) {
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Reset")) {
-			batteries::reload();
 			GetGameState().CurrentScene->Reset();
 			GetGameState().CurrentScene->Init();
 		}
@@ -154,6 +131,9 @@ static void debug(void) {
 	ImGui::End();
 }
 #endif
+
+constexpr int kScreenWidth = 176;
+constexpr int kScreenHeight = 128;
 
 pti_desc pti_main(int argc, char *argv[]) {
 
