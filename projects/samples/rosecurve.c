@@ -5,12 +5,16 @@
 // engine
 #include "pti/pti.h"
 #include "palettes.h"
-#define pal sweetie16
+
+pti_palette_t pal = {
+		.count = 16,
+		.colors = &sweetie16[0],
+};
 
 static void init(void) {
-	// gfx state
-	// pti_dither(0x5a5a);
+	pti_set_palette(&pal);
 	pti_dither(0xeae0);
+	// pti_dither(0x5a5a);
 }
 
 static void cleanup(void) {}
@@ -47,13 +51,13 @@ static void frame(void) {
 			float rose_radius = petal_radius * cosf(petal_count * angle_rad + rotation_angle);
 
 			// color calculation: combine geometry
-			int color_index = (int) ((rose_radius + pixel_dist - growth_bias) / color_scale);
+			uint8_t color_index = (uint8_t) ((rose_radius + pixel_dist - growth_bias) / color_scale);
 
 			// normalize into [0, 15]
-			int low_index = ((color_index % 16) + 16) % 16;
-			int high_index = (low_index + 1) % 16;
+			uint8_t low_index = ((color_index % 16) + 16) % 16;
+			uint8_t high_index = (low_index + 1) % 16;
 
-			uint64_t color = ((uint64_t) pal[low_index] << 32) | pal[high_index];
+			uint16_t color = ((uint64_t) low_index << 8) | high_index;
 			pti_pset(px, py, color);
 		}
 	}
