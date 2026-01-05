@@ -39,7 +39,7 @@ void Flag::Update() {
 	}
 
 	if (collision) {
-		ChangeLevels();
+		GameStateInit();
 	}
 }
 

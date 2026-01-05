@@ -15,42 +15,8 @@
 bool show_overlays = false;
 #endif
 
-static void load(void) {
-	GameStateInit();
-	// batteries::reload();
-}
-
 static void init(void) {
-	batteries::init();
-	flags = batteries::flags("assets/flags.bin");
-	tileset = batteries::tileset("assets/tilemap.ase");
-	tilemap = batteries::tilemap("assets/tilemap.ase");
-	bitmap_bullet = batteries::sprite("assets/bullet.ase");
-	bitmap_coin = batteries::sprite("assets/coin.ase");
-	bitmap_player = batteries::sprite("assets/dog.ase");
-	bitmap_goomba = batteries::sprite("assets/zombie.ase");
-	bitmap_heart = batteries::sprite("assets/heart.ase");
-	bitmap_platform = batteries::sprite("assets/platform.ase");
-	bitmap_font = batteries::sprite("assets/font.ase");
-	bitmap_fx_collect1 = batteries::sprite("assets/collect.ase");
-	bitmap_fx_collect2 = batteries::sprite("assets/collect2.ase");
-	bitmap_shooter = batteries::sprite("assets/cannon.ase");
-	bitmap_door = batteries::sprite("assets/door.ase");
-
-	GetGameState().levels = {
-			batteries::tilemap("assets/levels/01.ase"),
-			batteries::tilemap("assets/levels/02.ase"),
-			batteries::tilemap("assets/levels/03.ase"),
-			batteries::tilemap("assets/levels/04.ase"),
-			batteries::tilemap("assets/levels/05.ase"),
-			batteries::tilemap("assets/levels/06.ase"),
-	};
-
-	pti_set_flags(flags);
-	pti_set_tileset(tileset);
-	pti_set_font(bitmap_font);
-
-	load();
+	GameStateInit();
 }
 
 static void cleanup(void) {
@@ -61,17 +27,8 @@ static void frame(void) {
 	auto &gameState = GetGameState();
 	if (pti_down(PTI_DBG)) {
 		GetGameState().Reset();
-		load();
+		GameStateInit();
 		return;
-	}
-
-	if (gameState.PlayerIsDead) {
-		gameState.ResetTimer += PTI_DELTA;
-		if (gameState.ResetTimer >= kDeathResetTimer) {
-			gameState.Deaths++;
-			GameStateInit();
-			return;
-		}
 	}
 
 	GetGameState().Tick();
@@ -80,7 +37,7 @@ static void frame(void) {
 	/* render ui */
 	char buffer[100];
 
-	pti_color(0xffffffff);
+	pti_color(12);
 
 	// coin counter
 	std::snprintf(buffer, sizeof(buffer), "Coins: %d\n", gameState.Coins);
@@ -155,6 +112,9 @@ void debug(void) {
 	ImGui::End();
 }
 #endif
+
+constexpr int kScreenWidth = 320;
+constexpr int kScreenHeight = 224;
 
 pti_desc pti_main(int argc, char *argv[]) {
 
