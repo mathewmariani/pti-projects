@@ -14,9 +14,11 @@
 void GameScene::Init(void) {
 	batteries::init();
 	bitmap_player = batteries::sprite("assets/link.ase");
+	flags = batteries::flags("assets/flags.bin");
 	tilemap = batteries::tilemap("assets/tilemap.ase");
 	tileset = batteries::tileset("assets/tilemap.ase");
 
+	pti_set_flags(flags);
 	pti_set_tilemap(tilemap);
 	pti_set_tileset(tileset);
 

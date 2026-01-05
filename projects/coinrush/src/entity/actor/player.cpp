@@ -49,13 +49,18 @@ void Player::Hurt(const CoordXY<float> &direction) {
 	Shake();
 }
 
+#define spikeT (0x03)
+#define spikeR (0x04)
+#define spikeB (0x05)
+#define spikeL (0x06)
+
 void Player::Update() {
 	HandleHorizontalMovement();
 	HandleVerticalMovement();
 	HandleJump();
 
 	// check for spikes
-	if (PlaceMeeting(direction, 42) || PlaceMeeting(direction, 43) || PlaceMeeting(direction, 53) || PlaceMeeting(direction, 54)) {
+	if (PlaceMeeting(direction, spikeT) || PlaceMeeting(direction, spikeR) || PlaceMeeting(direction, spikeB) || PlaceMeeting(direction, spikeL)) {
 		Hurt(CoordXY<float>::Zero);
 		return;
 	}

@@ -34,10 +34,10 @@ bool Player::Walkable(const CoordXY<int> &distance) const {
 
 	for (int j = top; j <= bottom; ++j) {
 		for (int i = left; i <= right; ++i) {
-			int flags = pti_fget(i, j);
+			auto tile = pti_mget(i,j);
+			auto flags = pti_fget(tile);
 			switch (flags) {
-				case 6:
-				case 16:
+				case 0x01:
 					return false;
 			}
 		}

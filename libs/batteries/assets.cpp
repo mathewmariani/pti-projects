@@ -1,7 +1,9 @@
 #include "assets.h"
 
-#include <unordered_map>
+#include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
+#include <unordered_map>
 
 #include "pti/pti.h"
 #include "cute/cute_aseprite.h"
@@ -11,6 +13,7 @@
 namespace batteries {
 
 	static std::unordered_map<std::string, pti_bitmap_t> _sprite_cache;
+	static std::unordered_map<std::string, pti_flags_t> _flags_cache;
 	static std::unordered_map<std::string, pti_tileset_t> _tileset_cache;
 	static std::unordered_map<std::string, pti_tilemap_t> _tilemap_cache;
 	static std::unordered_map<std::string, pti_sound_t> _sound_cache;
@@ -49,6 +52,35 @@ namespace batteries {
 
 		return bitmap;
 	}
+
+	pti_flags_t __create_flags(const std::string &path) {
+		pti_flags_t flags = {0, 0};  // initialize
+	
+		FILE *fp = fopen(path.c_str(), "rb");
+		if (!fp) return flags;
+	
+		fseek(fp, 0, SEEK_END);
+		long filesize = ftell(fp);
+		rewind(fp);
+	
+		flags.flags = (uint8_t *) pti_alloc(&bank, filesize);
+		if (!flags.flags) {
+			fclose(fp);
+			return flags;
+		}
+	
+		memset(flags.flags, 0, filesize);   // zero memory first
+		flags.count = filesize;
+	
+		size_t read = fread(flags.flags, 1, flags.count, fp);
+		if (read != flags.count) {
+			fprintf(stderr, "Warning: read %zu of %zu bytes\n", read, flags.count);
+		}
+	
+		fclose(fp);
+		return flags;
+	}
+	
 
 	pti_tileset_t __create_tileset(const std::string &path) {
 		ase_t *ase = cute_aseprite_load_from_file(path.c_str(), NULL);
@@ -140,6 +172,13 @@ namespace batteries {
 			_sprite_cache.emplace(std::make_pair(path, __create_bitmap(path)));
 		}
 		return &_sprite_cache[path];
+	}
+
+	pti_flags_t *flags(const std::string &path) {
+		if (_flags_cache.find(path) == _flags_cache.end()) {
+			_flags_cache.emplace(std::make_pair(path, __create_flags(path)));
+		}
+		return &_flags_cache[path];
 	}
 
 	pti_tileset_t *tileset(const std::string &path) {
