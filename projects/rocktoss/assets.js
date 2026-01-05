@@ -128,6 +128,6 @@ Module['FS_createPath']("/", "assets", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/assets/bullet.ase", "start": 0, "end": 417}, {"filename": "/assets/dog.ase", "start": 417, "end": 1003}, {"filename": "/assets/font.ase", "start": 1003, "end": 2569}, {"filename": "/assets/tilemap.ase", "start": 2569, "end": 4502}], "remote_package_size": 4502});
+    loadPackage({"files": [{"filename": "/assets/bullet.ase", "start": 0, "end": 417}, {"filename": "/assets/dog.ase", "start": 417, "end": 1003}, {"filename": "/assets/flags.bin", "start": 1003, "end": 1064}, {"filename": "/assets/font.ase", "start": 1064, "end": 2630}, {"filename": "/assets/tilemap.ase", "start": 2630, "end": 4563}], "remote_package_size": 4563});
 
   })();

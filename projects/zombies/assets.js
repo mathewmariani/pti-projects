@@ -128,6 +128,6 @@ Module['FS_createPath']("/", "assets", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/assets/bullet.ase", "start": 0, "end": 635}, {"filename": "/assets/coin.ase", "start": 635, "end": 1333}, {"filename": "/assets/collect.ase", "start": 1333, "end": 2186}, {"filename": "/assets/dog.ase", "start": 2186, "end": 2772}, {"filename": "/assets/font.ase", "start": 2772, "end": 4338}, {"filename": "/assets/heart.ase", "start": 4338, "end": 4716}, {"filename": "/assets/platform.ase", "start": 4716, "end": 5103}, {"filename": "/assets/tilemap.ase", "start": 5103, "end": 7068}, {"filename": "/assets/zombie.ase", "start": 7068, "end": 7660}], "remote_package_size": 7660});
+    loadPackage({"files": [{"filename": "/assets/bullet.ase", "start": 0, "end": 635}, {"filename": "/assets/coin.ase", "start": 635, "end": 1333}, {"filename": "/assets/collect.ase", "start": 1333, "end": 2186}, {"filename": "/assets/dog.ase", "start": 2186, "end": 2772}, {"filename": "/assets/flags.bin", "start": 2772, "end": 2833}, {"filename": "/assets/font.ase", "start": 2833, "end": 4399}, {"filename": "/assets/heart.ase", "start": 4399, "end": 4777}, {"filename": "/assets/platform.ase", "start": 4777, "end": 5164}, {"filename": "/assets/tilemap.ase", "start": 5164, "end": 7129}, {"filename": "/assets/zombie.ase", "start": 7129, "end": 7721}], "remote_package_size": 7721});
 
   })();
