@@ -14,9 +14,6 @@
 bool show_overlays = false;
 #endif
 
-#define XPOS(x) (x * kTileSize)
-#define YPOS(y) (y * kTileSize)
-
 static void init(void) {
 	GameStateInit();
 }
