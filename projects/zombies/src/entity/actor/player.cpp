@@ -46,6 +46,9 @@ void Player::Hurt(const CoordXY<float> &direction) {
 	}
 }
 
+constexpr int kScreenWidth = 176;
+constexpr int kScreenHeight = 128;
+
 void Player::Update() {
 	shoot_timer -= PTI_DELTA;
 

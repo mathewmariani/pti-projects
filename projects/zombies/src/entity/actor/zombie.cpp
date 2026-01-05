@@ -78,6 +78,8 @@ void Zombie::Hurt(const CoordXY<int> &direction) {
 	}
 }
 
+constexpr int kTileSize = 8;
+
 bool Zombie::CanSee(const Actor *e) const {
 	int x0 = static_cast<int>(position.x / kTileSize);
 	int y0 = static_cast<int>(position.y / kTileSize);
