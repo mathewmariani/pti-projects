@@ -1,10 +1,38 @@
-#include "menu.h"
-#include "../gamestate.h"
-#include "../bank.h"
-
 #include "pti/pti.h"
 
-void MenuScene::Init(void) {}
+// batteries
+#include "batteries/assets.h"
+#include "batteries/palettes.h"
+
+#include "menu.h"
+#include "../bank.h"
+#include "../gamestate.h"
+
+pti_palette_t pal = {
+		.count = 16,
+		.colors = &sweetie16[0],
+};
+
+void MenuScene::Init(void) {
+	batteries::init();
+	bitmap_a = batteries::sprite("assets/btn_a.ase");
+	bitmap_b = batteries::sprite("assets/btn_b.ase");
+	bitmap_x = batteries::sprite("assets/btn_x.ase");
+	bitmap_y = batteries::sprite("assets/btn_y.ase");
+
+	bitmap_left = batteries::sprite("assets/btn_left.ase");
+	bitmap_right = batteries::sprite("assets/btn_right.ase");
+	bitmap_up = batteries::sprite("assets/btn_up.ase");
+	bitmap_down = batteries::sprite("assets/btn_down.ase");
+
+	bitmap_start = batteries::sprite("assets/btn_start.ase");
+	bitmap_select = batteries::sprite("assets/btn_select.ase");
+	bitmap_rshoulder = batteries::sprite("assets/btn_rshoulder.ase");
+	bitmap_lshoulder = batteries::sprite("assets/btn_lshoulder.ase");
+	batteries::reload();
+
+	pti_set_palette(&pal);
+}
 void MenuScene::Update(void) {}
 
 #define DRAW_BTN(btn, bitmap, x, y)                          \
@@ -14,8 +42,7 @@ void MenuScene::Update(void) {}
 	} while (0)
 
 void MenuScene::Render(void) {
-	pti_cls(0xff575757);
-	pti_color(0xffffffff);
+	pti_cls(0);
 
 	int state, ox, oy;
 
