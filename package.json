@@ -8,6 +8,7 @@
     "libs:tracy": "./libs/tracy/update.sh",
     "libs:stb": "./libs/stb/update.sh",
     "libs:dr": "./libs/dr/update.sh",
+    "libs:cute": "./libs/cute/update.sh",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
