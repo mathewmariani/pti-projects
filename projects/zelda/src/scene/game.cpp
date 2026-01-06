@@ -48,7 +48,7 @@ void GameScene::Update(void) {
 constexpr float kTransitionSpeed = 0.25f;
 
 void GameScene::Render(void) {
-	pti_cls(0);
+	pti_cls(15);
 
 	auto gameState = GetGameState();
 	auto target = gameState.currentRoom * 128.0f;

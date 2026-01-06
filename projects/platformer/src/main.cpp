@@ -119,7 +119,7 @@ static void frame(void) {
 
 	GameStateTick();
 
-	pti_cls(0);
+	pti_cls(15);
 
 	/* adjust camera */
 	int cam_x, cam_y;

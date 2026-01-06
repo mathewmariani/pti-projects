@@ -231,7 +231,7 @@ void GameScene::Update(void) {
 }
 
 void GameScene::Render(void) {
-	pti_cls(0);
+	pti_cls(15);
 
 	// keep camera inbounds
 	int cam_x, cam_y;

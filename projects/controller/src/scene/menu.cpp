@@ -38,7 +38,7 @@ void MenuScene::Update(void) {}
 	} while (0)
 
 void MenuScene::Render(void) {
-	pti_cls(0);
+	pti_cls(15);
 
 	int state, ox, oy;
 
