@@ -7,7 +7,6 @@
 #include "batteries/actor.h"
 #include "batteries/solid.h"
 #include "batteries/assets.h"
-#include "batteries/palettes.h"
 
 // actors
 #include "../entity/actor/player.h"
@@ -15,11 +14,6 @@
 #include "game.h"
 #include "../bank.h"
 #include "../gamestate.h"
-
-pti_palette_t pal = {
-		.count = 16,
-		.colors = &sweetie16[0],
-};
 
 // should be defined elsewhere
 constexpr int kTileSize = 8;
@@ -34,6 +28,7 @@ constexpr int kWorldHeight = 384;
 
 void GameScene::Init(void) {
 	batteries::init();
+	palette = batteries::palette("assets/palette.hex");
 	flags = batteries::flags("assets/flags.bin");
 	tileset = batteries::tileset("assets/tilemap.ase");
 	tilemap = batteries::tilemap("assets/tilemap.ase");
@@ -42,11 +37,10 @@ void GameScene::Init(void) {
 	bitmap_player = batteries::sprite("assets/dog.ase");
 	bitmap_zombie = batteries::sprite("assets/zombie.ase");
 	bitmap_heart = batteries::sprite("assets/heart.ase");
-	bitmap_platform = batteries::sprite("assets/platform.ase");
 	bitmap_font = batteries::sprite("assets/font.ase");
 	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
 
-	pti_set_palette(&pal);
+	pti_set_palette(palette);
 	pti_set_flags(flags);
 	pti_set_tilemap(tilemap);
 	pti_set_tileset(tileset);
