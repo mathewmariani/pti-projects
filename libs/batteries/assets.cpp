@@ -56,7 +56,9 @@ namespace batteries {
 			uint8_t r = (rgb >> 16) & 0xFF;
 			uint8_t g = (rgb >> 8) & 0xFF;
 			uint8_t b = (rgb >> 0) & 0xFF;
-			uint32_t argb = (0xFFu << 24) | (r << 16) | (g << 8) | (b << 0);
+
+			// NOTE: ABGR
+			uint32_t argb = (0xFFu << 24) | (b << 16) | (g << 8) | (r << 0);
 
 			colors.push_back(argb);
 		}
