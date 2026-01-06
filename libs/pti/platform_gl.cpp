@@ -16,7 +16,7 @@
 // opengl
 #if defined(SOKOL_GLCORE)
 #if defined(_PTI_WINDOWS)
-#include "GL/gl3w.h"
+#include "gl3w/include/GL/gl3w.h"
 #elif defined(_PTI_APPLE)
 #include <OpenGL/gl3.h>
 #include <OpenGL/gl3ext.h>

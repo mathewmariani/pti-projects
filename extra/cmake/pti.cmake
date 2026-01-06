@@ -12,6 +12,10 @@ if(BUILD_WITH_PTI)
   add_library(pti STATIC ${PTI_FILES})
   target_link_libraries(pti PRIVATE sokol)
 
+  if (CMAKE_SYSTEM_NAME STREQUAL Windows)
+    target_link_libraries(pti PRIVATE gl3w)
+  endif()
+
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions(-DPTI_TRACE_HOOKS)
     add_definitions(-DPTI_DEBUG)

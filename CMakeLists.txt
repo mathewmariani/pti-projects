@@ -24,6 +24,7 @@ include("extra/cmake/sokol.cmake")
 include("extra/cmake/stb.cmake")
 include("extra/cmake/tracy.cmake")
 include("extra/cmake/pti.cmake")
+include("extra/cmake/gl3w.cmake")
 
 include_directories(${THIRDPARTY_DIR})
 add_subdirectory(${PROJECTS_DIR})
