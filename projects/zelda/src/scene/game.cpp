@@ -12,26 +12,29 @@
 
 #include "../entity/actor/player.h"
 
-pti_palette_t pal = {
-		.count = 16,
-		.colors = &sweetie16[0],
-};
+bool flag = false;
 
 void GameScene::Init(void) {
-	batteries::init();
-	bitmap_player = batteries::sprite("assets/link.ase");
-	palette = batteries::palette("assets/sweetie16.hex");
-	flags = batteries::flags("assets/flags.bin");
-	tilemap = batteries::tilemap("assets/tilemap.ase");
-	tileset = batteries::tileset("assets/tilemap.ase");
+	{ // FIXME: ugly hack.
+		if (!flag) {
+			batteries::init();
+			bitmap_player = batteries::sprite("assets/link.ase");
+			palette = batteries::palette("assets/sweetie16.hex");
+			flags = batteries::flags("assets/flags.bin");
+			tilemap = batteries::tilemap("assets/tilemap.ase");
+			tileset = batteries::tileset("assets/tilemap.ase");
 
-	pti_set_palette(palette);
-	pti_set_flags(flags);
-	pti_set_tilemap(tilemap);
-	pti_set_tileset(tileset);
+			pti_set_palette(palette);
+			pti_set_flags(flags);
+			pti_set_tilemap(tilemap);
+			pti_set_tileset(tileset);
 
-	// reload loads the specific bank into pti
-	batteries::reload();
+			flag = true;
+		}
+
+		// reload loads the specific bank into pti
+		batteries::reload();
+	}
 
 	Reset();
 

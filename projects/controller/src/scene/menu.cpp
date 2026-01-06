@@ -7,27 +7,35 @@
 #include "../bank.h"
 #include "../gamestate.h"
 
+bool flag = false;
+
 void MenuScene::Init(void) {
-	batteries::init();
-	palette = batteries::palette("assets/palette.hex");
+	{ // FIXME: ugly hack.
+		if (!flag) {
+			batteries::init();
+			palette = batteries::palette("assets/palette.hex");
+			bitmap_a = batteries::sprite("assets/btn_a.ase");
+			bitmap_b = batteries::sprite("assets/btn_b.ase");
+			bitmap_x = batteries::sprite("assets/btn_x.ase");
+			bitmap_y = batteries::sprite("assets/btn_y.ase");
+			bitmap_left = batteries::sprite("assets/btn_left.ase");
+			bitmap_right = batteries::sprite("assets/btn_right.ase");
+			bitmap_up = batteries::sprite("assets/btn_up.ase");
+			bitmap_down = batteries::sprite("assets/btn_down.ase");
+			bitmap_start = batteries::sprite("assets/btn_start.ase");
+			bitmap_select = batteries::sprite("assets/btn_select.ase");
+			bitmap_rshoulder = batteries::sprite("assets/btn_rshoulder.ase");
+			bitmap_lshoulder = batteries::sprite("assets/btn_lshoulder.ase");
+			batteries::reload();
 
-	bitmap_a = batteries::sprite("assets/btn_a.ase");
-	bitmap_b = batteries::sprite("assets/btn_b.ase");
-	bitmap_x = batteries::sprite("assets/btn_x.ase");
-	bitmap_y = batteries::sprite("assets/btn_y.ase");
+			pti_set_palette(palette);
 
-	bitmap_left = batteries::sprite("assets/btn_left.ase");
-	bitmap_right = batteries::sprite("assets/btn_right.ase");
-	bitmap_up = batteries::sprite("assets/btn_up.ase");
-	bitmap_down = batteries::sprite("assets/btn_down.ase");
+			flag = true;
+		}
 
-	bitmap_start = batteries::sprite("assets/btn_start.ase");
-	bitmap_select = batteries::sprite("assets/btn_select.ase");
-	bitmap_rshoulder = batteries::sprite("assets/btn_rshoulder.ase");
-	bitmap_lshoulder = batteries::sprite("assets/btn_lshoulder.ase");
-	batteries::reload();
-
-	pti_set_palette(palette);
+		// reload loads the specific bank into pti
+		batteries::reload();
+	}
 }
 void MenuScene::Update(void) {}
 

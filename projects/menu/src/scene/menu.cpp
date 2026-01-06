@@ -76,15 +76,24 @@ std::array<MenuItem, 6> items{{
 pti_sound_t tone;
 int current_index = 0;
 
+bool flag = false;
+
 void MenuScene::Init(void) {
-	batteries::init();
-	bitmap_font = batteries::sprite("assets/font.ase");
-	tone = batteries::create_sine_tone(440.0f, 0.3f, 0.125f, 44100.0f, 1);
+	{ // FIXME: ugly hack.
+		if (!flag) {
+			batteries::init();
+			bitmap_font = batteries::sprite("assets/font.ase");
+			tone = batteries::create_sine_tone(440.0f, 0.3f, 0.125f, 44100.0f, 1);
 
-	batteries::reload();
+			pti_set_palette(&pal);
+			pti_set_font(bitmap_font);
 
-	pti_set_palette(&pal);
-	pti_set_font(bitmap_font);
+			flag = true;
+		}
+
+		// reload loads the specific bank into pti
+		batteries::reload();
+	}
 }
 
 void MenuScene::Update(void) {

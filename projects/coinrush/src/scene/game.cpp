@@ -28,39 +28,48 @@ constexpr float kDeathResetTimer = 2.0f;
 #define XPOS(x) (x * kTileSize)
 #define YPOS(y) (y * kTileSize)
 
+bool flag = false;
+
 void GameScene::Init(void) {
-	batteries::init();
-	palette = batteries::palette("assets/palette.hex");
-	flags = batteries::flags("assets/flags.bin");
-	tileset = batteries::tileset("assets/tilemap.ase");
-	tilemap = batteries::tilemap("assets/tilemap.ase");
-	bitmap_bullet = batteries::sprite("assets/bullet.ase");
-	bitmap_coin = batteries::sprite("assets/coin.ase");
-	bitmap_player = batteries::sprite("assets/dog.ase");
-	bitmap_goomba = batteries::sprite("assets/zombie.ase");
-	bitmap_heart = batteries::sprite("assets/heart.ase");
-	bitmap_platform = batteries::sprite("assets/platform.ase");
-	bitmap_font = batteries::sprite("assets/font.ase");
-	bitmap_fx_collect1 = batteries::sprite("assets/collect.ase");
-	bitmap_fx_collect2 = batteries::sprite("assets/collect2.ase");
-	bitmap_shooter = batteries::sprite("assets/cannon.ase");
-	bitmap_door = batteries::sprite("assets/door.ase");
+	{ // FIXME: ugly hack.
+		if (!flag) {
+			batteries::init();
+			palette = batteries::palette("assets/palette.hex");
+			flags = batteries::flags("assets/flags.bin");
+			tileset = batteries::tileset("assets/tilemap.ase");
+			tilemap = batteries::tilemap("assets/tilemap.ase");
+			bitmap_bullet = batteries::sprite("assets/bullet.ase");
+			bitmap_coin = batteries::sprite("assets/coin.ase");
+			bitmap_player = batteries::sprite("assets/dog.ase");
+			bitmap_goomba = batteries::sprite("assets/zombie.ase");
+			bitmap_heart = batteries::sprite("assets/heart.ase");
+			bitmap_platform = batteries::sprite("assets/platform.ase");
+			bitmap_font = batteries::sprite("assets/font.ase");
+			bitmap_fx_collect1 = batteries::sprite("assets/collect.ase");
+			bitmap_fx_collect2 = batteries::sprite("assets/collect2.ase");
+			bitmap_shooter = batteries::sprite("assets/cannon.ase");
+			bitmap_door = batteries::sprite("assets/door.ase");
 
-	GetGameState().levels = {
-			batteries::tilemap("assets/levels/01.ase"),
-			batteries::tilemap("assets/levels/02.ase"),
-			batteries::tilemap("assets/levels/03.ase"),
-			batteries::tilemap("assets/levels/04.ase"),
-			batteries::tilemap("assets/levels/05.ase"),
-			batteries::tilemap("assets/levels/06.ase"),
-	};
+			GetGameState().levels = {
+					batteries::tilemap("assets/levels/01.ase"),
+					batteries::tilemap("assets/levels/02.ase"),
+					batteries::tilemap("assets/levels/03.ase"),
+					batteries::tilemap("assets/levels/04.ase"),
+					batteries::tilemap("assets/levels/05.ase"),
+					batteries::tilemap("assets/levels/06.ase"),
+			};
 
-	pti_set_palette(palette);
-	pti_set_flags(flags);
-	pti_set_tileset(tileset);
-	pti_set_font(bitmap_font);
+			pti_set_palette(palette);
+			pti_set_flags(flags);
+			pti_set_tileset(tileset);
+			pti_set_font(bitmap_font);
 
-	batteries::reload();
+			flag = true;
+		}
+
+		// reload loads the specific bank into pti
+		batteries::reload();
+	}
 
 	Reset();
 

@@ -22,23 +22,31 @@ constexpr float kDeathResetTimer = 2.0f;
 #define XPOS(x) (x * kTileSize)
 #define YPOS(y) (y * kTileSize)
 
+bool flag = false;
+
 void GameScene::Init(void) {
-	batteries::init();
-	palette = batteries::palette("assets/palette.hex");
-	flags = batteries::flags("assets/flags.bin");
-	tileset = batteries::tileset("assets/tilemap.ase");
-	tilemap = batteries::tilemap("assets/tilemap.ase");
-	bitmap_player = batteries::sprite("assets/dog.ase");
-	bitmap_bullet = batteries::sprite("assets/bullet.ase");
-	bitmap_font = batteries::sprite("assets/font.ase");
+	{ // FIXME: ugly hack.
+		if (!flag) {
+			batteries::init();
+			palette = batteries::palette("assets/palette.hex");
+			flags = batteries::flags("assets/flags.bin");
+			tileset = batteries::tileset("assets/tilemap.ase");
+			tilemap = batteries::tilemap("assets/tilemap.ase");
+			bitmap_player = batteries::sprite("assets/dog.ase");
+			bitmap_bullet = batteries::sprite("assets/bullet.ase");
+			bitmap_font = batteries::sprite("assets/font.ase");
 
-	pti_set_palette(palette);
-	pti_set_flags(flags);
-	pti_set_tilemap(tilemap);
-	pti_set_tileset(tileset);
-	pti_set_font(bitmap_font);
+			pti_set_palette(palette);
+			pti_set_flags(flags);
+			pti_set_tilemap(tilemap);
+			pti_set_tileset(tileset);
 
-	batteries::reload();
+			flag = true;
+		}
+
+		// reload loads the specific bank into pti
+		batteries::reload();
+	}
 
 	Reset();
 	int i, j, t;
