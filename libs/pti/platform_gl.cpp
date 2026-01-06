@@ -16,7 +16,7 @@
 // opengl
 #if defined(SOKOL_GLCORE)
 #if defined(_PTI_WINDOWS)
-#include "gl3w/include/GL/gl3w.h"
+#include "GL/gl3w.h"
 #elif defined(_PTI_APPLE)
 #include <OpenGL/gl3.h>
 #include <OpenGL/gl3ext.h>
@@ -570,12 +570,12 @@ static void frame(void) {
 
 #if defined(PTI_DEBUG)
 	/* debug ui */
-	__dbgui_begin();
-	imgui_debug_draw();
-	if (_pti.desc.debug_cb != NULL) {
-		_pti.desc.debug_cb();
-	}
-	__dbgui_end();
+	// __dbgui_begin();
+	// imgui_debug_draw();
+	// if (_pti.desc.debug_cb != NULL) {
+	// 	_pti.desc.debug_cb();
+	// }
+	// __dbgui_end();
 #endif
 }
 
