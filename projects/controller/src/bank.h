@@ -1,6 +1,9 @@
 #pragma once
 
+typedef struct pti_palette_t pti_palette_t;
 typedef struct pti_bitmap_t pti_bitmap_t;
+
+extern pti_palette_t *palette;
 
 // font
 extern pti_bitmap_t *bitmap_a;

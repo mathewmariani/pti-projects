@@ -2,19 +2,15 @@
 
 // batteries
 #include "batteries/assets.h"
-#include "batteries/palettes.h"
 
 #include "menu.h"
 #include "../bank.h"
 #include "../gamestate.h"
 
-pti_palette_t pal = {
-		.count = 16,
-		.colors = &sweetie16[0],
-};
-
 void MenuScene::Init(void) {
 	batteries::init();
+	palette = batteries::palette("assets/palette.hex");
+
 	bitmap_a = batteries::sprite("assets/btn_a.ase");
 	bitmap_b = batteries::sprite("assets/btn_b.ase");
 	bitmap_x = batteries::sprite("assets/btn_x.ase");
@@ -31,7 +27,7 @@ void MenuScene::Init(void) {
 	bitmap_lshoulder = batteries::sprite("assets/btn_lshoulder.ase");
 	batteries::reload();
 
-	pti_set_palette(&pal);
+	pti_set_palette(palette);
 }
 void MenuScene::Update(void) {}
 
