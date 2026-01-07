@@ -8,4 +8,6 @@ struct MenuScene : public BasicScene {
 	void Init(void) override;
 	void Update(void) override;
 	void Render(void) override;
+
+	int GetTileSize(void) override { return 8; };
 };
