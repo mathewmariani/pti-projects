@@ -570,12 +570,12 @@ static void frame(void) {
 
 #if defined(PTI_DEBUG)
 	/* debug ui */
-	// __dbgui_begin();
-	// imgui_debug_draw();
-	// if (_pti.desc.debug_cb != NULL) {
-	// 	_pti.desc.debug_cb();
-	// }
-	// __dbgui_end();
+	__dbgui_begin();
+	imgui_debug_draw();
+	if (_pti.desc.debug_cb != NULL) {
+		_pti.desc.debug_cb();
+	}
+	__dbgui_end();
 #endif
 }
 
