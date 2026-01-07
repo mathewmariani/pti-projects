@@ -24,6 +24,8 @@
 // should be defined elsewhere
 constexpr int kTileSize = 8;
 constexpr float kDeathResetTimer = 2.0f;
+constexpr int kWorldWidth = 40;
+constexpr int kWorldHeight = 28;
 
 #define XPOS(x) (x * kTileSize)
 #define YPOS(y) (y * kTileSize)
@@ -36,8 +38,8 @@ void GameScene::Init(void) {
 			batteries::init();
 			palette = batteries::palette("assets/palette.hex");
 			flags = batteries::flags("assets/flags.bin");
-			tileset = batteries::tileset("assets/tilemap.ase");
-			tilemap = batteries::tilemap("assets/tilemap.ase");
+			tileset = batteries::tileset("assets/levels/01.ase");
+			tilemap = batteries::tilemap("assets/levels/01.ase");
 			bitmap_bullet = batteries::sprite("assets/bullet.ase");
 			bitmap_coin = batteries::sprite("assets/coin.ase");
 			bitmap_player = batteries::sprite("assets/dog.ase");
@@ -82,8 +84,8 @@ void GameScene::Init(void) {
 	pti_set_tilemap(levels[next]);
 
 	int i, j, t;
-	for (i = 0; i < tilemap->height; i++) {
-		for (j = 0; j < tilemap->width; j++) {
+	for (i = 0; i < kWorldWidth; i++) {
+		for (j = 0; j < kWorldHeight; j++) {
 			t = pti_mget(i, j);
 			switch (t) {
 				case 48: {

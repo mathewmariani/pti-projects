@@ -26,32 +26,41 @@ constexpr int kWorldHeight = 384;
 #define XPOS(x) (x * kTileSize)
 #define YPOS(y) (y * kTileSize)
 
+bool flag = false;
+
 void GameScene::Init(void) {
-	batteries::init();
-	palette = batteries::palette("assets/palette.hex");
-	flags = batteries::flags("assets/flags.bin");
-	tileset = batteries::tileset("assets/tilemap.ase");
-	tilemap = batteries::tilemap("assets/tilemap.ase");
-	bitmap_bullet = batteries::sprite("assets/bullet.ase");
-	bitmap_coin = batteries::sprite("assets/coin.ase");
-	bitmap_player = batteries::sprite("assets/dog.ase");
-	bitmap_zombie = batteries::sprite("assets/zombie.ase");
-	bitmap_heart = batteries::sprite("assets/heart.ase");
-	bitmap_font = batteries::sprite("assets/font.ase");
-	bitmap_fx_collect = batteries::sprite("assets/collect.ase");
+	{ // FIXME: ugly hack.
+		if (!flag) {
+			batteries::init();
+			palette = batteries::palette("assets/palette.hex");
+			flags = batteries::flags("assets/flags.bin");
+			tileset = batteries::tileset("assets/tilemap.ase");
+			tilemap = batteries::tilemap("assets/tilemap.ase");
+			bitmap_bullet = batteries::sprite("assets/bullet.ase");
+			bitmap_coin = batteries::sprite("assets/coin.ase");
+			bitmap_player = batteries::sprite("assets/dog.ase");
+			bitmap_zombie = batteries::sprite("assets/zombie.ase");
+			bitmap_heart = batteries::sprite("assets/heart.ase");
+			bitmap_font = batteries::sprite("assets/font.ase");
+			bitmap_fx_collect = batteries::sprite("assets/collect.ase");
 
-	pti_set_palette(palette);
-	pti_set_flags(flags);
-	pti_set_tilemap(tilemap);
-	pti_set_tileset(tileset);
-	pti_set_font(bitmap_font);
+			pti_set_palette(palette);
+			pti_set_flags(flags);
+			pti_set_tilemap(tilemap);
+			pti_set_tileset(tileset);
+			pti_set_font(bitmap_font);
 
-	batteries::reload();
+			flag = true;
+		}
+
+		// reload loads the specific bank into pti
+		batteries::reload();
+	}
 
 	Reset();
 	int i, j, t;
-	for (i = 0; i < tilemap->height; i++) {
-		for (j = 0; j < tilemap->width; j++) {
+	for (i = 0; i < kWorldHeight / kTileSize; i++) {
+		for (j = 0; j < kWorldWidth / kTileSize; j++) {
 			t = pti_mget(i, j);
 			switch (t) {
 				case 48: {
