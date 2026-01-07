@@ -152,65 +152,59 @@ bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
 			auto tile = pti_mget(i, j);
 			auto flags = pti_fget(tile);
 			switch ((Collisions)flags) {
-				case Collisions::None:
-					return false;
 				case Collisions::Solid:
 					return true;
 				case Collisions::Semi:
-					// if ((y + by + bh - sy) <= (j * EN_TILE_SIZE)) return true;
-					// continue;
+					if ((y + by + bh - sy) <= (j * EN_TILE_SIZE)) return true;
+					continue;
 				case Collisions::SlopeRB: {// Shallow slope bottom (right)
-					// float cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
-					// float slope_y = (j + 1) * EN_TILE_SIZE - 0.5f * cx;
-					// if (y + by + bh + dir.y > slope_y) return true;
-					// continue;
-					return true;
+					float cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
+					float slope_y = (j + 1) * EN_TILE_SIZE - 0.5f * cx;
+					if (y + by + bh + dir.y > slope_y) return true;
+					continue;
 				}
 				case Collisions::SlopeRT: {// Shallow slope top (right)
-					// float cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
-					// float slope_y = (j + 1) * EN_TILE_SIZE - 4 - 0.5f * cx;
-					// if (y + by + bh + dir.y > slope_y) return true;
-					// continue;
-					return true;
+					float cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
+					float slope_y = (j + 1) * EN_TILE_SIZE - 4 - 0.5f * cx;
+					if (y + by + bh + dir.y > slope_y) return true;
+					continue;
 				}
 				case Collisions::SlopeLT: {// Shallow slope top (left)
-					// float cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
-					// float slope_y = j * EN_TILE_SIZE + 0.5f * cx;
-					// if (y + by + bh + dir.y > slope_y) return true;
-					// continue;
-					return true;
+					float cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
+					float slope_y = j * EN_TILE_SIZE + 0.5f * cx;
+					if (y + by + bh + dir.y > slope_y) return true;
+					continue;
 				}
 				case Collisions::SlopeLB: {// Shallow slope bottom (left)
-					// float cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
-					// float slope_y = (j + 1) * EN_TILE_SIZE - 4 + 0.5f * cx;
-					// if (y + by + bh + dir.y > slope_y) return true;
-					// continue;
-					return true;
+					float cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
+					float slope_y = (j + 1) * EN_TILE_SIZE - 4 + 0.5f * cx;
+					if (y + by + bh + dir.y > slope_y) return true;
+					continue;
 				}
 				case Collisions::SpikeT: {// top-half
-					// float solid_y = j * EN_TILE_SIZE + 4;
-					// if (y + by + dir.y < solid_y) return true;
-					// continue;
-					return true;
+					float solid_y = j * EN_TILE_SIZE + 4;
+					if (y + by + dir.y < solid_y) return true;
+					continue;
 				}
 				case Collisions::SpikeR: {// right-half
-					// float solid_x = (i + 1) * EN_TILE_SIZE - 4;
-					// if (x + bx + bw + dir.x > solid_x) return true;
-					// continue;
-					return true;
+					float solid_x = (i + 1) * EN_TILE_SIZE - 4;
+					if (x + bx + bw + dir.x > solid_x) return true;
+					continue;
 				}
 				case Collisions::SpikeB: {// bottom-half (one-way)
-					// float solid_y = (j + 1) * EN_TILE_SIZE - 4;
-					// if (y + by + bh + dir.y > solid_y) return true;
-					// continue;
-					return true;
+					float solid_y = (j + 1) * EN_TILE_SIZE - 4;
+					if (y + by + bh + dir.y > solid_y) return true;
+					continue;
 				}
 				case Collisions::SpikeL: {// left-half
-					// float solid_x = i * EN_TILE_SIZE + 4;
-					// if (x + bx + dir.x < solid_x) return true;
-					// continue;
-					return true;
+					float solid_x = i * EN_TILE_SIZE + 4;
+					if (x + bx + dir.x < solid_x) return true;
+					continue;
 				}
+
+				case Collisions::None:
+				default:
+					continue;
 			}
 		}
 	}
@@ -220,38 +214,6 @@ bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
 
 bool EntityBase::IsTouching() const {
 	return PlaceMeeting({direction, 0});
-}
-
-bool EntityBase::IsTouchingWall() const {
-	const auto top = std::max(0, (y + by) / EN_TILE_SIZE);
-	const auto left = std::max(0, (x + bx + direction) / EN_TILE_SIZE);
-	const auto bottom = std::min(EN_ROOM_ROWS - 1, (y + by + bh - 1) / EN_TILE_SIZE);
-	const auto right = std::min(EN_ROOM_COLS - 1, (x + bx + bw + direction - 1) / EN_TILE_SIZE);
-
-	for (auto j = top; j <= bottom; ++j) {
-		for (auto i = left; i <= right; ++i) {
-			auto tile = pti_mget(i, j);
-			auto flags = pti_fget(tile);
-			switch ((Collisions)flags) {
-				case Collisions::Semi:
-				case Collisions::SlopeRB:
-				case Collisions::SlopeRT:
-				case Collisions::SlopeLT:
-				case Collisions::SlopeLB:
-				case Collisions::SpikeT:
-				case Collisions::SpikeR:
-				case Collisions::SpikeB:
-				case Collisions::SpikeL:
-				case Collisions::None:
-					return false;
-				case Collisions::Solid:
-				default:
-					return true;
-			}
-		}
-	}
-
-	return false;
 }
 
 bool EntityBase::CanWiggle() {
