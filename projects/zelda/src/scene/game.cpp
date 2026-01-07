@@ -19,7 +19,7 @@ void GameScene::Init(void) {
 		if (!flag) {
 			batteries::init();
 			bitmap_player = batteries::sprite("assets/link.ase");
-			palette = batteries::palette("assets/sweetie16.hex");
+			palette = batteries::palette("assets/palette.hex");
 			flags = batteries::flags("assets/flags.bin");
 			tilemap = batteries::tilemap("assets/tilemap.ase");
 			tileset = batteries::tileset("assets/tilemap.ase");
