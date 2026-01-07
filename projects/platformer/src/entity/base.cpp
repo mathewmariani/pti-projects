@@ -6,12 +6,25 @@
 
 #include <algorithm>
 
-
 constexpr int EN_TILE_SIZE = 8;
 constexpr int EN_ROOM_WIDTH = 512;
-constexpr int EN_ROOM_HEIGHT = 368;
+constexpr int EN_ROOM_HEIGHT = 288;
 constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / EN_TILE_SIZE;
 constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / EN_TILE_SIZE;
+
+enum class Collisions : uint8_t {
+	None = 0x00,
+	Solid = 0x01,
+	Semi = 0x02,
+	SpikeT = 0x03,
+	SpikeR = 0x04,
+	SpikeB = 0x05,
+	SpikeL = 0x06,
+	SlopeRB = 0x07,
+	SlopeRT = 0x08,
+	SlopeLT = 0x09,
+	SlopeLB = 0x0A,
+};
 
 template<>
 bool EntityBase::Is<EntityBase>() const {
@@ -30,9 +43,14 @@ void EntityBase::Physics() {
 	int nx = sx + rx;
 	int ny = sy + ry;
 
+	/* Update move remainder */
+	rx = rx + sx;
+	ry = ry + sy;
+
 	/* Move in X direction */
-	int j = nx;
+	int j = std::round(rx);
 	int dx = _pti_sign(j);
+	rx -= j;
 	while (j != 0) {
 		// Moving up slope:
 		if (PlaceMeeting({dx, 0}) && !(PlaceMeeting({dx, -1}))) {
@@ -62,9 +80,10 @@ void EntityBase::Physics() {
 		j -= dx;
 	}
 
-	// Move in Y direction
-	j = ny;
+	/* Move in X direction */
+	j = std::round(ry);
 	int dy = _pti_sign(j);
+	ry -= j;
 	while (j != 0) {
 		if (sy < 0 && !CanWiggle()) {
 			sy = ry = ny = 0;
@@ -88,10 +107,6 @@ void EntityBase::Physics() {
 		y += dy;
 		j -= dy;
 	}
-
-	/* Update move remainder */
-	rx = sx + rx - nx;
-	ry = sy + ry - ny;
 }
 
 void EntityBase::Update() {}
@@ -136,57 +151,66 @@ bool EntityBase::PlaceMeeting(const CoordXY<int> &dir) const {
 		for (auto i = left; i <= right; ++i) {
 			auto tile = pti_mget(i, j);
 			auto flags = pti_fget(tile);
-
-			switch (flags) {
-				// Non-colliding tiles
-				case 0:
-				case 46:
-				case 47:
-					continue;
-
-				// Slope handling
-				case 31: {// Shallow slope bottom (right)
-					auto cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
-					auto slope_y = (j + 1) * EN_TILE_SIZE - 0.5f * cx;
-					if (y + by + bh + dir.y > slope_y) return true;
-					continue;
-				}
-				case 32: {// Shallow slope top (right)
-					auto cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
-					auto slope_y = (j + 1) * EN_TILE_SIZE - 4 - 0.5f * cx;
-					if (y + by + bh + dir.y > slope_y) return true;
-					continue;
-				}
-				case 33: {// Shallow slope top (left)
-					auto cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
-					auto slope_y = j * EN_TILE_SIZE + 0.5f * cx;
-					if (y + by + bh + dir.y > slope_y) return true;
-					continue;
-				}
-				case 34: {// Shallow slope bottom (left)
-					auto cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
-					auto slope_y = (j + 1) * EN_TILE_SIZE - 4 + 0.5f * cx;
-					if (y + by + bh + dir.y > slope_y) return true;
-					continue;
-				}
-
-				// One-way platforms
-				case 27:
-				case 28:
-				case 29:
-				case 30:
-				case 38:
-				case 39:
-				case 40:
-				case 41: {
-					// Allow collision only if the entity was entirely above the platform before the movement
-					if ((y + by + bh - sy) <= (j * EN_TILE_SIZE)) return true;
-					continue;
-				}
-
-				// Solid tiles
-				default:
+			switch ((Collisions)flags) {
+				case Collisions::None:
+					return false;
+				case Collisions::Solid:
 					return true;
+				case Collisions::Semi:
+					// if ((y + by + bh - sy) <= (j * EN_TILE_SIZE)) return true;
+					// continue;
+				case Collisions::SlopeRB: {// Shallow slope bottom (right)
+					// float cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
+					// float slope_y = (j + 1) * EN_TILE_SIZE - 0.5f * cx;
+					// if (y + by + bh + dir.y > slope_y) return true;
+					// continue;
+					return true;
+				}
+				case Collisions::SlopeRT: {// Shallow slope top (right)
+					// float cx = (x + bx + bw + dir.x) - i * EN_TILE_SIZE;
+					// float slope_y = (j + 1) * EN_TILE_SIZE - 4 - 0.5f * cx;
+					// if (y + by + bh + dir.y > slope_y) return true;
+					// continue;
+					return true;
+				}
+				case Collisions::SlopeLT: {// Shallow slope top (left)
+					// float cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
+					// float slope_y = j * EN_TILE_SIZE + 0.5f * cx;
+					// if (y + by + bh + dir.y > slope_y) return true;
+					// continue;
+					return true;
+				}
+				case Collisions::SlopeLB: {// Shallow slope bottom (left)
+					// float cx = (x + bx + dir.x) - i * EN_TILE_SIZE;
+					// float slope_y = (j + 1) * EN_TILE_SIZE - 4 + 0.5f * cx;
+					// if (y + by + bh + dir.y > slope_y) return true;
+					// continue;
+					return true;
+				}
+				case Collisions::SpikeT: {// top-half
+					// float solid_y = j * EN_TILE_SIZE + 4;
+					// if (y + by + dir.y < solid_y) return true;
+					// continue;
+					return true;
+				}
+				case Collisions::SpikeR: {// right-half
+					// float solid_x = (i + 1) * EN_TILE_SIZE - 4;
+					// if (x + bx + bw + dir.x > solid_x) return true;
+					// continue;
+					return true;
+				}
+				case Collisions::SpikeB: {// bottom-half (one-way)
+					// float solid_y = (j + 1) * EN_TILE_SIZE - 4;
+					// if (y + by + bh + dir.y > solid_y) return true;
+					// continue;
+					return true;
+				}
+				case Collisions::SpikeL: {// left-half
+					// float solid_x = i * EN_TILE_SIZE + 4;
+					// if (x + bx + dir.x < solid_x) return true;
+					// continue;
+					return true;
+				}
 			}
 		}
 	}
@@ -208,32 +232,19 @@ bool EntityBase::IsTouchingWall() const {
 		for (auto i = left; i <= right; ++i) {
 			auto tile = pti_mget(i, j);
 			auto flags = pti_fget(tile);
-			switch (flags) {
-				// --- Non-colliding tiles ---
-				case 0:
-				case 46:
-				case 47:
-					continue;
-
-				// --- Slopes (walkable, not walls) ---
-				case 31:
-				case 32:
-				case 33:
-				case 34:
-					continue;
-
-				// --- One-way platforms (also not walls) ---
-				case 27:
-				case 28:
-				case 29:
-				case 30:
-				case 38:
-				case 39:
-				case 40:
-				case 41:
-					continue;
-
-				// --- Solid tiles (true walls) ---
+			switch ((Collisions)flags) {
+				case Collisions::Semi:
+				case Collisions::SlopeRB:
+				case Collisions::SlopeRT:
+				case Collisions::SlopeLT:
+				case Collisions::SlopeLB:
+				case Collisions::SpikeT:
+				case Collisions::SpikeR:
+				case Collisions::SpikeB:
+				case Collisions::SpikeL:
+				case Collisions::None:
+					return false;
+				case Collisions::Solid:
 				default:
 					return true;
 			}

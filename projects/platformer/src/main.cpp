@@ -4,7 +4,6 @@
 #include "bank.h"
 #include "gamestate.h"
 #include "batteries/assets.h"
-#include "batteries/palettes.h"
 
 #include "entity/coin.h"
 #include "entity/goomba.h"
@@ -21,22 +20,17 @@ namespace {
 	constexpr int height = 135;
 	auto t = 0.0f;
 
-	constexpr int EN_ROOM_COLS = 64;
-	constexpr int EN_ROOM_ROWS = 46;
-	constexpr int EN_GRID_SIZE = 8;
+	constexpr int EN_TILE_SIZE = 8;
 	constexpr int EN_ROOM_WIDTH = 512;
 	constexpr int EN_ROOM_HEIGHT = 288;
+	constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / EN_TILE_SIZE;
+	constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / EN_TILE_SIZE;
 
 	float resetTimer = 0.0f;
 }// namespace
 
-#define XPOS(x) (x * EN_GRID_SIZE)
-#define YPOS(y) (y * EN_GRID_SIZE)
-
-pti_palette_t pal = {
-		.count = 16,
-		.colors = &sweetie16[0],
-};
+#define XPOS(x) (x * EN_TILE_SIZE)
+#define YPOS(y) (y * EN_TILE_SIZE)
 
 static void load(void) {
 	GameStateInit();
@@ -74,6 +68,8 @@ static void load(void) {
 
 static void init(void) {
 	batteries::init();
+	palette = batteries::palette("assets/palette.hex");
+	flags = batteries::flags("assets/flags.bin");
 	tileset = batteries::tileset("assets/tilemap.ase");
 	tilemap = batteries::tilemap("assets/tilemap.ase");
 
@@ -88,7 +84,8 @@ static void init(void) {
 	bitmap_fx_dust1 = batteries::sprite("assets/dust1.ase");
 	bitmap_fx_dust2 = batteries::sprite("assets/dust2.ase");
 
-	pti_set_palette(&pal);
+	pti_set_palette(palette);
+	pti_set_flags(flags);
 	pti_set_tilemap(tilemap);
 	pti_set_tileset(tileset);
 	pti_set_font(bitmap_font);
