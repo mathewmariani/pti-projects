@@ -128,6 +128,6 @@ Module['FS_createPath']("/", "assets", true, true);
     }
 
     }
-    loadPackage({"files": [{"filename": "/assets/font.ase", "start": 0, "end": 1566}], "remote_package_size": 1566});
+    loadPackage({"files": [{"filename": "/assets/font.ase", "start": 0, "end": 1031}], "remote_package_size": 1031});
 
   })();
