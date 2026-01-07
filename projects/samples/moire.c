@@ -5,10 +5,14 @@
 // engine
 #include "pti/pti.h"
 #include "palettes.h"
-#define pal sweetie16
+
+pti_palette_t pal = {
+		.count = 16,
+		.colors = &sweetie16[0],
+};
 
 static void init(void) {
-	// gfx state
+	pti_set_palette(&pal);
 	pti_dither(0x5a5a);
 	// pti_dither(0xeae0);
 }
@@ -35,11 +39,11 @@ static void frame(void) {
 			int c = (((int) sqrtf(dx1 + dy1) ^ (int) sqrtf(dx2 + dy2)) >> 4);
 			if ((c & 1) == 0) {
 				if (rand() % 5 == 1) {
-					pti_pset(x, y, ((uint64_t) pal[1] << 32) | (uint64_t) pal[2]);
+					pti_pset(x, y, ((uint16_t) 1 << 8) | 2);
 				}
 			} else {
 				if (rand() % 5 == 1) {
-					pti_pset(x, y, ((uint64_t) pal[3] << 32) | (uint64_t) pal[4]);
+					pti_pset(x, y, ((uint16_t) 3 << 8) | 4);
 				}
 			}
 		}

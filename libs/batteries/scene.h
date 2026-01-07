@@ -20,6 +20,8 @@ namespace batteries {
 		virtual void RemoveEntity(EntityBase *entity) = 0;
 		virtual void ForEachActor(const std::function<void(Actor &)> &fn) = 0;
 		virtual void ForEachSolid(const std::function<void(Solid &)> &fn) = 0;
+
+		virtual int GetTileSize(void) = 0;
 	};
 
 	template<size_t Max, typename... Types>

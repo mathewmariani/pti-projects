@@ -17,32 +17,8 @@
 bool show_overlays = false;
 #endif
 
-#define XPOS(x) (x * kTileSize)
-#define YPOS(y) (y * kTileSize)
-
-static void load(void) {
-	GameStateInit();
-	batteries::reload();
-}
-
 static void init(void) {
-	batteries::init();
-	bitmap_a = batteries::sprite("assets/btn_a.ase");
-	bitmap_b = batteries::sprite("assets/btn_b.ase");
-	bitmap_x = batteries::sprite("assets/btn_x.ase");
-	bitmap_y = batteries::sprite("assets/btn_y.ase");
-
-	bitmap_left = batteries::sprite("assets/btn_left.ase");
-	bitmap_right = batteries::sprite("assets/btn_right.ase");
-	bitmap_up = batteries::sprite("assets/btn_up.ase");
-	bitmap_down = batteries::sprite("assets/btn_down.ase");
-
-	bitmap_start = batteries::sprite("assets/btn_start.ase");
-	bitmap_select = batteries::sprite("assets/btn_select.ase");
-	bitmap_rshoulder = batteries::sprite("assets/btn_rshoulder.ase");
-	bitmap_lshoulder = batteries::sprite("assets/btn_lshoulder.ase");
-
-	load();
+	GameStateInit();
 }
 
 static void cleanup(void) {
@@ -53,7 +29,7 @@ static void frame(void) {
 	auto &gameState = GetGameState();
 	if (pti_down(PTI_DBG)) {
 		GetGameState().Reset();
-		load();
+		GameStateInit();
 		return;
 	}
 

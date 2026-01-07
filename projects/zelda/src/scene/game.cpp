@@ -3,6 +3,7 @@
 #include "batteries/actor.h"
 #include "batteries/solid.h"
 #include "batteries/assets.h"
+#include "batteries/palettes.h"
 
 #include "game.h"
 #include "../bank.h"
@@ -11,19 +12,29 @@
 
 #include "../entity/actor/player.h"
 
+bool flag = false;
+
 void GameScene::Init(void) {
-	batteries::init();
-	bitmap_player = batteries::sprite("assets/link.ase");
-	flags = batteries::flags("assets/flags.bin");
-	tilemap = batteries::tilemap("assets/tilemap.ase");
-	tileset = batteries::tileset("assets/tilemap.ase");
+	{ // FIXME: ugly hack.
+		if (!flag) {
+			batteries::init();
+			bitmap_player = batteries::sprite("assets/link.ase");
+			palette = batteries::palette("assets/palette.hex");
+			flags = batteries::flags("assets/flags.bin");
+			tilemap = batteries::tilemap("assets/tilemap.ase");
+			tileset = batteries::tileset("assets/tilemap.ase");
 
-	pti_set_flags(flags);
-	pti_set_tilemap(tilemap);
-	pti_set_tileset(tileset);
+			pti_set_palette(palette);
+			pti_set_flags(flags);
+			pti_set_tilemap(tilemap);
+			pti_set_tileset(tileset);
 
-	// reload loads the specific bank into pti
-	batteries::reload();
+			flag = true;
+		}
+
+		// reload loads the specific bank into pti
+		batteries::reload();
+	}
 
 	Reset();
 
@@ -40,14 +51,14 @@ void GameScene::Update(void) {
 constexpr float kTransitionSpeed = 0.25f;
 
 void GameScene::Render(void) {
-	pti_cls(0xff575757);
+	pti_cls(15);
 
 	auto gameState = GetGameState();
-	auto target = gameState.currentRoom * 128.0f;	
+	auto target = gameState.currentRoom * 128.0f;
 	auto diff = (target - camera) * kTransitionSpeed;
 	camera = camera + diff;
-	
-	pti_camera((int)std::round(camera.x), (int)std::round(camera.y));
+
+	pti_camera((int) std::round(camera.x), (int) std::round(camera.y));
 
 	pti_map(0, 0);
 	RenderEntitiesOfType<EntityBase>();

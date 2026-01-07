@@ -1,10 +1,42 @@
-#include "menu.h"
-#include "../gamestate.h"
-#include "../bank.h"
-
 #include "pti/pti.h"
 
-void MenuScene::Init(void) {}
+// batteries
+#include "batteries/assets.h"
+
+#include "menu.h"
+#include "../bank.h"
+#include "../gamestate.h"
+
+bool flag = false;
+
+void MenuScene::Init(void) {
+	{ // FIXME: ugly hack.
+		if (!flag) {
+			batteries::init();
+			palette = batteries::palette("assets/palette.hex");
+			bitmap_a = batteries::sprite("assets/btn_a.ase");
+			bitmap_b = batteries::sprite("assets/btn_b.ase");
+			bitmap_x = batteries::sprite("assets/btn_x.ase");
+			bitmap_y = batteries::sprite("assets/btn_y.ase");
+			bitmap_left = batteries::sprite("assets/btn_left.ase");
+			bitmap_right = batteries::sprite("assets/btn_right.ase");
+			bitmap_up = batteries::sprite("assets/btn_up.ase");
+			bitmap_down = batteries::sprite("assets/btn_down.ase");
+			bitmap_start = batteries::sprite("assets/btn_start.ase");
+			bitmap_select = batteries::sprite("assets/btn_select.ase");
+			bitmap_rshoulder = batteries::sprite("assets/btn_rshoulder.ase");
+			bitmap_lshoulder = batteries::sprite("assets/btn_lshoulder.ase");
+			batteries::reload();
+
+			pti_set_palette(palette);
+
+			flag = true;
+		}
+
+		// reload loads the specific bank into pti
+		batteries::reload();
+	}
+}
 void MenuScene::Update(void) {}
 
 #define DRAW_BTN(btn, bitmap, x, y)                          \
@@ -14,8 +46,7 @@ void MenuScene::Update(void) {}
 	} while (0)
 
 void MenuScene::Render(void) {
-	pti_cls(0xff575757);
-	pti_color(0xffffffff);
+	pti_cls(15);
 
 	int state, ox, oy;
 

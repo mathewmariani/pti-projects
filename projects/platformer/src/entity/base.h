@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../world/coordinate.h"
+#include "batteries/coordinate.h"
 
 #include <algorithm>
 #include <stdint.h>

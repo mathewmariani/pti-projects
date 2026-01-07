@@ -1,5 +1,7 @@
 #include "bank.h"
 
+pti_palette_t *palette = nullptr;
+
 // bitmaps
 pti_bitmap_t *bitmap_a = nullptr;
 pti_bitmap_t *bitmap_b = nullptr;

@@ -5,13 +5,17 @@
 // engine
 #include "pti/pti.h"
 #include "palettes.h"
-#define pal sweetie16
 
-static int light[] = {2, 3, 5, 7, 9, 11};
-static int dark[] = {1, 4, 6, 8, 10, 12};
+static uint8_t light[] = {2, 3, 5, 7, 9, 11};
+static uint8_t dark[] = {1, 4, 6, 8, 10, 12};
+
+pti_palette_t pal = {
+		.count = 16,
+		.colors = &sweetie16[0],
+};
 
 static void init(void) {
-	// gfx state
+	pti_set_palette(&pal);
 	pti_dither(0x5a5a);
 	// pti_dither(0xeae0);
 }
@@ -44,13 +48,8 @@ static void frame(void) {
 		// square:
 		// int i = ((int)(floor(xx / w) - floor(yy / h)) % s) % n;
 
-		unsigned int l = light[i];
-		unsigned int d = dark[i];
-		uint64_t c = ((uint64_t) pal[l] << 32) | (uint64_t) pal[d];
-
-		// local c = light[i]
-		pti_pset(x, y, c);
-		// pti.circ(x,y,1,c)
+		uint16_t color = ((uint16_t) light[i] << 8) | dark[i];
+		pti_pset(x, y, color);
 	}
 }
 

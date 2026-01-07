@@ -1,7 +1,7 @@
 #pragma once
 
 #include "base.h"
-#include "../world/coordinate.h"
+#include "batteries/coordinate.h"
 
 #include <cstdint>
 

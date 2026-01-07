@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 // scenes
 #include "scene/menu.h"
 
@@ -9,18 +7,6 @@
 #include "batteries/gamestate.h"
 #include "batteries/registry.h"
 #include "batteries/scene.h"
-
-typedef struct pti_tilemap_t pti_tilemap_t;
-
-constexpr int kScreenWidth = 320;
-constexpr int kScreenHeight = 224;
-constexpr int kTileSize = 8;
-constexpr int EN_ROOM_WIDTH = (kScreenWidth);
-constexpr int EN_ROOM_HEIGHT = (kScreenHeight);
-constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / kTileSize;
-constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
-#define PTI_DELTA (1.0 / 30.0)
-constexpr float kDeathResetTimer = 2.0f;
 
 enum class SceneType {
 	Menu = 0,

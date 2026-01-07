@@ -6,13 +6,7 @@
 
 #include "gamestate.h"
 
-constexpr int kScreenWidth = 176;
-constexpr int kScreenHeight = 128;
-constexpr int kTileSize = 8;
-constexpr int EN_ROOM_WIDTH = (176 * 3);
-constexpr int EN_ROOM_HEIGHT = (128 * 3);
-constexpr int EN_ROOM_COLS = EN_ROOM_WIDTH / kTileSize;
-constexpr int EN_ROOM_ROWS = EN_ROOM_HEIGHT / kTileSize;
+#define kTileSize (Scene()->GetTileSize())
 
 template<>
 bool EntityBase::Is<EntityBase>() const {
@@ -88,8 +82,8 @@ template<typename Predicate>
 bool EntityBase::CheckTiles(const CoordXY<int> &dir, Predicate &&pred) const {
 	const auto top = std::max(0, (position.y + by + dir.y) / kTileSize);
 	const auto left = std::max(0, (position.x + bx + dir.x) / kTileSize);
-	const auto bottom = std::min(EN_ROOM_ROWS - 1, (position.y + by + bh + dir.y - 1) / kTileSize);
-	const auto right = std::min(EN_ROOM_COLS - 1, (position.x + bx + bw + dir.x - 1) / kTileSize);
+	const auto bottom = (position.y + by + bh + dir.y - 1) / kTileSize;
+	const auto right = (position.x + bx + bw + dir.x - 1) / kTileSize;
 
 	for (int j = top; j <= bottom; ++j) {
 		for (int i = left; i <= right; ++i) {

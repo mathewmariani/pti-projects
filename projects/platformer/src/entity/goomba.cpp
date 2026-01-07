@@ -26,10 +26,8 @@ void Goomba::Create(const CoordXY<int> &location) {
 }
 
 void Goomba::Update() {
-	if (IsTouchingWall()) {
+	if (PlaceMeeting({direction, 0})) {
 		direction *= -1;
-		x += direction;
-		sx = -sx;
 	}
 
 	HandleHorizontalMovement();

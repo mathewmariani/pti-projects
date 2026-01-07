@@ -17,21 +17,8 @@
 bool show_overlays = false;
 #endif
 
-#define XPOS(x) (x * kTileSize)
-#define YPOS(y) (y * kTileSize)
-
-static void load(void) {
-	GameStateInit();
-	batteries::reload();
-}
-
 static void init(void) {
-	batteries::init();
-	bitmap_font = batteries::sprite("assets/font.ase");
-
-	pti_set_font(bitmap_font);
-
-	load();
+	GameStateInit();
 }
 
 static void cleanup(void) {
@@ -42,7 +29,7 @@ static void frame(void) {
 	auto &gameState = GetGameState();
 	if (pti_down(PTI_DBG)) {
 		GetGameState().Reset();
-		load();
+		GameStateInit();
 		return;
 	}
 

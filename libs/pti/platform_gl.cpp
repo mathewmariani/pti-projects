@@ -16,7 +16,7 @@
 // opengl
 #if defined(SOKOL_GLCORE)
 #if defined(_PTI_WINDOWS)
-#include "gl3w/include/GL/gl3w.h"
+#include "GL/gl3w.h"
 #elif defined(_PTI_APPLE)
 #include <OpenGL/gl3.h>
 #include <OpenGL/gl3ext.h>
@@ -533,6 +533,8 @@ static void init(void) {
 	hooks.set_font = _pti_set_font;
 	hooks.set_tilemap = _pti_set_tilemap;
 	hooks.set_tileset = _pti_set_tileset;
+	hooks.set_flags = nullptr;
+	hooks.set_palette = nullptr;
 	pti_install_trace_hooks(&hooks);
 #endif
 
