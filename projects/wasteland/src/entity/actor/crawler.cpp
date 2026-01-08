@@ -10,63 +10,19 @@
 
 constexpr int kSpriteOffsetX = 8;
 constexpr int kSpriteOffsetY = 8;
-constexpr int kWalkDistance = 1;
+constexpr int kWalkDistance = 16;
 constexpr int kAnimationTimer = 4;
 
 // should be 8...
 // should be defined elsewhere
-constexpr int kTileSize = 2;
-constexpr int kTilemapSize = 64;
+constexpr int kTileSize = 16;
+constexpr int kTilemapSize = 256;
 
 Crawler::Crawler() {
 	bx = -8;
 	by = 0;
 	bw = 16;
 	bh = 8;
-}
-
-bool Crawler::Walkable(const CoordXY<int> &distance) const {
-	return true;
-}
-
-void Crawler::WaitForInput() {
-	auto pos = position;
-	auto press = false;
-	if (pti_down(PTI_LEFT)) {
-		direction = CoordXY<int>::Left;
-		animation_index = 4;
-		press = true;
-	}
-	if (pti_down(PTI_RIGHT)) {
-		direction = CoordXY<int>::Right;
-		animation_index = 6;
-		press = true;
-	}
-	if (pti_down(PTI_UP)) {
-		direction = CoordXY<int>::Down;
-		animation_index = 2;
-		press = true;
-	}
-	if (pti_down(PTI_DOWN)) {
-		direction = CoordXY<int>::Up;
-		animation_index = 0;
-		press = true;
-	}
-
-	auto collision = false;
-	if (press) {
-		auto next_pos = direction * kWalkDistance;
-		if (!Walkable(next_pos)) {
-			return;
-		}
-
-		state = State::Move;
-		move_distance = kWalkDistance;
-		HandleMovement();
-	} else {
-		animation_timer = kAnimationTimer - 1;
-		animation_frame = 1;
-	}
 }
 
 void Crawler::ChangeDirection() {
@@ -88,16 +44,6 @@ void Crawler::DrunkWalk() {
 	HandleMovement();
 }
 
-void Crawler::SpawnCrawler() {
-	if ((rand() % 100) > 5) {
-		return;
-	}
-	auto *e = CreateEntity<Crawler>();
-	e->position = position;
-	e->direction = direction;
-}
-
-
 void Crawler::HandleMovement() {
 	position = position + direction;
 
@@ -110,32 +56,37 @@ void Crawler::HandleMovement() {
 
 	move_distance--;
 	if (move_distance <= 0) {
-		int x = position.x / kTileSize;
-		int y = position.x / kTileSize;
-		pti_mset(x, y, 2);
-		state = State::Idle;
+
+		state = State::Smash;
 	}
 }
 
 void Crawler::DestroyTile() {
-	int x = (position.x / 16);
-	int y = (position.y / 16);
-	pti_mset(x, y, 0);
+	int x = position.x / kTileSize;
+	int y = position.y / kTileSize;
+	pti_mset(x, y, 21);
 }
 
 void Crawler::Update() {
 	switch (state) {
 		case State::Idle: {
-			// WaitForInput();
 			ChangeDirection();
 			DrunkWalk();
 		} break;
 		case State::Move: {
 			HandleMovement();
 		} break;
+		case State::Smash: {
+			idle_timer--;
+			if (idle_timer <= 0) {
+				DestroyTile();
+				state = State::Idle;
+				idle_timer = 5;
+			}
+		} break;
 	}
 }
 
 void Crawler::Render() {
-	pti_pset(position.x, position.y, 0);
+	pti_rect(position.x, position.y, kTileSize, kTileSize, 2);
 }

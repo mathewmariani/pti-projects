@@ -5,6 +5,7 @@
 struct Crawler : Actor {
 	enum class State {
 		Idle,
+		Smash,
 		Move,
 	};
 
@@ -13,17 +14,19 @@ struct Crawler : Actor {
 	void Update() override;
 	void Render() override;
 
-public:
-	bool Walkable(const CoordXY<int> &distance) const;
-	void WaitForInput();
+	bool IsIdle() const {
+		return state == State::Idle;
+	}
+
+private:
 	void DestroyTile();
 	void ChangeDirection();
 	void DrunkWalk();
-	void SpawnCrawler();
 	void HandleMovement();
 
 private:
 	State state;
+	int idle_timer = 0;
 	int move_distance = 0;
 
 	int animation_timer = 0;

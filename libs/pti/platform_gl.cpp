@@ -444,13 +444,13 @@ void imgui_debug_draw() {
 	if (show_tileset_window) {
 		ImGui::SetNextWindowSize(ImVec2(440, 400), ImGuiCond_Once);
 		if (ImGui::Begin("Tileset", &show_tileset_window)) {
-			ImGui::Text("Width: %d", _pti.vm.draw.tileset->width);
-			ImGui::Text("Height: %d", _pti.vm.draw.tileset->height);
-			ImGui::Text("Tile Width: %d", _pti.vm.draw.tileset->tile_w);
-			ImGui::Text("Tile Height: %d", _pti.vm.draw.tileset->tile_h);
-			ImGui::Text("Pixels: %p", _pti.vm.draw.tileset->pixels);
+			ImGui::Text("Width: %d", _pti.vm.vram.tileset->width);
+			ImGui::Text("Height: %d", _pti.vm.vram.tileset->height);
+			ImGui::Text("Tile Width: %d", _pti.vm.vram.tileset->tile_w);
+			ImGui::Text("Tile Height: %d", _pti.vm.vram.tileset->tile_h);
+			ImGui::Text("Pixels: %p", _pti.vm.vram.tileset->pixels);
 
-			const ImVec2 tileset_vec2{(float) _pti.vm.draw.tileset->width, (float) _pti.vm.draw.tileset->height};
+			const ImVec2 tileset_vec2{(float) _pti.vm.vram.tileset->width, (float) _pti.vm.vram.tileset->height};
 			ImGui::Image((ImTextureID) (intptr_t) state.gl.tileset, tileset_vec2, uv_min, uv_max);
 		}
 		ImGui::End();
@@ -459,11 +459,11 @@ void imgui_debug_draw() {
 	if (show_font_window) {
 		ImGui::SetNextWindowSize(ImVec2(440, 400), ImGuiCond_Once);
 		if (ImGui::Begin("Font", &show_font_window)) {
-			ImGui::Text("Width: %d", _pti.vm.draw.font->width);
-			ImGui::Text("Height: %d", _pti.vm.draw.font->height);
-			ImGui::Text("Pixels: %p", _pti.vm.draw.font->pixels);
+			ImGui::Text("Width: %d", _pti.vm.vram.font->width);
+			ImGui::Text("Height: %d", _pti.vm.vram.font->height);
+			ImGui::Text("Pixels: %p", _pti.vm.vram.font->pixels);
 
-			const ImVec2 font_vec2{(float) _pti.vm.draw.font->width, (float) _pti.vm.draw.font->height};
+			const ImVec2 font_vec2{(float) _pti.vm.vram.font->width, (float) _pti.vm.vram.font->height};
 			ImGui::Image((ImTextureID) (intptr_t) state.gl.font, font_vec2, uv_min, uv_max);
 		}
 		ImGui::End();
@@ -472,9 +472,9 @@ void imgui_debug_draw() {
 	if (show_tilemap_window) {
 		ImGui::SetNextWindowSize(ImVec2(440, 400), ImGuiCond_Once);
 		if (ImGui::Begin("Tilemap", &show_tilemap_window)) {
-			ImGui::Text("Width: %d", _pti.vm.tilemap->width);
-			ImGui::Text("Height: %d", _pti.vm.tilemap->height);
-			ImGui::Text("Tiles: %p", _pti.vm.tilemap->tiles);
+			ImGui::Text("Width: %d", _pti.vm.vram.tilemap->width);
+			ImGui::Text("Height: %d", _pti.vm.vram.tilemap->height);
+			ImGui::Text("Tiles: %p", _pti.vm.vram.tilemap->tiles);
 		}
 		ImGui::End();
 	}

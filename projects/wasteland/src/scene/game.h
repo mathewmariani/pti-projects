@@ -12,6 +12,8 @@ struct GameScene : public BasicScene {
 	void Update(void) override;
 	void Render(void) override;
 
+	int GetTileSize(void) { return 2; };
+
 private:
 	CoordXY<float> camera = CoordXY<float>::Zero;
 };
