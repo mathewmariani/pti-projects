@@ -178,7 +178,7 @@ namespace batteries {
 					const size_t size = cel->w * cel->h * sizeof(int);
 					tilemap.width = (int16_t) cel->w;
 					tilemap.height = (int16_t) cel->h;
-					tilemap.tiles = (int *) pti_alloc(&bank, size);
+					tilemap.tiles = (uint8_t *) pti_alloc(&bank, size);
 					memcpy(tilemap.tiles, cel->tiles, size);
 				}
 			}

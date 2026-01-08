@@ -109,7 +109,7 @@ typedef struct pti_tileset_t {
 typedef struct pti_tilemap_t {
 	uint16_t width;
 	uint16_t height;
-	int *tiles;
+	uint8_t *tiles;
 } pti_tilemap_t;
 
 typedef struct pti_flags_t {
@@ -184,8 +184,8 @@ bool pti_pressed(pti_button btn);
 bool pti_released(pti_button btn);
 
 //>> map api
-uint32_t pti_mget(int x, int y);
-void pti_mset(int x, int y, int value);
+uint8_t pti_mget(int x, int y);
+void pti_mset(int x, int y, uint8_t value);
 uint8_t pti_fget(int i);
 
 //>> random api
@@ -234,6 +234,7 @@ inline void pti_music(pti_sound_t &music) { pti_music(&music); };
 #ifdef PTI_IMPL
 
 #include <stdlib.h>// malloc, free
+#include <time.h>
 
 #if defined(__APPLE__)
 // apple
@@ -467,6 +468,7 @@ void pti_init(const pti_desc *desc) {
 	_pti.data = pti_alloc(&_pti.ram, desc->memory_size);
 
 	// init random
+	srand(time(NULL));
 	for (int i = 0; i < 4; ++i) {
 		_pti.vm.hardware.rnd_reg[i] = 0x0;
 	}
@@ -669,16 +671,18 @@ bool pti_released(pti_button btn) {
 
 //>> map
 
-uint32_t pti_mget(int x, int y) {
+uint8_t pti_mget(int x, int y) {
 	if (_pti.vm.tilemap == NULL) {
 		return 0;
 	}
-	int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
+	// int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
+	uint8_t *tiles = _pti.vm.tilemap->tiles;
 	return *(tiles + x + y * _pti.vm.tilemap->width);
 }
 
-void pti_mset(int x, int y, int value) {
-	int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
+void pti_mset(int x, int y, uint8_t value) {
+	// int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
+	uint8_t *tiles = _pti.vm.tilemap->tiles;
 	*(tiles + x + y * _pti.vm.tilemap->width) = value;
 }
 
@@ -995,8 +999,10 @@ void pti_map(int x, int y) {
 
 	const int tiles_per_row = tileset->width / tile_w;
 
-	const int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
-	uint8_t *pixels = (uint8_t *) _pti__ptr_to_bank((void *) tileset->pixels);
+	// const int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
+	// uint8_t *pixels = (uint8_t *) _pti__ptr_to_bank((void *) tileset->pixels);
+	const uint8_t *tiles = _pti.vm.tilemap->tiles;
+	// const uint8_t *pixels = tileset->pixels;
 
 	_pti__transform(&x, &y);
 
