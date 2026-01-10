@@ -9,6 +9,7 @@ set(WASTELAND_HEADERS
     src/scene/game.h
 
     # actors
+    src/entity/actor/player.h
     src/entity/actor/crawler.h)
 
 set(WASTELAND_SRC
@@ -19,6 +20,7 @@ set(WASTELAND_SRC
     src/scene/game.cpp
 
     # actors
+    src/entity/actor/player.cpp
     src/entity/actor/crawler.cpp)
 
 set(WASTELAND_FILES

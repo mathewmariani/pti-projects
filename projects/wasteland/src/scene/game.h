@@ -3,9 +3,10 @@
 #include "batteries/scene.h"
 
 // actors
+#include "../entity/actor/player.h"
 #include "../entity/actor/crawler.h"
 
-using BasicScene = batteries::Scene<256, Crawler>;
+using BasicScene = batteries::Scene<256, Player, Crawler>;
 
 struct GameScene : public BasicScene {
 	void Init(void) override;

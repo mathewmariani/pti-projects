@@ -11,6 +11,7 @@
 #include "game.h"
 #include "../gamestate.h"
 
+#include "../entity/actor/player.h"
 #include "../entity/actor/crawler.h"
 
 bool flag = false;
@@ -71,12 +72,15 @@ void GameScene::Init(void) {
 		if (!flag) {
 			// load external assets
 			batteries::init();
+			flags = batteries::flags("assets/flags.bin");
 			palette = batteries::palette("assets/tilemap3.ase");
 			tilemap = batteries::tilemap("assets/tilemap3.ase");
 			tileset = batteries::tileset("assets/tilemap3.ase");
+			player_bitmap = batteries::sprite("assets/link.ase");
 			batteries::reload();
 
 			// load the bank data into pti
+			pti_set_flags(flags);
 			pti_set_palette(palette);
 			pti_set_tilemap(tilemap);
 			pti_set_tileset(tileset);
@@ -93,6 +97,7 @@ void GameScene::Init(void) {
 	}
 
 	CreateEntity<Crawler>(CoordXY<int>{256, 256});
+	CreateEntity<Player>(CoordXY<int>{256, 256});
 }
 
 void GameScene::Update(void) {
@@ -104,11 +109,10 @@ void GameScene::Update(void) {
 			count += pti_mget(x, y) == 0 ? 1 : 0;
 		}
 	}
-	if (((float)count / (30.0f * 30.0f)) > 0.50f) {
+	if (((float)count / (30.0f * 30.0f)) > 0.35f) {
 		for (auto *c : crawlers) {
 			c->Destroy();
 		}
-		return;
 	}
 	for (auto *c : crawlers) {
 		c->Update();
@@ -127,6 +131,8 @@ void GameScene::Update(void) {
 		}
 		
 	}
+
+	UpdateEntitiesOfType<Player>();
 }
 
 static const uint8_t AUTOTILE_LUT[16] = {
