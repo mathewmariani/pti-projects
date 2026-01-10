@@ -16,29 +16,41 @@ constexpr int kAnimationTimer = 4;
 // should be 8...
 // should be defined elsewhere
 constexpr int kTileSize = 16;
-constexpr int kTilemapSize = 256;
+constexpr int kTilemapSize = 32;
 
-Crawler::Crawler() {
-	bx = -8;
-	by = 0;
-	bw = 16;
-	bh = 8;
+Crawler::Crawler(const CoordXY<int>& pos) {
+	position = pos;
+	direction = RandomDirection();
 }
 
-void Crawler::ChangeDirection() {
-	if ((rand() % 2) != 0) {
-		return;
+CoordXY<int> Crawler::RandomDirection() const {
+    for (int tries = 0; tries < 4; ++tries) {
+		auto i = rand() % 4;
+        CoordXY<int> d = CoordXY<int>::VonNewmanNeighborhood()[i];
+        if (IsWalkable(d)) {
+            return d;
+		}
+    }
+
+    return CoordXY<int>::Zero; // nowhere to go
+}
+
+bool Crawler::IsWalkable(const CoordXY<int> &dir) const {
+	CoordXY<int> newPos = position + (dir * kTileSize);
+	int x = newPos.x / kTileSize;
+	int y = newPos.y / kTileSize;
+	if (x < 1 || x >= kTilemapSize - 1 || y < 1 || y >= kTilemapSize - 1) {
+		return false;
 	}
-	int i = rand() % 4;
-	switch (i) {
-	case 0: direction = CoordXY<int>::Up; break;
-	case 1: direction = CoordXY<int>::Down; break;
-	case 2: direction = CoordXY<int>::Left; break;
-	case 3: direction = CoordXY<int>::Right; break;
-	}
+	return true;
 }
 
 void Crawler::DrunkWalk() {
+	if (rand() % 2 == 0) {
+		direction = RandomDirection();
+	} else if (!IsWalkable(direction)) {
+		direction = RandomDirection();
+	}
 	state = State::Move;
 	move_distance = kWalkDistance;
 	HandleMovement();
@@ -64,13 +76,12 @@ void Crawler::HandleMovement() {
 void Crawler::DestroyTile() {
 	int x = position.x / kTileSize;
 	int y = position.y / kTileSize;
-	pti_mset(x, y, 21);
+	pti_mset(x, y, 0);
 }
 
 void Crawler::Update() {
 	switch (state) {
 		case State::Idle: {
-			ChangeDirection();
 			DrunkWalk();
 		} break;
 		case State::Move: {
@@ -81,7 +92,7 @@ void Crawler::Update() {
 			if (idle_timer <= 0) {
 				DestroyTile();
 				state = State::Idle;
-				idle_timer = 5;
+				idle_timer = 2;
 			}
 		} break;
 	}

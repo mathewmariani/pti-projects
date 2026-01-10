@@ -70,8 +70,8 @@ void debug(void) {
 }
 #endif
 
-constexpr int kScreenWidth = 256;
-constexpr int kScreenHeight = 256;
+constexpr int kScreenWidth = 512;
+constexpr int kScreenHeight = 512;
 
 pti_desc pti_main(int argc, char *argv[]) {
 

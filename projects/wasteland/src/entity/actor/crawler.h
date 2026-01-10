@@ -9,7 +9,7 @@ struct Crawler : Actor {
 		Move,
 	};
 
-	Crawler();
+	Crawler(const CoordXY<int>& position);
 
 	void Update() override;
 	void Render() override;
@@ -19,6 +19,9 @@ struct Crawler : Actor {
 	}
 
 private:
+	CoordXY<int> RandomDirection() const;
+
+	bool IsWalkable(const CoordXY<int> &dir) const;
 	void DestroyTile();
 	void ChangeDirection();
 	void DrunkWalk();

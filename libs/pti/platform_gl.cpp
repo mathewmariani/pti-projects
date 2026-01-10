@@ -46,8 +46,8 @@ sapp_desc sokol_main(int argc, char *argv[]) {
 	pti_desc desc = pti_main(argc, argv);
 	pti_init(&desc);
 
-	int width = desc.width * 3;
-	int height = desc.height * 3;
+	int width = desc.width;
+	int height = desc.height;
 
 	return (sapp_desc) {
 			.init_cb = init,
