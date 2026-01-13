@@ -46,8 +46,8 @@ sapp_desc sokol_main(int argc, char *argv[]) {
 	pti_desc desc = pti_main(argc, argv);
 	pti_init(&desc);
 
-	int width = desc.width;
-	int height = desc.height;
+	int width = desc.width;// * 3;
+	int height = desc.height;// * 3;
 
 	return (sapp_desc) {
 			.init_cb = init,
@@ -80,7 +80,8 @@ static struct {
 	struct {
 		GLuint vao;
 		GLuint vbo;
-		GLuint color0;
+		GLuint color0;// screen texture
+		GLuint color1;// palette texture;
 		GLuint program;
 		GLuint crt;
 		GLuint tileset;
@@ -162,12 +163,15 @@ static void gl_init(void) {
 			"#version 300 es\n"
 			"precision mediump float;\n"
 #endif
-			"uniform sampler2D screen;\n"
+			"uniform usampler2D screen;\n"
+			"uniform sampler2D palette;\n"
+			"uniform int palette_size;\n"
 			"in vec2 vs_texcoord;\n"
 			"out vec4 frag_color;\n"
 			"void main() {\n"
-			"  vec4 texel = texture(screen, vs_texcoord);\n"
-			"  frag_color = texel;\n"
+			"  float index = float(texture(screen, vs_texcoord).r) / palette_size;\n"
+			"  vec3 color = texture(palette, vec2(index, 0.5)).rgb;\n"
+			"  frag_color = vec4(color, 1.0);\n"
 			"}\n";
 
 	const char *crt_fs_src =
@@ -256,7 +260,17 @@ static void gl_init(void) {
 	// create texture
 	glGenTextures(1, &state.gl.color0);
 	glBindTexture(GL_TEXTURE_2D, state.gl.color0);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_R8UI, width, height, 0, GL_RED_INTEGER, GL_UNSIGNED_BYTE, NULL);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// create texture
+	glGenTextures(1, &state.gl.color1);
+	glBindTexture(GL_TEXTURE_2D, state.gl.color1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 16, 1, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, NULL);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -283,19 +297,30 @@ void gl_draw() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// upload pixel data
-	glBindTexture(GL_TEXTURE_2D, state.gl.color0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, state.gl.color1);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 16, 1, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, _pti.vm.draw.palette->colors);
+
+	// Indices (color0)
 	glActiveTexture(GL_TEXTURE0);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, _pti.screen);
+	glBindTexture(GL_TEXTURE_2D, state.gl.color0);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1);// Required for 1-channel data
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED_INTEGER, GL_UNSIGNED_BYTE, _pti.screen);
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);// Reset to default
 
 	// bind shader
 	GLuint program = state.crt ? state.gl.crt : state.gl.program;
 	glUseProgram(program);
 	glUniform1i(glGetUniformLocation(state.gl.program, "screen"), 0);
+	glUniform1i(glGetUniformLocation(state.gl.program, "palette"), 1);
+	glUniform1i(glGetUniformLocation(state.gl.program, "palette_size"), _pti.vm.draw.palette->count);
 
 	// draw fullscreen quad
 	glBindVertexArray(state.gl.vao);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, state.gl.color0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, state.gl.color1);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -444,13 +469,13 @@ void imgui_debug_draw() {
 	if (show_tileset_window) {
 		ImGui::SetNextWindowSize(ImVec2(440, 400), ImGuiCond_Once);
 		if (ImGui::Begin("Tileset", &show_tileset_window)) {
-			ImGui::Text("Width: %d", _pti.vm.vram.tileset->width);
-			ImGui::Text("Height: %d", _pti.vm.vram.tileset->height);
-			ImGui::Text("Tile Width: %d", _pti.vm.vram.tileset->tile_w);
-			ImGui::Text("Tile Height: %d", _pti.vm.vram.tileset->tile_h);
-			ImGui::Text("Pixels: %p", _pti.vm.vram.tileset->pixels);
+			ImGui::Text("Width: %d", _pti.vm.draw.tileset->width);
+			ImGui::Text("Height: %d", _pti.vm.draw.tileset->height);
+			ImGui::Text("Tile Width: %d", _pti.vm.draw.tileset->tile_w);
+			ImGui::Text("Tile Height: %d", _pti.vm.draw.tileset->tile_h);
+			ImGui::Text("Pixels: %p", _pti.vm.draw.tileset->pixels);
 
-			const ImVec2 tileset_vec2{(float) _pti.vm.vram.tileset->width, (float) _pti.vm.vram.tileset->height};
+			const ImVec2 tileset_vec2{(float) _pti.vm.draw.tileset->width, (float) _pti.vm.draw.tileset->height};
 			ImGui::Image((ImTextureID) (intptr_t) state.gl.tileset, tileset_vec2, uv_min, uv_max);
 		}
 		ImGui::End();
@@ -459,11 +484,11 @@ void imgui_debug_draw() {
 	if (show_font_window) {
 		ImGui::SetNextWindowSize(ImVec2(440, 400), ImGuiCond_Once);
 		if (ImGui::Begin("Font", &show_font_window)) {
-			ImGui::Text("Width: %d", _pti.vm.vram.font->width);
-			ImGui::Text("Height: %d", _pti.vm.vram.font->height);
-			ImGui::Text("Pixels: %p", _pti.vm.vram.font->pixels);
+			ImGui::Text("Width: %d", _pti.vm.draw.font->width);
+			ImGui::Text("Height: %d", _pti.vm.draw.font->height);
+			ImGui::Text("Pixels: %p", _pti.vm.draw.font->pixels);
 
-			const ImVec2 font_vec2{(float) _pti.vm.vram.font->width, (float) _pti.vm.vram.font->height};
+			const ImVec2 font_vec2{(float) _pti.vm.draw.font->width, (float) _pti.vm.draw.font->height};
 			ImGui::Image((ImTextureID) (intptr_t) state.gl.font, font_vec2, uv_min, uv_max);
 		}
 		ImGui::End();
@@ -472,9 +497,9 @@ void imgui_debug_draw() {
 	if (show_tilemap_window) {
 		ImGui::SetNextWindowSize(ImVec2(440, 400), ImGuiCond_Once);
 		if (ImGui::Begin("Tilemap", &show_tilemap_window)) {
-			ImGui::Text("Width: %d", _pti.vm.vram.tilemap->width);
-			ImGui::Text("Height: %d", _pti.vm.vram.tilemap->height);
-			ImGui::Text("Tiles: %p", _pti.vm.vram.tilemap->tiles);
+			ImGui::Text("Width: %d", _pti.vm.tilemap->width);
+			ImGui::Text("Height: %d", _pti.vm.tilemap->height);
+			ImGui::Text("Tiles: %p", _pti.vm.tilemap->tiles);
 		}
 		ImGui::End();
 	}

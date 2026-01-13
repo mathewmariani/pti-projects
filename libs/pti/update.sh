@@ -2,7 +2,7 @@
 # update the required pti headers
 
 # repo url
-BRANCH="main"
+BRANCH="palette-rendering"
 PTI_PREFIX="https://raw.githubusercontent.com/mathewmariani/pti/$BRANCH"
 
 # files

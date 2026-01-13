@@ -48,19 +48,7 @@ namespace batteries {
 		palette.colors = data;
 
 		for (int i = 0; i < palette.count; ++i) {
-			const auto& c = ase->palette.entries[i].color;
-
-			uint8_t r = c.r;
-			uint8_t g = c.g;
-			uint8_t b = c.b;
-			uint8_t a = c.a;
-
-			// ABGR packing
-			palette.colors[i] =
-				(uint32_t(a) << 24) |
-				(uint32_t(b) << 16) |
-				(uint32_t(g) << 8)  |
-				(uint32_t(r) << 0);
+			palette.colors[i] = *(uint32_t *) &ase->palette.entries[i].color;
 		}
 
 		/* release cute resources. */
@@ -172,7 +160,7 @@ namespace batteries {
 			for (int j = 0; j < frame->cel_count; ++j) {
 				ase_cel_t *cel = frame->cels + j;
 				if (cel->is_tilemap) {
-					const size_t size = cel->w * cel->h * sizeof(int);
+					const size_t size = cel->w * cel->h * sizeof(uint8_t);
 					tilemap.width = (int16_t) cel->w;
 					tilemap.height = (int16_t) cel->h;
 					tilemap.tiles = (uint8_t *) pti_alloc(&bank, size);

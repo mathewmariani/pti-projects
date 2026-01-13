@@ -234,7 +234,6 @@ inline void pti_music(pti_sound_t &music) { pti_music(&music); };
 #ifdef PTI_IMPL
 
 #include <stdlib.h>// malloc, free
-#include <time.h>
 
 #if defined(__APPLE__)
 // apple
@@ -312,16 +311,13 @@ typedef struct {
 		uint16_t height;
 	} screen;
 
+	pti_flags_t *flags;
+	pti_tilemap_t *tilemap;
+
 	struct {
 		pti_palette_t *palette;
-		pti_bitmap_t *font;
-		pti_tilemap_t *tilemap;
 		pti_tileset_t *tileset;
-	} vram;
-
-	pti_flags_t *flags;
-
-	struct {
+		pti_bitmap_t *font;
 		int16_t clip_x0, clip_y0;
 		int16_t clip_x1, clip_y1;
 		int16_t cam_x, cam_y;
@@ -355,7 +351,7 @@ typedef struct {
 	pti_bank_t ram;
 	pti_bank_t cart;
 	_pti__vm_t vm;
-	uint32_t *screen;
+	uint8_t *screen;
 	void *data;
 #if defined(PTI_TRACE_HOOKS)
 	pti_trace_hooks hooks;
@@ -467,11 +463,10 @@ void pti_init(const pti_desc *desc) {
 	pti_bank_init(&_pti.ram, capacity);
 
 	// allocate virtual machine
-	_pti.screen = (uint32_t *) pti_alloc(&_pti.ram, vram_size);
+	_pti.screen = (uint8_t *) pti_alloc(&_pti.ram, vram_size);
 	_pti.data = pti_alloc(&_pti.ram, desc->memory_size);
 
 	// init random
-	srand(time(NULL));
 	for (int i = 0; i < 4; ++i) {
 		_pti.vm.hardware.rnd_reg[i] = 0x0;
 	}
@@ -573,7 +568,7 @@ void pti_memset(void *dst, const int value, size_t len) {
 
 void pti_set_palette(pti_palette_t *ptr) {
 	_PTI_TRACE_ARGS(set_palette, ptr);
-	_pti.vm.vram.palette = ptr;
+	_pti.vm.draw.palette = ptr;
 }
 
 void pti_set_flags(pti_flags_t *ptr) {
@@ -583,17 +578,17 @@ void pti_set_flags(pti_flags_t *ptr) {
 
 void pti_set_tilemap(pti_tilemap_t *ptr) {
 	_PTI_TRACE_ARGS(set_tilemap, ptr);
-	_pti.vm.vram.tilemap = ptr;
+	_pti.vm.tilemap = ptr;
 }
 
 void pti_set_tileset(pti_tileset_t *ptr) {
 	_PTI_TRACE_ARGS(set_tileset, ptr);
-	_pti.vm.vram.tileset = ptr;
+	_pti.vm.draw.tileset = ptr;
 }
 
 void pti_set_font(pti_bitmap_t *ptr) {
 	_PTI_TRACE_ARGS(set_font, ptr);
-	_pti.vm.vram.font = ptr;
+	_pti.vm.draw.font = ptr;
 }
 
 pti_stat_t pti_stat(const pti_stat_type type) {
@@ -675,18 +670,16 @@ bool pti_released(pti_button btn) {
 //>> map
 
 uint8_t pti_mget(int x, int y) {
-	if (_pti.vm.vram.tilemap == NULL) {
+	if (_pti.vm.tilemap == NULL) {
 		return 0;
 	}
-	int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.vram.tilemap->tiles);
-	// uint8_t *tiles = _pti.vm.vram.tilemap->tiles;
-	return *(tiles + x + y * _pti.vm.vram.tilemap->width);
+	uint8_t *tiles = (uint8_t *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
+	return *(tiles + x + y * _pti.vm.tilemap->width);
 }
 
 void pti_mset(int x, int y, uint8_t value) {
-	int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.vram.tilemap->tiles);
-	// uint8_t *tiles = _pti.vm.vram.tilemap->tiles;
-	*(tiles + x + y * _pti.vm.vram.tilemap->width) = value;
+	uint8_t *tiles = (uint8_t *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
+	*(tiles + x + y * _pti.vm.tilemap->width) = value;
 }
 
 uint8_t pti_fget(int i) {
@@ -728,7 +721,6 @@ _PTI_PRIVATE inline void _pti__transform(int *x, int *y) {
 	*y -= _pti.vm.draw.cam_y;
 }
 
-// FIXME: heavy functions, offset functionality to the gpu.
 _PTI_PRIVATE inline void _pti__set_pixel(int x, int y, uint16_t color) {
 	const int16_t clip_x0 = _pti.vm.draw.clip_x0;
 	const int16_t clip_y0 = _pti.vm.draw.clip_y0;
@@ -739,14 +731,8 @@ _PTI_PRIVATE inline void _pti__set_pixel(int x, int y, uint16_t color) {
 		return;
 	}
 
-	// TODO: dither can be an image on the gpu
-	// TODO: palette can be an image on the gpu
 	uint8_t i = _pti__get_dither_bit(x, y) ? (color >> 8) & 0xff : (color >> 0) & 0xff;
-	uint32_t c = _pti.vm.vram.palette->colors[i];
-
-	// TODO: just use the `i` instead of looking for the color itself.
-	// NOTE: this means screen can be `uint8_t` instead of `uint32_t`/
-	*(_pti.screen + (x + y * _pti.vm.screen.width)) = c;
+	*(_pti.screen + (x + y * _pti.vm.screen.width)) = i;
 }
 
 _PTI_PRIVATE void _pti__plot(uint8_t *pixels, bool mask, int n, int dst_x, int dst_y, int dst_w, int dst_h, int src_x, int src_y, int src_w, int src_h, bool flip_x, bool flip_y) {
@@ -842,9 +828,9 @@ void pti_cls(const uint8_t idx) {
 	const int screen_h = _pti.vm.screen.height;
 	const size_t pixel_count = screen_w * screen_h;
 
-	uint32_t color = _pti.vm.vram.palette->colors[idx];
+	uint8_t color = _pti.vm.draw.palette->colors[idx];
 	for (size_t i = 0; i < pixel_count; i++) {
-		*((uint32_t *) _pti.screen + i) = color;
+		*((uint8_t *) _pti.screen + i) = color;
 	}
 }
 
@@ -990,22 +976,20 @@ void pti_rectf(int x, int y, int w, int h, uint16_t color) {
 }
 
 void pti_map(int x, int y) {
-	if (_pti.vm.vram.tilemap == NULL) {
+	if (_pti.vm.tilemap == NULL) {
 		return;
 	}
-	const int map_w = _pti.vm.vram.tilemap->width;
-	const int map_h = _pti.vm.vram.tilemap->height;
+	const int map_w = _pti.vm.tilemap->width;
+	const int map_h = _pti.vm.tilemap->height;
 
-	const pti_tileset_t *tileset = _pti.vm.vram.tileset;
+	const pti_tileset_t *tileset = _pti.vm.draw.tileset;
 	const int tile_w = tileset->tile_w;
 	const int tile_h = tileset->tile_h;
 
 	const int tiles_per_row = tileset->width / tile_w;
 
-	const int *tiles = (int *) _pti__ptr_to_bank((void *) _pti.vm.vram.tilemap->tiles);
+	const uint8_t *tiles = (uint8_t *) _pti__ptr_to_bank((void *) _pti.vm.tilemap->tiles);
 	uint8_t *pixels = (uint8_t *) _pti__ptr_to_bank((void *) tileset->pixels);
-	// const uint8_t *tiles = _pti.vm.vram.tilemap->tiles;
-	// const uint8_t *pixels = tileset->pixels;
 
 	_pti__transform(&x, &y);
 
@@ -1070,7 +1054,7 @@ uint32_t _pti__next_utf8_code_point(const char *data, uint32_t *index, uint32_t 
 #define FONT_TAB_SIZE (3)
 
 void pti_print(const char *text, int x, int y) {
-	uint8_t *pixels = (uint8_t *) _pti__ptr_to_bank((void *) _pti.vm.vram.font->pixels);
+	uint8_t *pixels = (uint8_t *) _pti__ptr_to_bank((void *) _pti.vm.draw.font->pixels);
 	int cursor_x = x;
 	int cursor_y = y;
 	uint32_t text_length = strlen(text);
@@ -1097,8 +1081,8 @@ void pti_print(const char *text, int x, int y) {
 		glyph_x *= FONT_GLYPH_WIDTH;
 		glyph_y *= FONT_GLYPH_HEIGHT;
 
-		int width = _pti.vm.vram.font->width;
-		int height = _pti.vm.vram.font->height;
+		int width = _pti.vm.draw.font->width;
+		int height = _pti.vm.draw.font->height;
 		_pti__plot(pixels, true, 0, cursor_x, cursor_y, FONT_GLYPH_WIDTH, FONT_GLYPH_HEIGHT, glyph_x, glyph_y, width, height, false, false);
 
 		cursor_x += FONT_GLYPH_WIDTH;
