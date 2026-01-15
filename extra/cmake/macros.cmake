@@ -21,22 +21,12 @@ macro(preload_assets target src_dir)
     return()
   endif()
 
-  file(GLOB_RECURSE ASSET_FILES "${src_dir}/*")
-  set(OUT_JS "$<TARGET_FILE_DIR:${target}>/assets.js")
-  set(OUT_DATA "$<TARGET_FILE_DIR:${target}>/assets.data")
+  target_link_options(${target} PRIVATE
+    --preload-file ${src_dir}@/assets)
 
-  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${src_dir}/*")
-
-  # Use POST_BUILD so it runs only after the target exists and is built
-  add_custom_command(
-    TARGET ${target} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:${target}>"
-    COMMAND ${Python3_EXECUTABLE} ${EMSCRIPTEN_ROOT_PATH}/tools/file_packager.py
-            "$<TARGET_FILE_DIR:${target}>/assets.data"
-            --preload ${src_dir}@/assets
-            --js-output="$<TARGET_FILE_DIR:${target}>/assets.js"
-    COMMENT "Building Emscripten data pack for target ${target}"
-  )
+  # Make CMake reconfigure if assets change
+  set_property(DIRECTORY APPEND PROPERTY
+    CMAKE_CONFIGURE_DEPENDS "${src_dir}")
 endmacro()
 
 macro(copy_assets target)
