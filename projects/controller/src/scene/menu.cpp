@@ -13,7 +13,7 @@ void MenuScene::Init(void) {
 	{ // FIXME: ugly hack.
 		if (!flag) {
 			batteries::init();
-			palette = batteries::palette("assets/palette.hex");
+			palette = batteries::palette("assets/palette.ase");
 			bitmap_a = batteries::sprite("assets/btn_a.ase");
 			bitmap_b = batteries::sprite("assets/btn_b.ase");
 			bitmap_x = batteries::sprite("assets/btn_x.ase");
