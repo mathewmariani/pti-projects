@@ -3,7 +3,6 @@
 #include "batteries/actor.h"
 #include "batteries/solid.h"
 #include "batteries/assets.h"
-#include "batteries/palettes.h"
 
 #include "game.h"
 #include "../bank.h"
