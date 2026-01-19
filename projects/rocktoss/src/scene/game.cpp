@@ -28,7 +28,7 @@ void GameScene::Init(void) {
 	{ // FIXME: ugly hack.
 		if (!flag) {
 			batteries::init();
-			palette = batteries::palette("assets/palette.hex");
+			palette = batteries::palette("assets/tilemap.ase");
 			flags = batteries::flags("assets/flags.bin");
 			tileset = batteries::tileset("assets/tilemap.ase");
 			tilemap = batteries::tilemap("assets/tilemap.ase");

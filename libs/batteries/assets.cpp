@@ -36,38 +36,27 @@ namespace batteries {
 	}
 
 	pti_palette_t __create_palette(const std::string &path) {
-		std::ifstream file(path);
-		if (!file.is_open()) {
-			throw std::runtime_error("Failed to open palette file");
-		}
+		auto *ase = cute_aseprite_load_from_file(path.c_str(), NULL);
 
-		std::vector<uint32_t> colors;
-		std::string line;
+		/* allocate palette data */
+		auto size = ase->palette.entry_count * sizeof(pti_color_t);
+		auto *data = (pti_color_t *) pti_alloc(&bank, size);
 
-		while (std::getline(file, line)) {
-			if (line.empty()) continue;
-
-			if (line.size() != 6) {
-				throw std::runtime_error("Invalid hex color: " + line);
-			}
-
-			uint32_t rgb = std::stoul(line, nullptr, 16);
-
-			uint8_t r = (rgb >> 16) & 0xFF;
-			uint8_t g = (rgb >> 8) & 0xFF;
-			uint8_t b = (rgb >> 0) & 0xFF;
-
-			// NOTE: ABGR
-			uint32_t argb = (0xFFu << 24) | (b << 16) | (g << 8) | (r << 0);
-
-			colors.push_back(argb);
-		}
-
+		/* initialize */
 		pti_palette_t palette;
-		palette.count = (uint16_t) colors.size();
-		palette.colors = (uint32_t *) pti_alloc(&bank, palette.count * sizeof(uint32_t));
+		palette.count = ase->palette.entry_count;
+		palette.colors = data;
 
-		memcpy(palette.colors, colors.data(), palette.count * sizeof(uint32_t));
+		for (int i = 0; i < palette.count; ++i) {
+			const auto col = ase->palette.entries[i].color;
+			palette.colors[i].r = col.r;
+			palette.colors[i].g = col.g;
+			palette.colors[i].b = col.b;
+			palette.colors[i].a = col.a;
+		}
+
+		/* release cute resources. */
+		cute_aseprite_free(ase);
 
 		return palette;
 	}
@@ -174,13 +163,14 @@ namespace batteries {
 			ase_frame_t *frame = ase->frames + i;
 			for (int j = 0; j < frame->cel_count; ++j) {
 				ase_cel_t *cel = frame->cels + j;
-				if (cel->is_tilemap) {
-					const size_t size = cel->w * cel->h * sizeof(int);
-					tilemap.width = (int16_t) cel->w;
-					tilemap.height = (int16_t) cel->h;
-					tilemap.tiles = (int *) pti_alloc(&bank, size);
-					memcpy(tilemap.tiles, cel->tiles, size);
+				if (!cel->is_tilemap) {
+					continue;
 				}
+				const size_t size = cel->w * cel->h * sizeof(int);
+				tilemap.width = (int16_t) cel->w;
+				tilemap.height = (int16_t) cel->h;
+				tilemap.tiles = (int *) pti_alloc(&bank, size);
+				memcpy(tilemap.tiles, cel->tiles, size);
 			}
 		}
 

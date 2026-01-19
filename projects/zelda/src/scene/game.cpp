@@ -3,7 +3,6 @@
 #include "batteries/actor.h"
 #include "batteries/solid.h"
 #include "batteries/assets.h"
-#include "batteries/palettes.h"
 
 #include "game.h"
 #include "../bank.h"
@@ -19,13 +18,13 @@ void GameScene::Init(void) {
 		if (!flag) {
 			batteries::init();
 			bitmap_player = batteries::sprite("assets/link.ase");
-			palette = batteries::palette("assets/palette.hex");
 			flags = batteries::flags("assets/flags.bin");
+			palette = batteries::palette("assets/tilemap.ase");
 			tilemap = batteries::tilemap("assets/tilemap.ase");
 			tileset = batteries::tileset("assets/tilemap.ase");
 
-			pti_set_palette(palette);
 			pti_set_flags(flags);
+			pti_set_palette(palette);
 			pti_set_tilemap(tilemap);
 			pti_set_tileset(tileset);
 

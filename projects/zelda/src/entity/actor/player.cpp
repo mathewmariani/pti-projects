@@ -16,7 +16,7 @@ constexpr int kAnimationTimer = 4;
 
 // should be 8...
 // should be defined elsewhere
-constexpr int kTileSize = 16;
+constexpr int kTileSize = 8;
 constexpr int kTilemapSize = 128;
 
 Player::Player() {
