@@ -1,22 +1,17 @@
 #define PTI_IMPL
-#include "pti.h"
+#include "pti/pti.h"
+
+#include <iostream>
 
 // sokol
 #include "sokol/sokol_app.h"
 #include "sokol/sokol_audio.h"
 #include "sokol/sokol_log.h"
 
-#if defined(PTI_DEBUG)
-#include "dbgui/dbgui.h"
-#include "imgui/imgui.h"
-#endif
-
-#include <iostream>
-
 // opengl
 #if defined(SOKOL_GLCORE)
 #if defined(_PTI_WINDOWS)
-#include "GL/gl3w.h"
+#include <GL/gl3w.h>
 #elif defined(_PTI_APPLE)
 #include <OpenGL/gl3.h>
 #include <OpenGL/gl3ext.h>
@@ -30,6 +25,13 @@
 #include <GLES3/gl3.h>
 #else
 #error ("opengl.h: unknown 3D API selected; must be SOKOL_GLCORE or SOKOL_GLES3")
+#endif
+
+#if defined(PTI_DEBUG)
+#include "dbgui/dbgui.h"
+#include "imgui/imgui.h"
+#include "tracy/Tracy.hpp"
+#include "tracy/TracyOpenGL.hpp"
 #endif
 
 // forward declarations
@@ -139,9 +141,13 @@ static void gl_init(void) {
 		fprintf(stderr, "OpenGL 3.2 not supported\n");
 		return;
 	}
-	printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 #endif
 
+	printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+#if defined(PTI_DEBUG)
+	TracyGpuContext;
+#endif
 	const char *default_vs_src =
 #if defined(SOKOL_GLCORE)
 			"#version 410\n"
@@ -589,10 +595,28 @@ static void frame(void) {
 	}
 
 	double frame_time_ns = sapp_frame_duration() * 1000000000.0;
-	pti_tick(frame_time_ns);
 
-	/* draw graphics */
+#if defined(PTI_DEBUG)
+    {
+        ZoneScopedN("Tick");
+        pti_tick(frame_time_ns);
+    }
+#else
+	pti_tick(frame_time_ns);
+#endif
+
+#if defined(PTI_DEBUG)
+    {
+        TracyGpuZone("Draw");
+        gl_draw();
+    }
+#else
 	gl_draw();
+#endif
+
+#if defined(PTI_DEBUG)
+	TracyGpuCollect;
+#endif
 
 #if defined(PTI_DEBUG)
 	/* debug ui */
