@@ -30,8 +30,8 @@
 #if defined(PTI_DEBUG)
 #include "dbgui/dbgui.h"
 #include "imgui/imgui.h"
-#include "tracy/Tracy.hpp"
-#include "tracy/TracyOpenGL.hpp"
+// #include "tracy/Tracy.hpp"
+// #include "tracy/TracyOpenGL.hpp"
 #endif
 
 // forward declarations
@@ -146,7 +146,7 @@ static void gl_init(void) {
 	printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 #if defined(PTI_DEBUG)
-	TracyGpuContext;
+	// TracyGpuContext;
 #endif
 	const char *default_vs_src =
 #if defined(SOKOL_GLCORE)
@@ -597,25 +597,25 @@ static void frame(void) {
 	double frame_time_ns = sapp_frame_duration() * 1000000000.0;
 
 #if defined(PTI_DEBUG)
-    {
-        ZoneScopedN("Tick");
-        pti_tick(frame_time_ns);
-    }
+	{
+		// ZoneScopedN("Tick");
+		pti_tick(frame_time_ns);
+	}
 #else
 	pti_tick(frame_time_ns);
 #endif
 
 #if defined(PTI_DEBUG)
-    {
-        TracyGpuZone("Draw");
-        gl_draw();
-    }
+	{
+		// TracyGpuZone("Draw");
+		gl_draw();
+	}
 #else
 	gl_draw();
 #endif
 
 #if defined(PTI_DEBUG)
-	TracyGpuCollect;
+	// TracyGpuCollect;
 #endif
 
 #if defined(PTI_DEBUG)

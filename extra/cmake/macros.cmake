@@ -57,7 +57,7 @@ macro(pti_project target files)
 
     target_link_libraries(${target} PRIVATE dbgui)
     target_link_libraries(${target} PRIVATE imgui)
-    target_link_libraries(${target} PRIVATE tracy)
+    # target_link_libraries(${target} PRIVATE tracy)
   endif()
 
   emscripten(${target})
