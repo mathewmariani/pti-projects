@@ -8,6 +8,22 @@
 #include <stdint.h>
 #include <string.h>
 
+#if defined(__APPLE__)
+// apple
+#define PTI_APPLE (1)
+#elif defined(__EMSCRIPTEN__)
+// emscripten (asm.js or wasm)
+#define PTI_EMSCRIPTEN (1)
+#elif defined(_WIN32)
+// windows
+#define PTI_WINDOWS (1)
+#elif defined(__linux__) || defined(__unix__)
+// linux
+#define PTI_LINUX (1)
+#else
+#error "pti.h: Unknown platform"
+#endif
+
 #define _pti_kilobytes(n) (1024 * (n))
 #define _pti_megabytes(n) (1024 * _pti_kilobytes(n))
 #define _pti_gigabytes(n) (1024 * _pti_megabytes(n))
@@ -239,22 +255,6 @@ inline void pti_music(pti_sound_t &music) { pti_music(&music); };
 
 #include <stdlib.h>// malloc, free
 
-#if defined(__APPLE__)
-// apple
-#define _PTI_APPLE (1)
-#elif defined(__EMSCRIPTEN__)
-// emscripten (asm.js or wasm)
-#define _PTI_EMSCRIPTEN (1)
-#elif defined(_WIN32)
-// windows
-#define _PTI_WINDOWS (1)
-#elif defined(__linux__) || defined(__unix__)
-// linux
-#define _PTI_LINUX (1)
-#else
-#error "pti.h: Unknown platform"
-#endif
-
 //>> implementation
 
 #ifndef _PTI_PRIVATE
@@ -273,9 +273,9 @@ inline void pti_music(pti_sound_t &music) { pti_music(&music); };
 #define PTI_ASSERT(c) assert(c)
 #endif
 
-#if defined(_PTI_WINDOWS)
+#if defined(PTI_WINDOWS)
 #include <memoryapi.h>
-#elif defined(_PTI_LINUX)
+#elif defined(PTI_LINUX)
 #include <sys/mman.h>
 #endif
 
@@ -370,7 +370,7 @@ _PTI_PRIVATE inline void *_pti__ptr_to_bank(void *ptr) {
 }
 
 _PTI_PRIVATE void *_pti__virtual_reserve(void *ptr, const size_t size) {
-#if defined(_PTI_WINDOWS)
+#if defined(PTI_WINDOWS)
 	// Reserves a range of the process's virtual offsetess space without
 	// allocating any actual physical storage in memory or in the paging file on
 	// disk.
@@ -380,7 +380,7 @@ _PTI_PRIVATE void *_pti__virtual_reserve(void *ptr, const size_t size) {
 
 	ptr = VirtualAlloc(ptr, size, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
 	PTI_ASSERT(ptr);
-#elif defined(_PTI_LINUX)
+#elif defined(PTI_LINUX)
 	// Create a private copy-on-write mapping.
 	// The mapping is not backed by any file;
 	// its contents are initialized to zero.
@@ -397,11 +397,11 @@ _PTI_PRIVATE void *_pti__virtual_reserve(void *ptr, const size_t size) {
 }
 
 _PTI_PRIVATE void *_pti__virtual_commit(void *ptr, const uint32_t size) {
-#if defined(_PTI_WINDOWS)
+#if defined(PTI_WINDOWS)
 	// Enables read-only or read/write access to the committed region of pages.
 	ptr = VirtualAlloc(ptr, size, MEM_COMMIT, PAGE_READWRITE);
 	PTI_ASSERT(ptr);
-#elif defined(_PTI_LINUX)
+#elif defined(PTI_LINUX)
 	uint16_t flags = (MAP_FIXED | MAP_SHARED | MAP_ANON);
 	ptr = mmap(ptr, size, (PROT_READ | PROT_WRITE), flags, -1, 0);
 	PTI_ASSERT(ptr != MAP_FAILED);
@@ -419,9 +419,9 @@ _PTI_PRIVATE void *_pti__virtual_commit(void *ptr, const uint32_t size) {
 }
 
 _PTI_PRIVATE void *_pti__virtual_decommit(void *ptr, const uint32_t size) {
-#if defined(_PTI_WINDOWS)
+#if defined(PTI_WINDOWS)
 	VirtualFree(ptr, size, MEM_DECOMMIT);
-#elif defined(_PTI_LINUX)
+#elif defined(PTI_LINUX)
 	uint16_t flags = (MAP_FIXED | MAP_SHARED | MAP_ANON);
 	mmap(ptr, size, PROT_NONE, flags, -1, 0);
 	msync(ptr, size, (MS_SYNC | MS_INVALIDATE));
@@ -438,10 +438,10 @@ _PTI_PRIVATE void *_pti__virtual_alloc(void *ptr, const uint32_t size) {
 }
 
 _PTI_PRIVATE void _pti__virtual_free(void *ptr, const uint32_t size) {
-#if defined(_PTI_WINDOWS)
+#if defined(PTI_WINDOWS)
 	_PTI_UNUSED(size);
 	VirtualFree((void *) ptr, 0, MEM_RELEASE);
-#elif defined(_PTI_LINUX)
+#elif defined(PTI_LINUX)
 	// Requests an update and waits for it to complete.
 	msync(ptr, size, MS_SYNC);
 	munmap(ptr, size);

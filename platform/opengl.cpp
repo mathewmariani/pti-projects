@@ -1,7 +1,6 @@
+// pti
 #define PTI_IMPL
 #include "pti/pti.h"
-
-#include <iostream>
 
 // sokol
 #include "sokol/sokol_app.h"
@@ -10,12 +9,12 @@
 
 // opengl
 #if defined(SOKOL_GLCORE)
-#if defined(_PTI_WINDOWS)
+#if defined(PTI_WINDOWS)
 #include <GL/gl3w.h>
-#elif defined(_PTI_APPLE)
+#elif defined(PTI_APPLE)
 #include <OpenGL/gl3.h>
 #include <OpenGL/gl3ext.h>
-#elif defined(_PTI_LINUX)
+#elif defined(PTI_LINUX)
 #define GL_GLEXT_PROTOTYPES
 #include <GL/gl.h>
 #else
@@ -30,9 +29,11 @@
 #if defined(PTI_DEBUG)
 #include "dbgui/dbgui.h"
 #include "imgui/imgui.h"
-#include "tracy/Tracy.hpp"
-#include "tracy/TracyOpenGL.hpp"
+// #include "tracy/Tracy.hpp"
+// #include "tracy/TracyOpenGL.hpp"
 #endif
+
+#include <iostream>
 
 // forward declarations
 static void init(void);
@@ -132,7 +133,7 @@ static GLuint create_program(GLuint vs, GLuint fs) {
 }
 
 static void gl_init(void) {
-#if defined(_PTI_WINDOWS)
+#if defined(PTI_WINDOWS)
 	if (gl3wInit()) {
 		fprintf(stderr, "failed to initialize OpenGL\n");
 		return;
@@ -146,7 +147,7 @@ static void gl_init(void) {
 	printf("OpenGL %s, GLSL %s\n", glGetString(GL_VERSION), glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 #if defined(PTI_DEBUG)
-	TracyGpuContext;
+	// TracyGpuContext;
 #endif
 	const char *default_vs_src =
 #if defined(SOKOL_GLCORE)
@@ -598,7 +599,7 @@ static void frame(void) {
 
 #if defined(PTI_DEBUG)
     {
-        ZoneScopedN("Tick");
+        // ZoneScopedN("Tick");
         pti_tick(frame_time_ns);
     }
 #else
@@ -607,7 +608,7 @@ static void frame(void) {
 
 #if defined(PTI_DEBUG)
     {
-        TracyGpuZone("Draw");
+        // TracyGpuZone("Draw");
         gl_draw();
     }
 #else
@@ -615,7 +616,7 @@ static void frame(void) {
 #endif
 
 #if defined(PTI_DEBUG)
-	TracyGpuCollect;
+	// TracyGpuCollect;
 #endif
 
 #if defined(PTI_DEBUG)
