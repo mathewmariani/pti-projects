@@ -23,6 +23,7 @@
         #define SOKOL_D3D11
         #define SOKOL_METAL
         #define SOKOL_WGPU
+        #define SOKOL_VULKAN
         #define SOKOL_NOAPI
 
     Optionally provide the following defines with your own implementations:
@@ -79,11 +80,17 @@
         - with SOKOL_GLCORE: GL
         - with SOKOL_GLES3: GLESv2
         - with SOKOL_WGPU: a WebGPU implementation library (tested with webgpu_dawn)
+        - with SOKOL_VULKAN: vulkan
         - with EGL: EGL
     - on Android: GLESv3, EGL, log, android
     - on Windows:
         - with MSVC or Clang: library dependencies are defined via `#pragma comment`
         - with SOKOL_WGPU: a WebGPU implementation library (tested with webgpu_dawn)
+        - with SOKOL_VULKAN:
+            - install the Vulkan SDK
+            - set a header search path to $VULKAN_SDK/Include
+            - set a library search path to $VULKAN_SDK/Lib
+            - link with vulkan-1.lib
         - with MINGW/MSYS2 gcc:
             - compile with '-mwin32' so that _WIN32 is defined
             - link with the following libs: -lkernel32 -luser32 -lshell32
@@ -92,6 +99,11 @@
 
     On Linux, you also need to use the -pthread compiler and linker option, otherwise weird
     things will happen, see here for details: https://github.com/floooh/sokol/issues/376
+
+    For Linux+Vulkan install the following packages (or equivalents):
+        - libvulkan-dev
+        - vulkan-validationlayers
+        - vulkan-tools
 
     On macOS and iOS, the implementation must be compiled as Objective-C.
 
@@ -1799,6 +1811,7 @@ typedef struct sapp_allocator {
     _SAPP_LOGITEM_XMACRO(WGPU_REQUEST_ADAPTER_STATUS_ERROR, "wgpu: requesting adapter failed with status 'error'") \
     _SAPP_LOGITEM_XMACRO(WGPU_REQUEST_ADAPTER_STATUS_UNKNOWN, "wgpu: requesting adapter failed with status 'unknown'") \
     _SAPP_LOGITEM_XMACRO(WGPU_CREATE_INSTANCE_FAILED, "wgpu: failed to create instance") \
+    _SAPP_LOGITEM_XMACRO(VULKAN_REQUIRED_INSTANCE_EXTENSION_FUNCTION_MISSING, "vulkan: could not lookup a required instance extension function pointer") \
     _SAPP_LOGITEM_XMACRO(VULKAN_ALLOC_DEVICE_MEMORY_NO_SUITABLE_MEMORY_TYPE, "vulkan: could not find suitable memory type") \
     _SAPP_LOGITEM_XMACRO(VULKAN_ALLOCATE_MEMORY_FAILED, "vulkan: vkAllocateMemory() failed!") \
     _SAPP_LOGITEM_XMACRO(VULKAN_CREATE_INSTANCE_FAILED, "vulkan: vkCreateInstance failed") \
@@ -1880,6 +1893,7 @@ typedef struct sapp_wgpu_environment {
 } sapp_wgpu_environment;
 
 typedef struct sapp_vulkan_environment {
+    const void* instance;
     const void* physical_device;
     const void* device;
     const void* queue;
@@ -2307,8 +2321,12 @@ inline void sapp_run(const sapp_desc& desc) { return sapp_run(&desc); }
 #elif defined(_WIN32)
     // Windows (D3D11 or GL)
     #define _SAPP_WIN32 (1)
-    #if !defined(SOKOL_D3D11) && !defined(SOKOL_GLCORE) && !defined(SOKOL_WGPU) && !defined(SOKOL_NOAPI)
-    #error("sokol_app.h: unknown 3D API selected for Win32, must be SOKOL_D3D11, SOKOL_GLCORE, SOKOL_WGPU or SOKOL_NOAPI")
+    #if !defined(SOKOL_D3D11) && !defined(SOKOL_GLCORE) && !defined(SOKOL_WGPU) && !defined(SOKOL_VULKAN) && !defined(SOKOL_NOAPI)
+    #error("sokol_app.h: unknown 3D API selected for Win32, must be SOKOL_D3D11, SOKOL_GLCORE, SOKOL_WGPU, SOKOL_VULKAN or SOKOL_NOAPI")
+    #endif
+    #if defined(SOKOL_VULKAN)
+    #define VK_USE_PLATFORM_WIN32_KHR
+    #include <vulkan/vulkan.h>
     #endif
 #elif defined(__ANDROID__)
     // Android
@@ -2791,6 +2809,9 @@ typedef struct {
         VkSemaphore render_finished_sem;
         VkSemaphore present_complete_sem;
     } sync[_SAPP_VK_MAX_SWAPCHAIN_IMAGES];
+    struct {
+        PFN_vkSetDebugUtilsObjectNameEXT set_debug_utils_object_name_ext;
+    } ext;
 } _sapp_vk_t;
 #endif
 
@@ -4101,7 +4122,7 @@ _SOKOL_PRIVATE void _sapp_wgpu_request_device_cb(WGPURequestDeviceStatus status,
 _SOKOL_PRIVATE void _sapp_wgpu_create_device_and_swapchain(void) {
     SOKOL_ASSERT(_sapp.wgpu.adapter);
     size_t cur_feature_index = 1;
-    #define _SAPP_WGPU_MAX_REQUESTED_FEATURES (8)
+    #define _SAPP_WGPU_MAX_REQUESTED_FEATURES (16)
     WGPUFeatureName requiredFeatures[_SAPP_WGPU_MAX_REQUESTED_FEATURES] = {
         WGPUFeatureName_Depth32FloatStencil8,
     };
@@ -4121,6 +4142,10 @@ _SOKOL_PRIVATE void _sapp_wgpu_create_device_and_swapchain(void) {
     if (wgpuAdapterHasFeature(_sapp.wgpu.adapter, WGPUFeatureName_Float32Filterable)) {
         SOKOL_ASSERT(cur_feature_index < _SAPP_WGPU_MAX_REQUESTED_FEATURES);
         requiredFeatures[cur_feature_index++] = WGPUFeatureName_Float32Filterable;
+    }
+    if (wgpuAdapterHasFeature(_sapp.wgpu.adapter, WGPUFeatureName_DualSourceBlending)) {
+        SOKOL_ASSERT(cur_feature_index < _SAPP_WGPU_MAX_REQUESTED_FEATURES);
+        requiredFeatures[cur_feature_index++] = WGPUFeatureName_DualSourceBlending;
     }
     #undef _SAPP_WGPU_MAX_REQUESTED_FEATURES
 
@@ -4258,6 +4283,37 @@ _SOKOL_PRIVATE void _sapp_wgpu_frame(void) {
 #define _SAPP_VK_MAX_COUNT_AND_ARRAY(num, type, count_name, array_name) uint32_t count_name = num; type array_name[num] = {0}
 #endif
 
+_SOKOL_PRIVATE void _sapp_vk_load_instance_ext_funcs(void) {
+    SOKOL_ASSERT(_sapp.vk.instance);
+    #if defined(SOKOL_DEBUG)
+        _sapp.vk.ext.set_debug_utils_object_name_ext = (PFN_vkSetDebugUtilsObjectNameEXT)vkGetInstanceProcAddr(_sapp.vk.instance, "vkSetDebugUtilsObjectNameEXT");
+        if (0 == _sapp.vk.ext.set_debug_utils_object_name_ext) {
+            _SAPP_PANIC(VULKAN_REQUIRED_INSTANCE_EXTENSION_FUNCTION_MISSING);
+        }
+    #endif
+}
+
+_SOKOL_PRIVATE void _sapp_vk_set_object_label(VkObjectType obj_type, uint64_t obj_handle, const char* label) {
+    #if defined(SOKOL_DEBUG)
+        SOKOL_ASSERT(_sapp.vk.device);
+        SOKOL_ASSERT(_sapp.vk.ext.set_debug_utils_object_name_ext);
+        SOKOL_ASSERT(obj_handle);
+        if (label) {
+            _SAPP_STRUCT(VkDebugUtilsObjectNameInfoEXT, name_info);
+            name_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
+            name_info.objectType = obj_type;
+            name_info.objectHandle = obj_handle,
+            name_info.pObjectName = label;
+            VkResult res = _sapp.vk.ext.set_debug_utils_object_name_ext(_sapp.vk.device, &name_info);
+            SOKOL_ASSERT(res == VK_SUCCESS);
+        }
+    #else
+        _SOKOL_UNUSED(obj_type);
+        _SOKOL_UNUSED(obj_handle);
+        _SOKOL_UNUSED(label);
+    #endif
+}
+
 _SOKOL_PRIVATE int _sapp_vk_mem_find_memory_type_index(uint32_t type_filter, VkMemoryPropertyFlags props) {
     SOKOL_ASSERT(_sapp.vk.physical_device);
     _SAPP_STRUCT(VkPhysicalDeviceMemoryProperties, mem_props);
@@ -4289,8 +4345,13 @@ _SOKOL_PRIVATE void _sapp_vk_create_instance(void) {
 
     _SAPP_VK_ZERO_COUNT_AND_ARRAY(32, const char*, ext_count, ext_names);
     ext_names[ext_count++] = VK_KHR_SURFACE_EXTENSION_NAME;
+    #if defined(SOKOL_DEBUG)
+        ext_names[ext_count++] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
+    #endif
     #if defined(VK_USE_PLATFORM_XLIB_KHR)
         ext_names[ext_count++] = VK_KHR_XLIB_SURFACE_EXTENSION_NAME;
+    #elif defined(VK_USE_PLATFORM_WIN32_KHR)
+        ext_names[ext_count++] = VK_KHR_WIN32_SURFACE_EXTENSION_NAME;
     #endif
     SOKOL_ASSERT(ext_count <= 32);
 
@@ -4371,9 +4432,9 @@ _SOKOL_PRIVATE void _sapp_vk_pick_physical_device(void) {
     _SAPP_VK_ZERO_COUNT_AND_ARRAY(32, const char*, ext_count, ext_names);
     ext_count = _sapp_vk_required_device_extensions(ext_names, 32);
 
-    VkPhysicalDevice pdev = 0;
+    VkPhysicalDevice picked_pdev = 0;
     for (uint32_t pdev_idx = 0; pdev_idx < physical_device_count; pdev_idx++) {
-        pdev = physical_devices[pdev_idx];
+        const VkPhysicalDevice pdev = physical_devices[pdev_idx];
         _SAPP_STRUCT(VkPhysicalDeviceProperties, dev_props);
         vkGetPhysicalDeviceProperties(pdev, &dev_props);
         if (dev_props.apiVersion < VK_API_VERSION_1_3) {
@@ -4407,12 +4468,13 @@ _SOKOL_PRIVATE void _sapp_vk_pick_physical_device(void) {
         }
 
         // if we arrive here, found a suitable device
+        picked_pdev = pdev;
         break;
     }
-    if (0 == pdev) {
+    if (0 == picked_pdev) {
         _SAPP_PANIC(VULKAN_NO_SUITABLE_PHYSICAL_DEVICE_FOUND);
     }
-    _sapp.vk.physical_device = pdev;
+    _sapp.vk.physical_device = picked_pdev;
     SOKOL_ASSERT(_sapp.vk.physical_device);
 }
 
@@ -4458,6 +4520,7 @@ _SOKOL_PRIVATE void _sapp_vk_create_device(void) {
     required.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     required.pNext = &vk13_features;
     required.features.samplerAnisotropy = VK_TRUE;
+    required.features.dualSrcBlend = VK_TRUE;
     if (supports.features.textureCompressionBC) {
         required.features.textureCompressionBC = VK_TRUE;
     }
@@ -4517,6 +4580,12 @@ _SOKOL_PRIVATE void _sapp_vk_create_surface(void) {
         xlib_info.dpy = _sapp.x11.display;
         xlib_info.window = _sapp.x11.window;
         res = vkCreateXlibSurfaceKHR(_sapp.vk.instance, &xlib_info, 0, &_sapp.vk.surface);
+    #elif defined(_SAPP_WIN32)
+        _SAPP_STRUCT(VkWin32SurfaceCreateInfoKHR, win32_info);
+        win32_info.sType = VK_STRUCTURE_TYPE_WIN32_SURFACE_CREATE_INFO_KHR;
+        win32_info.hinstance = GetModuleHandleW(NULL);
+        win32_info.hwnd = _sapp.win32.hwnd;
+        res = vkCreateWin32SurfaceKHR(_sapp.vk.instance, &win32_info, 0, &_sapp.vk.surface);
     #else
     #error "sokol_app.h: unsupported Vulkan platform"
     #endif
@@ -4564,8 +4633,10 @@ _SOKOL_PRIVATE void _sapp_vk_create_sync_objects(void) {
         SOKOL_ASSERT(0 == _sapp.vk.sync[i].render_finished_sem);
         res = vkCreateSemaphore(_sapp.vk.device, &create_info, 0, &_sapp.vk.sync[i].present_complete_sem);
         SOKOL_ASSERT((res == VK_SUCCESS) && (_sapp.vk.sync[i].present_complete_sem));
+        _sapp_vk_set_object_label(VK_OBJECT_TYPE_SEMAPHORE, (uint64_t)_sapp.vk.sync[i].present_complete_sem, "present_complete_sem");
         res = vkCreateSemaphore(_sapp.vk.device, &create_info, 0, &_sapp.vk.sync[i].render_finished_sem);
         SOKOL_ASSERT((res == VK_SUCCESS) && (_sapp.vk.sync[i].render_finished_sem));
+        _sapp_vk_set_object_label(VK_OBJECT_TYPE_SEMAPHORE, (uint64_t)_sapp.vk.sync[i].render_finished_sem, "render_finished_sem");
     }
 }
 
@@ -4630,7 +4701,9 @@ _SOKOL_PRIVATE void _sapp_vk_swapchain_create_surface(
     uint32_t height,
     VkSampleCountFlagBits sample_count_flags,
     VkImageUsageFlags usage,
-    VkImageAspectFlags aspect_mask)
+    VkImageAspectFlags aspect_mask,
+    const char* image_debug_label,
+    const char* view_debug_label)
 {
     SOKOL_ASSERT(_sapp.vk.physical_device);
     SOKOL_ASSERT(_sapp.vk.device);
@@ -4662,6 +4735,7 @@ _SOKOL_PRIVATE void _sapp_vk_swapchain_create_surface(
         _SAPP_PANIC(VULKAN_SWAPCHAIN_CREATE_IMAGE_FAILED);
     }
     SOKOL_ASSERT(surf->img);
+    _sapp_vk_set_object_label(VK_OBJECT_TYPE_IMAGE, (uint64_t)surf->img, image_debug_label);
 
     _SAPP_STRUCT(VkMemoryRequirements, mem_reqs);
     vkGetImageMemoryRequirements(_sapp.vk.device, surf->img, &mem_reqs);
@@ -4688,6 +4762,51 @@ _SOKOL_PRIVATE void _sapp_vk_swapchain_create_surface(
         _SAPP_PANIC(VULKAN_SWAPCHAIN_CREATE_IMAGE_VIEW_FAILED);
     }
     SOKOL_ASSERT(surf->view);
+    _sapp_vk_set_object_label(VK_OBJECT_TYPE_IMAGE_VIEW, (uint64_t)surf->view, view_debug_label);
+}
+
+_SOKOL_PRIVATE uint32_t _sapp_vk_swapchain_min_image_count(const VkSurfaceCapabilitiesKHR* surf_caps) {
+    // FIXME: figure out why at least 3 swapchain images are required to appease the validation layer
+    // (on the Linux Intel driver, present-mode-fifo has a surf_caps.minImageCount == 3, while
+    // on Windows surf_caps.minImageCount == 2, and using this directly causes validation layer
+    // errors about the present-complete semaphore (to reproduce simply change the '= 3' below to '= 2')
+    SOKOL_ASSERT(surf_caps);
+    const uint32_t required_image_count = 3;
+    uint32_t min_image_count = surf_caps->minImageCount;
+    if (min_image_count < required_image_count) {
+        min_image_count = required_image_count;
+    }
+    return min_image_count;
+}
+
+_SOKOL_PRIVATE void _sapp_vk_create_swapchain_image_view(uint32_t image_index) {
+    SOKOL_ASSERT(_sapp.vk.device);
+    SOKOL_ASSERT(image_index < _sapp.vk.num_swapchain_images);
+    SOKOL_ASSERT(_sapp.vk.swapchain_images[image_index]);
+    SOKOL_ASSERT(0 == _sapp.vk.swapchain_views[image_index]);
+
+    _SAPP_STRUCT(VkImageViewCreateInfo, view_create_info);
+    view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    view_create_info.format = _sapp.vk.surface_format.format;
+    view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    view_create_info.subresourceRange.levelCount = 1;
+    view_create_info.subresourceRange.layerCount = 1;
+    view_create_info.image = _sapp.vk.swapchain_images[image_index];
+    VkResult res = vkCreateImageView(_sapp.vk.device, &view_create_info, 0, &_sapp.vk.swapchain_views[image_index]);
+    if (res != VK_SUCCESS) {
+        _SAPP_PANIC(VULKAN_SWAPCHAIN_CREATE_IMAGE_VIEW_FAILED);
+    }
+    SOKOL_ASSERT(_sapp.vk.swapchain_views[image_index]);
+    _sapp_vk_set_object_label(VK_OBJECT_TYPE_IMAGE_VIEW, (uint64_t)_sapp.vk.swapchain_views[image_index], "swapchain_view");
+}
+
+_SOKOL_PRIVATE void _sapp_vk_destroy_swapchain_image_view(uint32_t image_index) {
+    SOKOL_ASSERT(_sapp.vk.device);
+    SOKOL_ASSERT(image_index < _sapp.vk.num_swapchain_images);
+    SOKOL_ASSERT(_sapp.vk.swapchain_views[image_index]);
+    vkDestroyImageView(_sapp.vk.device, _sapp.vk.swapchain_views[image_index], 0);
+    _sapp.vk.swapchain_views[image_index] = 0;
 }
 
 _SOKOL_PRIVATE void _sapp_vk_create_swapchain(bool recreate) {
@@ -4711,23 +4830,21 @@ _SOKOL_PRIVATE void _sapp_vk_create_swapchain(bool recreate) {
     _SAPP_STRUCT(VkSurfaceCapabilitiesKHR, surf_caps);
     VkResult res = vkGetPhysicalDeviceSurfaceCapabilitiesKHR(_sapp.vk.physical_device, _sapp.vk.surface, &surf_caps);
     SOKOL_ASSERT(res == VK_SUCCESS);
-    const uint32_t width = surf_caps.currentExtent.width;
-    const uint32_t height = surf_caps.currentExtent.height;
+    const uint32_t fb_width = surf_caps.currentExtent.width;
+    const uint32_t fb_height = surf_caps.currentExtent.height;
 
     _sapp.vk.surface_format = _sapp_vk_pick_surface_format();
-    // FIXME: pick better present-mode if supported
-    VkPresentModeKHR present_mode = VK_PRESENT_MODE_FIFO_KHR;
+    const VkPresentModeKHR present_mode = VK_PRESENT_MODE_FIFO_KHR;
 
-    // FIXME: better imageExtent (scale vs no-scale!)
     _SAPP_STRUCT(VkSwapchainCreateInfoKHR, create_info);
     create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    create_info.flags = 0; // FIXME?
+    create_info.flags = 0;
     create_info.surface = _sapp.vk.surface;
-    create_info.minImageCount = surf_caps.minImageCount;
+    create_info.minImageCount = _sapp_vk_swapchain_min_image_count(&surf_caps);
     create_info.imageFormat = _sapp.vk.surface_format.format;
     create_info.imageColorSpace = _sapp.vk.surface_format.colorSpace;
-    create_info.imageExtent.width = width;
-    create_info.imageExtent.height = height;
+    create_info.imageExtent.width = fb_width;
+    create_info.imageExtent.height = fb_height;
     create_info.imageArrayLayers = 1;
     create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
     create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
@@ -4746,9 +4863,7 @@ _SOKOL_PRIVATE void _sapp_vk_create_swapchain(bool recreate) {
         // NOTE: destroying the depth- and msaa-surfaces happens
         // down in the respective _sapp_vk_swapchain_create_surface() calls!
         for (uint32_t i = 0; i < _sapp.vk.num_swapchain_images; i++) {
-            SOKOL_ASSERT(_sapp.vk.swapchain_views[i]);
-            vkDestroyImageView(_sapp.vk.device, _sapp.vk.swapchain_views[i], 0);
-            _sapp.vk.swapchain_views[i] = 0;
+            _sapp_vk_destroy_swapchain_image_view(i);
         }
         vkDestroySwapchainKHR(_sapp.vk.device, old_swapchain, 0);
     }
@@ -4761,50 +4876,40 @@ _SOKOL_PRIVATE void _sapp_vk_create_swapchain(bool recreate) {
     SOKOL_ASSERT(res == VK_SUCCESS);
     SOKOL_ASSERT(_sapp.vk.num_swapchain_images >= surf_caps.minImageCount);
 
-    _SAPP_STRUCT(VkImageViewCreateInfo, view_create_info);
-    view_create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-    view_create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-    view_create_info.format = _sapp.vk.surface_format.format;
-    view_create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-    view_create_info.subresourceRange.levelCount = 1;
-    view_create_info.subresourceRange.layerCount = 1;
     for (uint32_t i = 0; i < _sapp.vk.num_swapchain_images; i++) {
-        SOKOL_ASSERT(_sapp.vk.swapchain_images[i]);
-        SOKOL_ASSERT(0 == _sapp.vk.swapchain_views[i]);
-        view_create_info.image = _sapp.vk.swapchain_images[i];
-        res = vkCreateImageView(_sapp.vk.device, &view_create_info, 0, &_sapp.vk.swapchain_views[i]);
-        if (res != VK_SUCCESS) {
-            _SAPP_PANIC(VULKAN_SWAPCHAIN_CREATE_IMAGE_VIEW_FAILED);
-        }
-        SOKOL_ASSERT(_sapp.vk.swapchain_views[i]);
+        _sapp_vk_create_swapchain_image_view(i);
     }
 
     // create depth-stencil buffer
     _sapp_vk_swapchain_create_surface(&_sapp.vk.depth,
         recreate,
         VK_FORMAT_D32_SFLOAT_S8_UINT,
-        width,
-        height,
+        fb_width,
+        fb_height,
         (VkSampleCountFlagBits)_sapp.sample_count,
         VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-        VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT);
+        VK_IMAGE_ASPECT_DEPTH_BIT | VK_IMAGE_ASPECT_STENCIL_BIT,
+        "swapchain_depthstencil_image",
+        "swapchain_depthstencil_view");
 
     // optionally create MSAA surface
     if (_sapp.sample_count > 1) {
         _sapp_vk_swapchain_create_surface(&_sapp.vk.msaa,
             recreate,
             _sapp.vk.surface_format.format,
-            width,
-            height,
+            fb_width,
+            fb_height,
             (VkSampleCountFlagBits)_sapp.sample_count,
             VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-            VK_IMAGE_ASPECT_COLOR_BIT);
+            VK_IMAGE_ASPECT_COLOR_BIT,
+            "swapchain_msaa_image",
+            "swapchain_msaa_view");
     }
 
     // this is the only place in the Vulkan code path which updates
     // _sapp.framebuffer_width/height
-    _sapp.framebuffer_width = (int)surf_caps.currentExtent.width;
-    _sapp.framebuffer_height = (int)surf_caps.currentExtent.height;
+    _sapp.framebuffer_width = (int)fb_width;
+    _sapp.framebuffer_height = (int)fb_height;
 }
 
 _SOKOL_PRIVATE void _sapp_vk_destroy_swapchain(void) {
@@ -4816,11 +4921,8 @@ _SOKOL_PRIVATE void _sapp_vk_destroy_swapchain(void) {
     }
     _sapp_vk_swapchain_destroy_surface(&_sapp.vk.depth);
     for (uint32_t i = 0; i < _sapp.vk.num_swapchain_images; i++) {
-        SOKOL_ASSERT(_sapp.vk.swapchain_views[i]);
-        vkDestroyImageView(_sapp.vk.device, _sapp.vk.swapchain_views[i], 0);
-        _sapp.vk.swapchain_views[i] = 0;
+        _sapp_vk_destroy_swapchain_image_view(i);
         _sapp.vk.swapchain_images[i] = 0;
-
     }
     vkDestroySwapchainKHR(_sapp.vk.device, _sapp.vk.swapchain, 0);
     _sapp.vk.swapchain = 0;
@@ -4829,6 +4931,9 @@ _SOKOL_PRIVATE void _sapp_vk_destroy_swapchain(void) {
 
 #if defined(_SAPP_LINUX)
 _SOKOL_PRIVATE void _sapp_x11_app_event(sapp_event_type type);
+#endif
+#if defined(_SAPP_WIN32)
+_SOKOL_PRIVATE void _sapp_win32_app_event(sapp_event_type type);
 #endif
 
 _SOKOL_PRIVATE void _sapp_vk_recreate_swapchain(void) {
@@ -4842,12 +4947,16 @@ _SOKOL_PRIVATE void _sapp_vk_recreate_swapchain(void) {
             #if defined(_SAPP_LINUX)
             _sapp_x11_app_event(SAPP_EVENTTYPE_RESIZED);
             #endif
+            #if defined(_SAPP_WIN32)
+            _sapp_win32_app_event(SAPP_EVENTTYPE_RESIZED);
+            #endif
         }
     }
 }
 
 _SOKOL_PRIVATE void _sapp_vk_init(void) {
     _sapp_vk_create_instance();
+    _sapp_vk_load_instance_ext_funcs();
     _sapp_vk_create_surface();
     _sapp_vk_pick_physical_device();
     _sapp_vk_create_device();
@@ -4885,6 +4994,8 @@ _SOKOL_PRIVATE void _sapp_vk_present(void) {
     _SAPP_STRUCT(VkPresentInfoKHR, present_info);
     present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     present_info.waitSemaphoreCount = 1;
+    // NOTE: using the current swapchain image index here instead of `sync_slot` is *NOT* a bug! The render_finished_semaphore *must*
+    // be associated with the current swapchain image in case the swapchain implementation doesn't return swapchain images in order
     present_info.pWaitSemaphores = &_sapp.vk.sync[_sapp.vk.cur_swapchain_image_index].render_finished_sem;
     present_info.swapchainCount = 1;
     present_info.pSwapchains = &_sapp.vk.swapchain;
@@ -6104,16 +6215,23 @@ _SOKOL_PRIVATE void _sapp_ios_mtl_discard_state(void) {
 }
 
 _SOKOL_PRIVATE bool _sapp_ios_mtl_update_framebuffer_dimensions(CGRect screen_rect) {
-    _sapp.framebuffer_width = _sapp_roundf_gzero(screen_rect.size.width * _sapp.dpi_scale);
-    _sapp.framebuffer_height = _sapp_roundf_gzero(screen_rect.size.height * _sapp.dpi_scale);
-    const CGSize fb_size = _sapp.ios.view.drawableSize;
-    int cur_fb_width = _sapp_roundf_gzero(fb_size.width);
-    int cur_fb_height = _sapp_roundf_gzero(fb_size.height);
-    bool dim_changed = (_sapp.framebuffer_width != cur_fb_width) || (_sapp.framebuffer_height != cur_fb_height);
-    if (dim_changed) {
-        const CGSize drawable_size = { (CGFloat) _sapp.framebuffer_width, (CGFloat) _sapp.framebuffer_height };
+    // get current screen size and if it changed, update the MTKView drawable size
+    const int screen_width = _sapp_roundf_gzero(screen_rect.size.width * _sapp.dpi_scale);
+    const int screen_height = _sapp_roundf_gzero(screen_rect.size.height * _sapp.dpi_scale);
+    const CGSize view_size = _sapp.ios.view.drawableSize;
+    const int view_width = _sapp_roundf_gzero(view_size.width);
+    const int view_height = _sapp_roundf_gzero(view_size.height);
+    const bool needs_update = (screen_width != view_width) || (screen_height != view_height);
+    if (needs_update) {
+        const CGSize drawable_size = { (CGFloat) screen_width, (CGFloat) screen_height };
         _sapp.ios.view.drawableSize = drawable_size;
     }
+    // now separately, get the current drawable's size
+    const int cur_fb_width = _sapp_roundf_gzero(_sapp.ios.view.currentDrawable.texture.width);
+    const int cur_fb_height = _sapp_roundf_gzero(_sapp.ios.view.currentDrawable.texture.height);
+    const bool dim_changed = (cur_fb_width != _sapp.framebuffer_width) || (cur_fb_height != _sapp.framebuffer_height);
+    _sapp.framebuffer_width = cur_fb_width;
+    _sapp.framebuffer_height = cur_fb_height;
     return dim_changed;
 }
 #endif
@@ -6255,6 +6373,11 @@ _SOKOL_PRIVATE void _sapp_ios_update_dimensions(void) {
 }
 
 _SOKOL_PRIVATE void _sapp_ios_frame(void) {
+    // NOTE: it's not great to call _sapp_ios_update_dimensions() so early in
+    // the frame, since this calls MTKView.currentDrawable, which should be
+    // delayed until the latest possible moment (e.g. sapp_get_swapchain()).
+    // MTKView is on the chopping block anyway though, so don't bother too much
+    // getting it right until MTKView is replaced with CAMetalLayer.
     _sapp_ios_update_dimensions();
     _sapp_frame();
 }
@@ -7166,7 +7289,7 @@ _SOKOL_PRIVATE EM_BOOL _sapp_emsc_wheel_cb(int emsc_type, const EmscriptenWheelE
         /* see https://github.com/floooh/sokol/issues/339 */
         float scale;
         switch (emsc_event->deltaMode) {
-            case DOM_DELTA_PIXEL: scale = -0.04f; break;
+            case DOM_DELTA_PIXEL: scale = -0.01f; break;
             case DOM_DELTA_LINE:  scale = -1.33f; break;
             case DOM_DELTA_PAGE:  scale = -10.0f; break; // FIXME: this is a guess
             default:              scale = -0.1f; break;  // shouldn't happen
@@ -8600,16 +8723,22 @@ _SOKOL_PRIVATE bool _sapp_win32_update_dimensions(void) {
         float window_height = (float)(rect.bottom - rect.top) / _sapp.win32.dpi.window_scale;
         _sapp.window_width = _sapp_roundf_gzero(window_width);
         _sapp.window_height = _sapp_roundf_gzero(window_height);
-        int fb_width = _sapp_roundf_gzero(window_width * _sapp.win32.dpi.content_scale);
-        int fb_height = _sapp_roundf_gzero(window_height * _sapp.win32.dpi.content_scale);
-        if ((fb_width != _sapp.framebuffer_width) || (fb_height != _sapp.framebuffer_height)) {
-            _sapp.framebuffer_width = fb_width;
-            _sapp.framebuffer_height = fb_height;
-            return true;
-        }
+        // NOTE: on Vulkan, updating the framebuffer dimensions and firing the resize-event
+        // is handled entirely by the swapchain management code
+        #if !defined(SOKOL_VULKAN)
+            int fb_width = _sapp_roundf_gzero(window_width * _sapp.win32.dpi.content_scale);
+            int fb_height = _sapp_roundf_gzero(window_height * _sapp.win32.dpi.content_scale);
+            if ((fb_width != _sapp.framebuffer_width) || (fb_height != _sapp.framebuffer_height)) {
+                _sapp.framebuffer_width = fb_width;
+                _sapp.framebuffer_height = fb_height;
+                return true;
+            }
+        #endif
     } else {
         _sapp.window_width = _sapp.window_height = 1;
+        #if !defined(SOKOL_VULKAN)
         _sapp.framebuffer_width = _sapp.framebuffer_height = 1;
+        #endif
     }
     return false;
 }
@@ -8943,8 +9072,8 @@ _SOKOL_PRIVATE void _sapp_win32_scroll_event(float x, float y) {
     if (_sapp_events_enabled()) {
         _sapp_init_event(SAPP_EVENTTYPE_MOUSE_SCROLL);
         _sapp.event.modifiers = _sapp_win32_mods();
-        _sapp.event.scroll_x = -x / 30.0f;
-        _sapp.event.scroll_y = y / 30.0f;
+        _sapp.event.scroll_x = x;
+        _sapp.event.scroll_y = y;
         _sapp_call_event(&_sapp.event);
     }
 }
@@ -9064,11 +9193,7 @@ _SOKOL_PRIVATE void _sapp_win32_timing_measure(void) {
         }
         // fallback if swap model isn't "flip-discard" or GetFrameStatistics failed for another reason
         _sapp_timing_measure(&_sapp.timing);
-    #endif
-    #if defined(SOKOL_GLCORE)
-        _sapp_timing_measure(&_sapp.timing);
-    #endif
-    #if defined(SOKOL_NOAPI)
+    #else
         _sapp_timing_measure(&_sapp.timing);
     #endif
 }
@@ -9076,6 +9201,8 @@ _SOKOL_PRIVATE void _sapp_win32_timing_measure(void) {
 _SOKOL_PRIVATE void _sapp_win32_frame(bool from_winproc) {
     #if defined(SOKOL_WGPU)
         _sapp_wgpu_frame();
+    #elif defined(SOKOL_VULKAN)
+        _sapp_vk_frame();
     #else
         _sapp_frame();
     #endif
@@ -9259,10 +9386,10 @@ _SOKOL_PRIVATE LRESULT CALLBACK _sapp_win32_wndproc(HWND hWnd, UINT uMsg, WPARAM
                 }
                 break;
             case WM_MOUSEWHEEL:
-                _sapp_win32_scroll_event(0.0f, (float)((SHORT)HIWORD(wParam)));
+                _sapp_win32_scroll_event(0.0f, (float)GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA);
                 break;
             case WM_MOUSEHWHEEL:
-                _sapp_win32_scroll_event((float)((SHORT)HIWORD(wParam)), 0.0f);
+                _sapp_win32_scroll_event(-(float)GET_WHEEL_DELTA_WPARAM(wParam) / (float)WHEEL_DELTA, 0.0f);
                 break;
             case WM_CHAR:
                 _sapp_win32_char_event((uint32_t)wParam, !!(lParam&0x40000000));
@@ -9693,6 +9820,8 @@ _SOKOL_PRIVATE void _sapp_win32_run(const sapp_desc* desc) {
         _sapp_wgl_create_context();
     #elif defined(SOKOL_WGPU)
         _sapp_wgpu_init();
+    #elif defined(SOKOL_VULKAN)
+        _sapp_vk_init();
     #endif
     _sapp.valid = true;
 
@@ -9711,6 +9840,8 @@ _SOKOL_PRIVATE void _sapp_win32_run(const sapp_desc* desc) {
         }
         _sapp_win32_frame(false);
         // check for window resized, this cannot happen in WM_SIZE as it explodes memory usage
+        // NOTE: when Vulkan is active, _sapp_win32_update_dimensions() will never return true,
+        // instead the resize-event is fixed by the swapchain management code
         if (_sapp_win32_update_dimensions()) {
             #if defined(SOKOL_D3D11)
             _sapp_d3d11_resize_default_render_target();
@@ -9741,6 +9872,8 @@ _SOKOL_PRIVATE void _sapp_win32_run(const sapp_desc* desc) {
         _sapp_wgl_shutdown();
     #elif defined(SOKOL_WGPU)
         _sapp_wgpu_discard();
+    #elif defined(SOKOL_VULKAN)
+        _sapp_vk_discard();
     #endif
     _sapp_win32_destroy_window();
     _sapp_win32_destroy_icons();
@@ -13850,6 +13983,7 @@ SOKOL_API_IMPL sapp_environment sapp_get_environment(void) {
         res.wgpu.device = (const void*) _sapp.wgpu.device;
     #endif
     #if defined(SOKOL_VULKAN)
+        res.vulkan.instance = (const void*) _sapp.vk.instance;
         res.vulkan.physical_device = (const void*) _sapp.vk.physical_device;
         res.vulkan.device = (const void*) _sapp.vk.device;
         res.vulkan.queue = (const void*) _sapp.vk.queue;
@@ -13918,6 +14052,8 @@ SOKOL_API_IMPL sapp_swapchain sapp_get_swapchain(void) {
         }
         res.vulkan.depth_stencil_image = (const void*) _sapp.vk.depth.img;
         res.vulkan.depth_stencil_view = (const void*) _sapp.vk.depth.view;
+        // NOTE: using the current swapchain image index here is *NOT* a bug! The render_finished_semaphore *must*
+        // be associated with its swapchain image in case the swapchain implementation doesn't return swapchain images in order
         res.vulkan.render_finished_semaphore = _sapp.vk.sync[img_idx].render_finished_sem;
         res.vulkan.present_complete_semaphore = _sapp.vk.sync[_sapp.vk.sync_slot].present_complete_sem;
     #endif
