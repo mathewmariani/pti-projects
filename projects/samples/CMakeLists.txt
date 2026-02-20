@@ -1,6 +1,7 @@
 macro(pti_executable target files)
   add_executable(${target} "../../platform/opengl.cpp" ${files})
   target_link_libraries(${target} PRIVATE pti)
+  target_link_libraries(${target} PRIVATE sokol)
 
   if (CMAKE_SYSTEM_NAME STREQUAL Windows)
     target_link_libraries(${target} PRIVATE gl3w)
